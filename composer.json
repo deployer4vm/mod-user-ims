@@ -1,0 +1,23 @@
+{
+    "name": "hp-synapse/mod-user",
+    "description": "Module User management & Auth user",
+    "autoload": {
+        "psr-4": {
+            "hpsynapse\\moduser\\": "src"
+        }
+    },
+    "require": {
+        "php":"~7.1"
+    },
+    "require-dev": {
+        "php":"~7.1"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "hpsynapse\\moduser\\Providers\\AppServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}
