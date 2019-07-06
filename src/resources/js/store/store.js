@@ -1,4 +1,4 @@
-import authStore from "./auth";
+import authStore from "./modules/auth";
 
 const state = {
     example_data: 'userdata'

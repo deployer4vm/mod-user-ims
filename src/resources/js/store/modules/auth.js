@@ -1,0 +1,220 @@
+import globals from "@/globals";
+
+var authPath = globals().AppConfig.endpoint.api.auth;
+
+const state = {
+  token: null, //token akses API
+  userId: null,
+  user: null, //data komplit user
+  role: null //list access control user
+};
+
+const getters = {
+  getLoginUser(state) {
+    return state.user;
+  },
+  isLogin(state) {
+    return state.token !== null;
+  },
+  getAuthRole(state) {
+    return state.role;
+  },
+  getAuthToken(state) {
+    return state.token;
+  }
+};
+
+const mutations = {
+  /*
+    params 
+        userData : object
+            token
+            user
+            acl
+  */
+  setLogin(state, userData) {
+    state.token = userData.token;
+    state.user = userData.user;
+    state.userId = userData.user.id;
+    state.role = userData.role;
+  },
+  setLogout(state) {
+    state.token = null;
+    state.userId = null;
+    state.user = null;
+    state.role = null;
+  }
+};
+
+const actions = {
+  login({ commit, dispatch, state }, authData) {
+    return globals().LocalApi
+      .post(authPath + "/login", {
+        email: authData.email,
+        password: authData.password,
+        returnSecureToken: true
+      })
+      .then(res => {
+        // const now = new Date();
+        // const expirationDate = new Date(
+        //   now.getTime() + res.data.expiresIn * 1000
+        // );
+        commit("setLogin", {
+            token: res.data.data.token,
+            user: res.data.data.user,
+            role: res.data.data.role
+        });
+        //set token di LocalApi
+        globals().LocalApi.defaults.headers.common['Authorization'] = 'bearer ' + state.token;
+
+        return dispatch("implementAcl");
+      });
+  },
+  logout({ commit }) {
+    commit("setLogout");
+
+    //delete autorization nya
+    delete globals().LocalApi.defaults.headers.common['Authorization'];
+  },
+  //---------------------------------------
+  initAuth({ commit, state, dispatch }) {},
+  /*
+  implement acl user yang online sekarang, baru bisa 3 level
+  un-elegan way, nanti ubah agar lebih efisien
+  */
+  implementAcl({ commit, state, dispatch }) {
+    var aclItem, aclItemLv2, aclItemLv3;
+
+    _.forEach(globals().AppConfig.packageLocal, (vPackage, packageNamespace) => {
+      //----cek hak akses level 1
+      _.forEach(vPackage.access.children, (accessItem, aclId) => {
+
+        if(state.role[packageNamespace]==undefined)return;
+
+        aclItem = state.role[packageNamespace][aclId];
+        if (aclItem.has_access) {
+          accessItem.active_acl = {
+            has_access: aclItem.has_access,
+            crud: { c: aclItem.c, r: aclItem.r, u: aclItem.u, d: aclItem.d }
+          };
+        } else {
+          accessItem.active_acl = {
+            has_access: 0,
+            crud: { c: 0, r: 0, u: 0, d: 0 }
+          };
+        }
+        //----cek hak askses level 2 jika ada
+        if (accessItem.children != undefined) {
+          _.forEach(accessItem.children, (accessItemLv2, aclIdLv2) => {
+
+            if(aclItemLv2.children[aclId]==undefined)return;
+
+            aclItemLv2 = aclItemLv2.children[aclId];
+            if (aclItemLv2.has_access) {
+              accessItemLv2.active_acl = {
+                has_access: aclItemLv2.has_access,
+                crud: {
+                  c: aclItemLv2.c,
+                  r: aclItemLv2.r,
+                  u: aclItemLv2.u,
+                  d: aclItemLv2.d
+                }
+              };
+            } else {
+              accessItemLv2.active_acl = {
+                has_access: 0,
+                crud: { c: 0, r: 0, u: 0, d: 0 }
+              };
+            }
+
+            //----cek hak askses level 3 jika ada
+            if (accessItemLv2.children != undefined) {
+              _.forEach(accessItemLv2.children, (accessItemLv3, aclIdLv2) => {
+
+                if(aclItemLv2.children[aclId]==undefined)return;
+
+                aclItemLv3 = aclItemLv2.children[aclId];
+                if (aclItemLv3.has_access) {
+                  accessItemLv3.active_acl = {
+                    has_access: aclItemLv3.has_access,
+                    crud: {
+                      c: aclItemLv3.c,
+                      r: aclItemLv3.r,
+                      u: aclItemLv3.u,
+                      d: aclItemLv3.d
+                    }
+                  };
+                } else {
+                  accessItemLv3.active_acl = {
+                    has_access: 0,
+                    crud: { c: 0, r: 0, u: 0, d: 0 }
+                  };
+                }
+              });
+            }
+          });
+        }
+      });
+    });
+
+  }
+};
+
+//format role
+var role = {
+  role_code_1: {
+    is_main_role:1,
+    has_auth_grant:1,
+    rules: {
+      moduleNameSpace: {
+        acl_key_1: {
+          has_access: 1, //apakah punya akses secara keseluruhan terhadap fitur ini
+          c: 1, //apakah punya akses create di fitur ini
+          r: 1, //apakah punya akses read di fitur ini
+          u: 1, //apakah punya akses update di fitur ini
+          d: 1, //apakah punya akses delete di fitur ini
+          children: {
+            // jika ada sub fitur lain
+            acl_key_1_1: {
+              has_access: 1, //apakah punya akses secara keseluruhan terhadap fitur ini
+              c: 1, //apakah punya akses create di fitur ini
+              r: 1, //apakah punya akses read di fitur ini
+              u: 1, //apakah punya akses update di fitur ini
+              d: 1 //apakah punya akses delete di fitur ini
+            }
+          }
+        },
+        acl_key_2: {
+          has_access: 1, //apakah punya akses secara keseluruhan terhadap fitur ini
+          c: 1, //apakah punya akses create di fitur ini
+          r: 1, //apakah punya akses read di fitur ini
+          u: 1, //apakah punya akses update di fitur ini
+          d: 1 //apakah punya akses delete di fitur ini
+        }
+      },
+      moduleNameSpace: {
+        acl_key_1: {
+          has_access: 1, //apakah punya akses secara keseluruhan terhadap fitur ini
+          c: 1, //apakah punya akses create di fitur ini
+          r: 1, //apakah punya akses read di fitur ini
+          u: 1, //apakah punya akses update di fitur ini
+          d: 1 //apakah punya akses delete di fitur ini
+        },
+        acl_key_2: {
+          has_access: 1, //apakah punya akses secara keseluruhan terhadap fitur ini
+          c: 1, //apakah punya akses create di fitur ini
+          r: 1, //apakah punya akses read di fitur ini
+          u: 1, //apakah punya akses update di fitur ini
+          d: 1 //apakah punya akses delete di fitur ini
+        }
+      }
+    }
+  }
+};
+
+export default {
+  state,
+  mutations,
+  actions,
+  getters
+};

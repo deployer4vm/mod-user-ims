@@ -1,0 +1,67 @@
+<?php
+
+namespace BSSystem\LIBAccount\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+
+class UserResetPassword extends Notification implements ShouldQueue
+{
+    use Queueable;
+    protected $userId,$appsId;
+
+    /**
+     * Create a new notification instance.
+     *
+     * @return void
+     * 
+     * Data :
+     * Link Reset Password
+     */
+    public function __construct($userId,$appsId)
+    {
+        $this->userId = $userId;
+        $this->appsId = $appsId;
+        
+        // $this->connection = config('bssystem.queue_connection_ac');
+        $this->queue = 'verification';
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function via($notifiable)
+    {
+        return ['mail'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return \Illuminate\Notifications\Messages\MailMessage
+     */
+    public function toMail($notifiable)
+    {
+        $email = new \hpsynapse\moduser\Mail\UserResetPassword($this->userId,$this->appsId);
+        return $email->to($notifiable->email);
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function toArray($notifiable)
+    {
+        return [
+            //
+        ];
+    }
+}
