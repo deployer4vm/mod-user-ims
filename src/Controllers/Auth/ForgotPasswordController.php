@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Modules\Auth\Controllers\Auth;
+namespace hpsynapse\moduser\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Facades\BSSystem\LIBAccount\Repositories\UserRepo;
-use Facades\BSSystem\LIBAccount\Repositories\AppsRepo;
+use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use Facades\hpsynapse\moduser\Repositories\AppsRepo;
 
-use App\Modules\Auth\Responses\AuthResponse;
-use BSSystem\Core\Base\BaseController;
+use App\Base\BaseController;
 
 class ForgotPasswordController extends BaseController
 {

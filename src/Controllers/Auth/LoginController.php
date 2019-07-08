@@ -92,13 +92,12 @@ class LoginController extends BaseController
     public function logout(Request $request)
     {
         
-        AcSSOService::unsetUser();
+        UserAuth::unsetUser();
         Auth::logout();
         
         //$request->session()->invalidate();
         $response['backlink'] = $request->input('backlink')?$request->input('backlink'):config('cur_apps.home_url');
         $response['reff'] = 'logout';
-        $response['token'] = AcSSOService::getAppsToken(config('cur_apps.id'));
         $response['isLogin'] = 0;
         
         return $this->authDone($response);
@@ -114,6 +113,7 @@ class LoginController extends BaseController
      * create token user
      * 
      * @param Request $request
+     *      
      * @param type $apps_code
      * @return json array
      */
@@ -127,8 +127,8 @@ class LoginController extends BaseController
             $this->setError(__('alert.incorect_parameter'));
             return $this->done();
         }        
-
-        if($user = UserRepo::loginCheck($authParam['email'],$authParam['password'])){
+        
+        if($user = UserRepo::loginCheck($authParam['email'],$authParam['password'],config('tenant.id'))){
             $pushParam = false;
             if($request->input('pushNotifToken')){
                 $pushParam = [
@@ -136,12 +136,22 @@ class LoginController extends BaseController
                     'type' => $request->input('pushType',1)
                 ];
             }
-            $token = UserRepo::generateToken($user['id'],0,1,$request->input('deviceId',''),$pushParam);
+            $token = UserRepo::generateToken($user['id'],1,$request->input('deviceId',''),$pushParam);
             $this->output['message'] = __('alert.auth_success');
             $this->output['data'] = UserAuth::getCurTimeStamp();
             $this->output['data']['token'] =$token['api_token'];            
             $this->output['data']['user'] = $user;
             $this->output['data']['role'] = RoleRepo::getRoleByUserId($user['id']);
+            foreach($this->output['data']['role'] as $key => $val) {
+                if($val['is_main_role']){
+                    $this->output['data']['role_code'] = $key;
+                }
+            }          
+            
+            // if(!isset($this->output['data']['role_code'])){
+            //     $tmp = explode(';', trim($user['role'],";"));
+            //     $this->output['data']['role_code'] = $tmp[0];
+            // }
             
             //subscribekan ke channel/topic berdasarkan user role nya
             if($request->input('pushNotifToken')){

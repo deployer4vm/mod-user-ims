@@ -1,18 +1,16 @@
 <?php
 
-namespace App\Modules\Auth\Controllers\Auth;
+namespace hpsynapse\moduser\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-use Facades\BSSystem\LIBAccount\Repositories\UserRepo;
-use Facades\BSSystem\LIBAccount\Repositories\RoleRepo;
-use Facades\BSSystem\LIBAccount\Repositories\UserNotifRepo;
+use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use Facades\hpsynapse\moduser\Repositories\RoleRepo;
+use Facades\hpsynapse\moduser\Repositories\UserNotifRepo;
+use Facades\hpsynapse\moduser\Services\UserAuth;
 
-use App\Modules\Auth\Responses\AuthResponse;
-use Facades\App\Services\AcSSOService;
-
-use BSSystem\Core\Base\BaseController;
+use App\Base\BaseController;
 
 class RegisterController extends BaseController
 {
@@ -111,22 +109,23 @@ class RegisterController extends BaseController
                         'type' => $request->input('pushType',1)
                     ];
                 }
-                $token = UserRepo::generateToken($regUserData['id'],0,1,$request->input('deviceId',''));
+                $token = UserRepo::generateToken($regUserData['id'],1,$request->input('deviceId',''));
                 $response['status'] = 200;
                 $response['errors'] = null;
                 $response['message'] = __('auth.registersuccess');
-                $response['data'] = AcSSOService::getCurTimeStamp();
+                $response['data'] = UserAuth::getCurTimeStamp();
                 $response['data']['token'] = $token['api_token'];
-                $response['data']['userData'] = $regUserData;
-                $response['data']['userRole'] = RoleRepo::getRoleByUserId($regUserData['id']); 
-                
+                $response['data']['user'] = $regUserData;
+                $response['data']['role'] = RoleRepo::getRoleByUserId($regUserData['id']); 
+                foreach($this->output['data']['role'] as $key => $val) {
+                    if($val['is_main_role']){
+                        $this->output['data']['role_code'] = $key;
+                    }
+                }  
                 //subscribekan ke channel/topic berdasarkan user role nya
                 if($request->input('pushNotifToken')){
                     $notifChannel[] = 'all';
-                    if(isset($response['data']['userRole'][9]))$notifChannel[] = 'member';                        
-                    if(isset($response['data']['userRole'][10]))$notifChannel[] = 'reseller';                    
-                    if(isset($response['data']['userRole'][11]))$notifChannel[] = 'merchant';
-                    if($response['data']['userData']['is_admin'])$notifChannel[] = 'admin';
+                    // if(isset($response['data']['role'][9]))$notifChannel[] = 'member';     
 
                     UserNotifRepo::subscribeToChannel($notifChannel,$pushParam['token']);
                 }

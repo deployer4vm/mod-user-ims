@@ -6,7 +6,9 @@ const state = {
   token: null, //token akses API
   userId: null,
   user: null, //data komplit user
-  role: null //list access control user
+  role: null, //list access control user
+  role_code: null, //main / active role
+  group_app: null //group app saat login, agar jike berpindah akan di logout kan
 };
 
 const getters = {
@@ -17,10 +19,13 @@ const getters = {
     return state.token !== null;
   },
   getAuthRole(state) {
-    return state.role;
+    return state.role?state.role[state.role_code]:false;
   },
   getAuthToken(state) {
     return state.token;
+  },
+  getGroupApp(state) {
+    return state.group_app;
   }
 };
 
@@ -30,19 +35,26 @@ const mutations = {
         userData : object
             token
             user
-            acl
+            role
+            role_code : active / main role code
   */
   setLogin(state, userData) {
     state.token = userData.token;
     state.user = userData.user;
     state.userId = userData.user.id;
     state.role = userData.role;
+    state.role_code = userData.role_code;
   },
   setLogout(state) {
     state.token = null;
     state.userId = null;
     state.user = null;
     state.role = null;
+    state.role_code = null;
+    state.group_app = null;
+  },
+  setGroupApp(state, groupApp) {
+    state.group_app = groupApp;
   }
 };
 
@@ -51,8 +63,7 @@ const actions = {
     return globals().LocalApi
       .post(authPath + "/login", {
         email: authData.email,
-        password: authData.password,
-        returnSecureToken: true
+        password: authData.password
       })
       .then(res => {
         // const now = new Date();
@@ -62,10 +73,12 @@ const actions = {
         commit("setLogin", {
             token: res.data.data.token,
             user: res.data.data.user,
-            role: res.data.data.role
+            role: res.data.data.role,
+            role_code: res.data.data.role_code
         });
+        commit("setGroupApp",authData.group_app);
         //set token di LocalApi
-        globals().LocalApi.defaults.headers.common['Authorization'] = 'bearer ' + state.token;
+        globals().LocalApi.defaults.headers.common['Authorization'] = 'Bearer ' + state.token;
 
         return dispatch("implementAcl");
       });
@@ -89,9 +102,10 @@ const actions = {
       //----cek hak akses level 1
       _.forEach(vPackage.access.children, (accessItem, aclId) => {
 
-        if(state.role[packageNamespace]==undefined)return;
+        //jika tidak punya akses acl maka tolak (menu akan ditampilkan sesuai default ACL nya)
+        if(state.role[state.role_code]==undefined || state.role[state.role_code][packageNamespace]==undefined)return;
 
-        aclItem = state.role[packageNamespace][aclId];
+        aclItem = state.role[state.role_code][packageNamespace][aclId];
         if (aclItem.has_access) {
           accessItem.active_acl = {
             has_access: aclItem.has_access,
@@ -103,13 +117,14 @@ const actions = {
             crud: { c: 0, r: 0, u: 0, d: 0 }
           };
         }
+        
         //----cek hak askses level 2 jika ada
         if (accessItem.children != undefined) {
           _.forEach(accessItem.children, (accessItemLv2, aclIdLv2) => {
 
-            if(aclItemLv2.children[aclId]==undefined)return;
+            if(aclItemLv2.children[aclIdLv2]==undefined)return;
 
-            aclItemLv2 = aclItemLv2.children[aclId];
+            aclItemLv2 = aclItemLv2.children[aclIdLv2];
             if (aclItemLv2.has_access) {
               accessItemLv2.active_acl = {
                 has_access: aclItemLv2.has_access,
@@ -129,11 +144,11 @@ const actions = {
 
             //----cek hak askses level 3 jika ada
             if (accessItemLv2.children != undefined) {
-              _.forEach(accessItemLv2.children, (accessItemLv3, aclIdLv2) => {
+              _.forEach(accessItemLv2.children, (accessItemLv3, aclIdLv3) => {
 
-                if(aclItemLv2.children[aclId]==undefined)return;
+                if(aclItemLv2.children[aclIdLv3]==undefined)return;
 
-                aclItemLv3 = aclItemLv2.children[aclId];
+                aclItemLv3 = aclItemLv2.children[aclIdLv3];
                 if (aclItemLv3.has_access) {
                   accessItemLv3.active_acl = {
                     has_access: aclItemLv3.has_access,

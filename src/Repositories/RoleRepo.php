@@ -33,7 +33,7 @@ class RoleRepo extends BaseRepository
     /**
      * 
      * @param type $userId
-     * @return boolean|array format mirip dataRole di SSOSession
+     * @return boolean|array format mirip data role di APPSSession
      */
     public function getRoleByUserId($userId,$withoutTime=true)
     {

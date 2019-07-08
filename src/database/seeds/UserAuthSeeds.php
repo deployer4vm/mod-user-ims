@@ -1,7 +1,7 @@
 <?php
 namespace hpsynapse\moduser\database\seeds;
 
-use Illuminate\Support\Str;//Str::random(10)
+// use Illuminate\Support\Str;//Str::random(10)
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -17,10 +17,12 @@ class UserAuthSeeds extends Seeder
     {
         $now = Now();
         DB::table('users')->insert([
+            'user_idcode' => '2019010110000001',
             'name' => 'Admin',
             'email' => 'admin@email.com',
             'password' => Hash::make('secret'),
             'role' => ';admin;',
+            'level' => 1,
             'created_at' => $now,
             'updated_at' => $now
         ]);

@@ -15,6 +15,8 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->tinyInteger('all_tenant')->default(1);
+            
             $table->string('user_idcode')->default('');
             $table->string('name');
             $table->string('email')->unique();
@@ -25,6 +27,7 @@ class CreateUsersTable extends Migration
             $table->string('auth_password')->default('');
             $table->text('note')->nullable();
             $table->text('role')->nullable();
+            $table->tinyInteger('level')->nullable(2);            
             
             $table->string('socialauth_facebook_id')->default('');
             $table->string('socialauth_facebook_token')->default('');

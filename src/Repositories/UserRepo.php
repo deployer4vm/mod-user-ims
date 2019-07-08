@@ -2,7 +2,7 @@
 
 namespace hpsynapse\moduser\Repositories;
 
-use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Facades\hpsynapse\moduser\Repositories\UserLogRepo;
 use Facades\hpsynapse\moduser\Repositories\RoleRepo;
@@ -13,9 +13,10 @@ use Carbon\Carbon;
 use hpsynapse\moduser\Models\User;
 use hpsynapse\moduser\Models\UserProfile;
 use hpsynapse\moduser\Models\PasswordReset;
-use hpsynapse\moduser\Models\UserRole;
+// use hpsynapse\moduser\Models\UserRole;
 use hpsynapse\moduser\Models\Role;
-use hpsynapse\moduser\Models\ApiToken;
+// use hpsynapse\moduser\Models\ApiToken;
+use App\Models\Tenant;
 
 use Validator;
 use Mail;
@@ -27,7 +28,6 @@ class UserRepo extends BaseRepository
     
     public $error = '';
     
-    protected $tokenType = 'users';//posisi library
     protected $userProfileField = [
         'avatar',
         'gender',
@@ -59,26 +59,40 @@ class UserRepo extends BaseRepository
         return $this->model->where($key, $value)->exists();
     }
     
-    public function isRole($userId,$roleCode)
+    /**
+     * cek apakah user tertentu memiliki role tertentu
+     * 
+     * @param integer $userId user id
+     * @param string $roleCode 
+     */
+    public function isHasRole($userId,$roleCode)
     {
-        return User::where('id',$userId)->where('role','LIKE','%;'.$roleCode.';%')->exists();
-        
+        $role = Role::where('role_code',$roleCode)->first();
+        if($role)
+        return User::UserRole('user_id',$userId)->where('role','LIKE','%;'.$roleCode.';%')->exists();        
     }
     
     /**
      * get user berdasarkan email dan password nya
      * 
-     * @param type $email
-     * @param type $password
+     * @param text $email
+     * @param text $password
+     * @param integer $tenantId id tenant
      * @return boolean
      */
-    public function loginCheck($email, $password, $withProfile=true)
+    public function loginCheck($email, $password, $tenantId=0)
     {
         $userData = User::where('email',$email)->first();
-        if(!$userData)return false;
-        if(!Hash::check($password, $userData->password))return false;
+        if($userData==null)return false;
+        if(!Hash::check($password, $userData->password))return false;        
         $user = $userData->toArray();
-        if($withProfile)$user['profile'] = $userData->profile->toArray();
+        //jika tidak punya akses all tenant maka cek tenant
+        if(!$user['all_tenant']){
+            if(Tenant::where('id',$tenantId)->first()==null){
+                return false;
+            }
+        }
+        $user['profile'] = $userData->profile?$userData->profile->toArray():[];
         return $user;
         
     }
@@ -209,6 +223,7 @@ class UserRepo extends BaseRepository
         $userData['password']=isset($userData['password'])?Hash::make($userData['password']):'';
         
         $userData['user_idcode'] = $this->generateUserIdcode();
+        $userData['tenant_id'] = config('tenant.id')?config('tenant.id'):0;
         
         //role dikosongin dahulu karena insert role di proses selanjutnya
         $role = $userData['role'];
@@ -339,20 +354,6 @@ class UserRepo extends BaseRepository
         
         if(!$userData){
             return false;
-        }
-        
-        if(isset($userData['name'])){            
-            $name = explode(' ', $userData['name']);
-            $count = count($name); 
-            $userData['last_name'] = $name[$count-1];           
-            if($count==1){
-                $userData['last_name'] = '';
-                $userData['first_name'] = $name[0];
-            }else{
-                unset($name[$count-1]);         
-                $userData['first_name'] = implode(' ', $name);
-                unset($userData['name']);
-            }
         }
         
         UserProfile::create($userData);
@@ -674,8 +675,7 @@ class UserRepo extends BaseRepository
         }
         
         if(isset($input)){
-            $this->_update(new UserProfile, $userId, $input);
-            if(isset($name))$this->_update(new User, $userId, ['name' => $name]);            
+            $this->_update(new UserProfile, $userId, $input);           
         }
     }
 

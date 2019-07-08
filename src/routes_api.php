@@ -1,5 +1,6 @@
 <?php
 
+use hpsynapse\moduser\Models\Role;
 /**
  * Route API feature Auth
  */
@@ -28,5 +29,9 @@ Route::group(['prefix'=>config('AppConfig.endpoint.api.auth')],function(){
  * Route API feature User Management
  */
 Route::group(['prefix'=>config('AppConfig.endpoint.api.moduser')],function(){
-
+    
+    Route::get('/testing', function(){
+        
+        var_dump(Role::where('role_code','taeun')->first());
+    });
 });

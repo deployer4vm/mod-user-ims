@@ -102,8 +102,8 @@ export default {
     }
   },
   computed: {
-    title() {
-      return this.Web.getAdminTitle();
+    title() {      
+      return this.Web.getTenantName()?this.Web.getTenantName():this.Web.getAdminTitle();
     }
   },
   methods: {
