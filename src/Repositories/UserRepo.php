@@ -128,7 +128,7 @@ class UserRepo extends BaseRepository
     
     public function listUser($filter=false, $offset=0,$limit=0)
     {
-        $data = $this->_getList(
+        $data = $this->_list(
             new User, [
             'filter' => $filter,
             'searchField' => ['name'],
@@ -138,14 +138,14 @@ class UserRepo extends BaseRepository
         return $data;
     }
 
-    public function getUser($key,$value=null) 
+    public function getUser($filter) 
     {
-        return $this->_getOne(new User, $key,$value);
+        return $this->_getOne(new User, $filter);
     }
     
     public function getUserProfile($userId) 
     {
-        return $this->_getOne(new UserProfile, ['user_id'=>$userId]);
+        return $this->_getOne(new UserProfile, ['user_id', $userId]);
     }
     
     /**

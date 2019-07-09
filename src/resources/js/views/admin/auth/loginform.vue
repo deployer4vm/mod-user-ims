@@ -26,7 +26,7 @@
           <!-- Form -->
           <b-form @submit="onSubmit" @reset="onReset">
             <b-form-group :label="Trans.get('auth.login.emailcaption')" class="position-relative">
-              <b-input :state="$v.form.email.$error?'invalid':''" v-model.trim.lazy="$v.form.email.$model" />
+              <b-input :state="$v.form.email.$error?'invalid':''" v-model.trim="form.email" @change="$v.form.email.$touch()" />
               <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('auth.login.emailcaption')" />
             </b-form-group>
             <b-form-group class="position-relative">
@@ -39,7 +39,7 @@
                   v-if="AppConfig.packageLocal.moduser.has_forgotpassword"
                 >{{ Trans.get('auth.login.forgotpassword') }}</router-link>
               </div>
-              <b-input type="password" :state="$v.form.password.$error?'invalid':''" v-model.trim.lazy="$v.form.password.$model" />
+              <b-input type="password" :state="$v.form.password.$error?'invalid':''" v-model.trim="form.password" @change="$v.form.password.$touch()" />
               <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('auth.login.passwordcaption')" />
             </b-form-group>
 

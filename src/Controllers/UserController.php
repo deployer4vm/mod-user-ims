@@ -35,8 +35,7 @@ class UserController extends BaseController
         \Breadcrumb::add('Create User ', route('user.create'));
 
         $data['mode'] = 'create';
-        $data['role'] = RoleRepo::listRole(['user_level'=>98]); 
-
+        $data['role'] = RoleRepo::listRole();
         return view('acuser.form', $data);
     }
 

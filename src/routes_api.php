@@ -1,6 +1,5 @@
 <?php
 
-use hpsynapse\moduser\Models\Role;
 /**
  * Route API feature Auth
  */
@@ -28,10 +27,27 @@ Route::group(['prefix'=>config('AppConfig.endpoint.api.auth')],function(){
 /**
  * Route API feature User Management
  */
-Route::group(['prefix'=>config('AppConfig.endpoint.api.moduser')],function(){
+Route::group(['prefix'=>config('AppConfig.endpoint.api.moduser'),'middleware'=>['auth:api'] ],function(){
     
+    /**
+     * Feature User
+     */
     Route::get('/testing', function(){
-        
-        var_dump(Role::where('role_code','taeun')->first());
+        $wekdut = new wekdut();
+        $query = Role::where('role','taeun');
+        $query = $wekdut->_setFilterWhere($query,[
+            ['wekdut','!=','taeun'],
+            ['or orwekdut','taeun'],
+            [
+                'or',
+                ['innested','yeah']
+            ]
+        ]);
+        dd($query->toSql());
+        // var_dump(Role::where('role_code','taeun')->first());
     });
+    
+    /**
+     * Module Role
+     */
 });

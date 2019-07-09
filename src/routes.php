@@ -2,11 +2,13 @@
 
 // $routeOpt = route_web_opt(config('bssystem.url.ac'),config('bssystem.url.acapi'));
 
-// Route::group([], function(){
-//     //use BSSystem\LIBAccount\Models\AppsClient;
-//     //use Facades\BSSystem\LIBAccount\Repositories\UserRepo;
+Route::group([], function(){
+    
+    //VerificationController
+    Route::get('/emailverify', 'Auth\VerificationController@verify')->name('auth.emailVerification');
+    Route::get('/emailverify/success', 'Auth\VerificationController@verifySuccess')->name('auth.emailVerification.success');
+    Route::get('/emailverify/fail', 'Auth\VerificationController@verifyFail')->name('auth.emailVerification.fail');
 
-//     Route::middleware('CheckApps')->group(function() {
 
 //         Route::get('/testing', function($apps_code) {
 //             dd(UserRepo::generateUserIdcode());
@@ -31,15 +33,10 @@
 //         Route::post('/resetpassword', 'Auth\ResetPasswordController@doResetPassword');//prosess reset password
 //         Route::get('/resetpassword/fail', 'Auth\ResetPasswordController@verifyFail')->name('auth.resetPassword.fail');
 
-//         //VerificationController
-//         Route::get('/email/verify', 'Auth\VerificationController@verify')->name('auth.emailVerification');
-//         Route::get('/email/verify/success', 'Auth\VerificationController@verifySuccess')->name('auth.emailVerification.success');
-//         Route::get('/email/verify/fail', 'Auth\VerificationController@verifyFail')->name('auth.emailVerification.fail');
-
 //         //Social Sign On
 //         Route::get('/socialauth/{provider}', 'Auth\SocialSignOnController@redirectToProvider')->name('socialAuth.login');
-//     });
+
 
 //     //Social Sign On
 //     Route::get('/socialauth/{provider}/callback', 'Auth\SocialSignOnController@handleProviderCallback')->name('socialAuth.callback');
-// });
+});
