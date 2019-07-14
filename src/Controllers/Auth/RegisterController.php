@@ -116,7 +116,7 @@ class RegisterController extends BaseController
                 $response['data'] = UserAuth::getCurTimeStamp();
                 $response['data']['token'] = $token['api_token'];
                 $response['data']['user'] = $regUserData;
-                $response['data']['role'] = RoleRepo::getRoleByUserId($regUserData['id']); 
+                $response['data']['role'] = UserRepo::getUserRole($regUserData['id']); 
                 foreach($this->output['data']['role'] as $key => $val) {
                     if($val['is_main_role']){
                         $this->output['data']['role_code'] = $key;

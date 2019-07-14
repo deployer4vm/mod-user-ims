@@ -19,14 +19,14 @@ class UserProfile extends Model
      * @var array
      */
     protected $guarded = ['id','created_at','updated_at'];
-    protected $fillable = [
-        'user_id',
-        'avatar',
-        'gender',
-        'date_of_birth',
-        'socnet_facebook',
-        'socnet_instagram',
-        'address',
-        'postal_code'
-        ];
+    // protected $fillable = [
+    //     'user_id',
+    //     'avatar',
+    //     'gender',
+    //     'date_of_birth',
+    //     'socnet_facebook',
+    //     'socnet_instagram',
+    //     'address',
+    //     'postal_code'
+    //     ];
 }

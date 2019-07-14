@@ -19,4 +19,9 @@ class UserRole extends Model
      * @var array
      */
     protected $guarded = ['id','created_at','updated_at'];
+    
+    public function role()
+    {
+        return $this->belongsTo('hpsynapse\moduser\Models\Role','role_id');
+    }   
 }

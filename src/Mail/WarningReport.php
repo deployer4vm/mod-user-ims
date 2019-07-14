@@ -1,6 +1,6 @@
 <?php
 
-namespace BSSystem\LIBAccount\Mail;
+namespace hpsynapse\moduser\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;

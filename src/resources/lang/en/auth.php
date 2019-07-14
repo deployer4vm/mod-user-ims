@@ -37,7 +37,7 @@ return [
     //text lang di halaman loting
     'login' => [
         'title' => 'Login to Your Account',
-        'emailcaption' => 'Email',
+        'usernamecaption' => 'Username/Email',
         'passwordcaption' => 'Password',
         'forgotpassword' => 'Forgot Password ?',
         'remember_me' => 'Remeber Me',

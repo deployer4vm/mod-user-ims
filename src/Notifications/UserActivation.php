@@ -1,6 +1,6 @@
 <?php
 
-namespace BSSystem\LIBAccount\Notifications;
+namespace hpsynapse\moduser\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -11,7 +11,7 @@ class UserActivation extends Notification implements ShouldQueue
 {
     use Queueable;
     
-    protected $userId,$appsId,$isSecondary;
+    protected $userId,$isSecondary;
 
     /**
      * Create a new notification instance.
@@ -21,10 +21,9 @@ class UserActivation extends Notification implements ShouldQueue
      * Data :
      * Link Activation
      */
-    public function __construct($userId,$appsId,$isSecondary=false)
+    public function __construct($userId,$isSecondary=false)
     {
         $this->userId = $userId;
-        $this->appsId = $appsId;
         $this->isSecondary = $isSecondary;
         
         // $this->connection = config('bssystem.queue_connection_ac');
@@ -50,7 +49,7 @@ class UserActivation extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $email = new \hpsynapse\moduser\Mail\UserActivation($this->userId,$this->appsId,$this->isSecondary);
+        $email = new \hpsynapse\moduser\Mail\UserActivation($this->userId,$this->isSecondary);
         return $email->to($notifiable->email);
     }
 

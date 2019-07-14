@@ -39,8 +39,8 @@ class TokenApiController extends BaseController
             $response['message'] = 'Token Valid';
             $response['data'] = UserAuth::getCurTimeStamp();
             
-            $response['data']['user'] = UserRepo::getOneWithProfile($apiToken['user_id']);
-            $response['data']['role'] = RoleRepo::getRoleByUserId($apiToken['user_id']);
+            $response['data']['user'] = UserRepo::getUser($apiToken['user_id']);
+            $response['data']['role'] = UserRepo::getUserRole($apiToken['user_id']);
             $notifToken = $request->input('pushNotifToken',false);
             //jika menyertakan update token notif
             if($notifToken){

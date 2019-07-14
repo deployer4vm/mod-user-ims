@@ -1,29 +1,5 @@
 import authStore from "./modules/auth";
+import userStore from "./modules/user";
+import roleStore from "./modules/role";
 
-const state = {
-    example_data: 'userdata'
-};
-
-const getters = {};
-
-const mutations = {
-    changeData (state, data) {
-      state.example_data = data
-    }
-};
-
-const actions = {
-    updateData({commit}, data) {
-        commit('changeData', data)
-    }
-};
-
-const userStore = {
-    namespaced: true,
-    state,
-    mutations,
-    actions,
-    getters
-}
-
-export default {userStore,auth: authStore};
+export default {user: userStore,role: roleStore,auth: authStore};

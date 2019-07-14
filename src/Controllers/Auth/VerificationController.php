@@ -10,33 +10,32 @@ use App\Base\BaseController;
 class VerificationController extends BaseController
 {
 
-    public function verify(Request $request, $apps_code = '')
+    public function verify(Request $request)
     {
         $data['verifyCode'] = $request->query('verifyCode');
         $data['email'] = $request->query('email');
-        $data['apps_code'] = $apps_code;
                         
         //jika verified
         if(!UserRepo::varifyEmail($data['email'],$data['verifyCode'])){
-            return redirect()->route('auth.emailVerification.fail', ['apps_code'=>$apps_code,'error_message'=>UserRepo::error()]);
+            return redirect()->route('auth.emailVerification.fail', ['error_message'=>UserRepo::error()]);
         }
 
         // $userData = UserRepo::getUser(['email'=>$data['email']]);
         // if($userData['status']==0){
-        //     $userData = UserRepo::resetPasswordEmailDataFormat($userData['id'],config('cur_apps.id'));
+        //     $userData = UserRepo::resetPasswordEmailDataFormat($userData['id']);
         //     return redirect($userData['resetPasswordUrl'].'&setNewPassword=true');
         // }else{
-            return redirect()->route('auth.emailVerification.success', ['apps_code'=>$apps_code]);
+            return redirect()->route('auth.emailVerification.success');
         // }
         
     }
     
-    public function verifySuccess(Request $request, $apps_code = '')
+    public function verifySuccess(Request $request)
     {
         return view('user.auth.emailvalidatesuccess', $request->all());
     }
     
-    public function verifyFail(Request $request, $apps_code = '')
+    public function verifyFail(Request $request)
     {
         return view('user.auth.emailvalidatefail', $request->all());
     }

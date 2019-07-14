@@ -5,7 +5,6 @@ namespace hpsynapse\moduser\Repositories;
 // use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Facades\hpsynapse\moduser\Repositories\UserLogRepo;
-use Facades\hpsynapse\moduser\Repositories\RoleRepo;
 
 use Carbon\Carbon;
 
@@ -13,7 +12,7 @@ use Carbon\Carbon;
 use hpsynapse\moduser\Models\User;
 use hpsynapse\moduser\Models\UserProfile;
 use hpsynapse\moduser\Models\PasswordReset;
-// use hpsynapse\moduser\Models\UserRole;
+use hpsynapse\moduser\Models\UserRole;
 use hpsynapse\moduser\Models\Role;
 // use hpsynapse\moduser\Models\ApiToken;
 use App\Models\Tenant;
@@ -24,10 +23,9 @@ use App\Base\BaseRepository;
 
 class UserRepo extends BaseRepository
 {
-    use ApiTokenTraits,UserMessageTraits;
-    
-    public $error = '';
-    
+    use ApiTokenTraits, UserMessageTraits;
+
+
     protected $userProfileField = [
         'avatar',
         'gender',
@@ -42,75 +40,186 @@ class UserRepo extends BaseRepository
     {
         $this->model = $model;
     }
+
+    /**
+     *  true / false operation method
+     * ==========================================================================
+     */
+
     /**
      * 
      * @param string $key
      * @param type $value
      * @return boolean : true jika ada, false jiak tidak ada
      */
-    public function isUserExist($key,$value=NULL)
+    public function isUserExist($key, $value = NULL)
     {
         //jika tidak menyertakan value berarti default nya by apps code
-        if(is_null($value)){
+        if (is_null($value)) {
             $value = $key;
             $key = 'id';
         }
-        
+
         return $this->model->where($key, $value)->exists();
     }
-    
+
     /**
      * cek apakah user tertentu memiliki role tertentu
      * 
      * @param integer $userId user id
      * @param string $roleCode 
      */
-    public function isHasRole($userId,$roleCode)
+    public function isHasRole($userId, $roleCode)
     {
-        $role = Role::where('role_code',$roleCode)->first();
-        if($role)
-        return User::UserRole('user_id',$userId)->where('role','LIKE','%;'.$roleCode.';%')->exists();        
+        $role = Role::where('role_code', $roleCode)->first();
+        if ($role)
+            return User::where('user_id', $userId)->where('role', 'LIKE', '%;' . $roleCode . ';%')->exists();
     }
-    
+
     /**
-     * get user berdasarkan email dan password nya
+     * get user berdasarkan username/email dan password nya
      * 
-     * @param text $email
+     * @param text $username
      * @param text $password
      * @param integer $tenantId id tenant
      * @return boolean
      */
-    public function loginCheck($email, $password, $tenantId=0)
+    public function loginCheck($username, $password, $tenantId = 0)
     {
-        $userData = User::where('email',$email)->first();
-        if($userData==null)return false;
-        if(!Hash::check($password, $userData->password))return false;        
+        $userData = User::where('username', $username)->first();
+        if ($userData == null){
+            $userData = User::where('email', $username)->first();
+            if ($userData == null){
+                return false;
+            } 
+        } 
+        if (!Hash::check($password, $userData->password)) return false;
         $user = $userData->toArray();
         //jika tidak punya akses all tenant maka cek tenant
-        if(!$user['all_tenant']){
-            if(Tenant::where('id',$tenantId)->first()==null){
+        if (!$user['all_tenant']) {
+            if (Tenant::where('id', $tenantId)->first() == null) {
                 return false;
             }
         }
-        $user['profile'] = $userData->profile?$userData->profile->toArray():[];
+        $user['profile'] = $userData->profile ? $userData->profile->toArray() : [];
         return $user;
-        
     }
 
-    public function activateUser($user_id)
+    /**
+     * cek apakah email sudah terdaftar sebelumnya
+     * 
+     * @param type $email
+     * @param type $except
+     * @return boolean
+     */
+    public function isEmailRegistered($email, $except_user_id = false)
     {
-        $userData = $this->model->find($user_id);
-        
-        if(!$userData){
-            $this->error = 'User not found.';
-            return false;
+        $user = User::where('email', $email);
+
+        if ($except_user_id) {
+            $user = $user->where('id', '!=', $except_user_id);
         }
-        
-        UserLogRepo::addActivityLog($user_id,'activate');
-        
-        return $userData->update(['status'=>1]);
+
+        if ($user->exists()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * cek apakah phone sudah terdaftar sebelumnya
+     * 
+     * @param string $phone
+     * @param type $except
+     * @return boolean
+     */
+    public function isPhoneRegistered($phone, $except_user_id = false)
+    {
+        $user = User::where('phone', $phone);
+
+        if ($except_user_id) {
+            $user = $user->where('id', '!=', $except_user_id);
+        }
+
+        if ($user->exists()) {
+            return true;
+        }
+
+        return false;
     }
     
+    /**
+     * cek apakah username sudah terdaftar sebelumnya
+     * 
+     * @param string $username
+     * @param type $except
+     * @return boolean
+     */
+    public function isUsernameRegistered($username, $except_user_id = false)
+    {
+        $user = User::where('username', $username);
+
+        if ($except_user_id) {
+            $user = $user->where('id', '!=', $except_user_id);
+        }
+
+        if ($user->exists()) {
+            return true;
+        }
+
+        return false;
+    }
+    /**
+     *  getter operation method
+     * ==========================================================================
+     */
+
+     /**
+      * @param $filter array
+      *     profile
+      */
+    public function listUser($filter = false, $offset = 0, $limit = 0)
+    {
+        if (!$filter) $filter = [];
+        $filter['searchField'] = ['name'];
+        $filter['hiddenColumn'] = ['created_at', 'updated_at', 'cached_at'];
+
+        $user = User::with(['profile']);
+
+        if(isset($filter['profile'])){
+            $user->whereHas('profile', function($q) use ($filter){
+                $q = $this->_where($q,$filter['profile']);
+            });
+            unset($filter['profile']);
+        }
+        
+        $data = $this->_list(
+            $user,
+            $filter,
+            $offset,
+            $limit,
+            false
+        );
+        $data['data'] = array_map([$this,'_formatUser'],$data['data']);
+        return $data;
+    }
+
+    /**
+     * get 1 record user beserta profile nya
+     * 
+     * @param type              $userId
+     * @return array|false      jika tidak ada
+     */
+    public function getUser($userId)
+    {
+        $user = User::with(['profile'])->find($userId);
+        if ($user) {          
+            return $this->_formatUser($user->toArray());
+        }
+        return false;
+    }
+
     /**
      * Hanya digunakan untuk fungsi yang memerlukan Model user, misal auth, notifikasi, dll
      * selain itu tidak boleh.
@@ -125,341 +234,379 @@ class UserRepo extends BaseRepository
     {
         return User::find($user_id);
     }
-    
-    public function listUser($filter=false, $offset=0,$limit=0)
-    {
-        $data = $this->_list(
-            new User, [
-            'filter' => $filter,
-            'searchField' => ['name'],
-            'hiddeColumn' => ['created_at','updated_at','cached_at']
-            ], false, $offset, $limit
-        );  
-        return $data;
-    }
 
-    public function getUser($filter) 
-    {
-        return $this->_getOne(new User, $filter);
-    }
-    
-    public function getUserProfile($userId) 
-    {
-        return $this->_getOne(new UserProfile, ['user_id', $userId]);
-    }
-    
-    /**
-     * get 1 record user beserta profile nya
-     * 
-     * @param type $userId
-     * @return mixed false jika tidak ada
-     */
-    public function getOneWithProfile($userId)
-    {
-        $user = User::with(['profile'])->find($userId);
-        if($user){
-            $result = $user->toArray();
-            $result['profile'] = $user->profile->toArray();
-            unset($result['profile']['id'],$result['profile']['user_id'],
-                $result['profile']['created_at'],$result['profile']['updated_at']);
-            if($result['profile']['avatar'])
-                $result['profile']['avatar_url'] = Storage::url($result['profile']['avatar'],false,'ac');
-            return $result;
-        }
-        return false;
-    }
-    
     public function getOneBySocnetId($id, $provider)
     {
-        $userData = User::where('socialauth_'.$provider.'_id',$id)->first();
-        
-        if(!$userData)return false;
-        return $userData->toArray();
+        $userData = User::with(['profile'])->where('socialauth_' . $provider . '_id', $id)->first();
+
+        if (!$userData) return false;
+        return $this->_formatUser($userData->toArray());
     }
-    
-    public function getOneBySocnetIdOrEmail($id,$email,$provider)
+
+    public function getOneBySocnetIdOrEmail($id, $email, $provider)
     {
-        $userData = User::where('email', $email)
-            ->orWhere('socialauth_'.$provider.'_id',$id)
+        $userData = User::with(['profile'])->where('email', $email)
+            ->orWhere('socialauth_' . $provider . '_id', $id)
             ->first();
-        
-        if(!$userData)return false;
-        return $userData->toArray();
+
+        if (!$userData) return false;
+        return $this->_formatUser($userData->toArray());
     }
-        
+
+    /**
+     * helper getter untuk get data user
+     */
+    private function _filterUserResult(array $result)
+    {
+        $hiddenField = array_merge(
+            config('AppConfig.packageLocal.moduser.users_hidden_field'), 
+            config('AppConfig.packageLocal.moduser.user_profiles.hide')
+        );
+
+        return $this->_filterField($result, $hiddenField);
+    }
+
+    /**
+     * helper getter untuk get data user
+     * fomat data user sesuai keperluan
+     */
+    private function _formatUser(array $user) {
+        $user = $this->_filterField($user, config('AppConfig.packageLocal.moduser.users_hidden_field'));
+
+        if (isset($user['avatar']) && $user['avatar'])
+            $user['avatar_url'] = Storage::url($user['avatar']);
+
+        if (!empty($user['profile'])) {
+            $user['profile'] = $this->_filterField($user['profile'], config('AppConfig.packageLocal.moduser.user_profiles.hide'));
+            unset($user['profile']['id'], $user['profile']['user_id'],
+                $user['profile']['created_at'], $user['profile']['updated_at']);
+                
+            // $user = array_merge($user, $user['profile']); // splice in at position 3
+        }
+        // unset($user['profile']);        
+        return $user;
+    }
+
+    /**
+     *  setter operation method
+     * ==========================================================================
+     */
+
     /**
      * rigistrasi user baru
      * 
      * @param array $userData : seluruh field di table user dan :
-     *      role_code
-     *      apps_id
-     *      has_auth_grant
+     *      role_code * optional    string role_code, jika tidak dicantumkan akan menggunakan default role_code
+     *      tenant_id * optional
+     *      user_id * optional      user id yang insert
+     * 
      * @param boolean $generateToken 1 jika generate token, 0 jika tidak
      * 
      * @return array : seluruh field di table user dan :
-     *      token : api_token dari table api_tokens yg digenerate saat registrasi
+     *      token : api_token dari table api_tokens yg digenerate saat registrasi, jika generatetoken true
      *      token_id : id dari table api_tokens nhya
      *      
      */
-    public function register(Array $userData,$generateToken=true)
+    public function register(array $userData, $generateToken = true)
     {
         $userData = $this->registerFilter($userData);
-        
-        if(!$userData){
+
+        if (!$userData) {
             return false;
         }
-        
-//        $userRole = null;
-//        foreach ($userData['role_code'] as $key => $value) {
-//            $roleData = Role::where('role_code',$value)->first()->toArray();;        
-//            if(!$roleData){
-//                $this->error = 'Role tidak terdaftar';
-//                return false;
-//            }
-//            $userRole[] = $roleData['id'].':'.$roleData['role_code'];
-//        }
-//        $userData['role'] = ';'.implode(';', $userRole).';';
 
-        $userData['password']=isset($userData['password'])?Hash::make($userData['password']):'';
-        
+        $userData['password'] = isset($userData['password']) ? Hash::make($userData['password']) : '';
+
         $userData['user_idcode'] = $this->generateUserIdcode();
-        $userData['tenant_id'] = config('tenant.id')?config('tenant.id'):0;
-        
+        $userData['tenant_id'] = config('tenant.id') ? config('tenant.id') : 0;
+
         //role dikosongin dahulu karena insert role di proses selanjutnya
         $role = $userData['role'];
         $userData['role'] = '';
-        
+
         $data = $this->model->create($userData);
         $data = $data->toArray();
-                
-        if($generateToken){
+
+        if ($generateToken) {
             $apiTokenData = $this->generateToken($data['id']);
             $data['token'] = $apiTokenData['api_token'];
         }
-        
-        $profileData = $data;
-        $profileData['user_id'] = $data['id'];
-        unset($profileData['id']);
-        
-        $this->registerProfile($profileData);
-             
-        if(isset($role) && is_array($role)){
-            foreach ($role as $key => $value) {
-                if(isset($value['role_code'])){
-                    RoleRepo::addUserRole(
-                        $data['id'],
-                        $value['role_code'],
-                        isset($value['is_main_role'])&&$value['is_main_role']?1:0,
-                        isset($value['has_auth_grant'])&&$value['has_auth_grant']?1:0,
-                        false);
-                }
-            }         
+
+        if(isset($userData['profile'])){
+            $userData['profile']['user_id'] = $data['id'];
+            //insert profile
+            $this->registerProfile($userData['profile']);
         }
-                
-        if(isset($userData['email']))
-            $this->sendUserActivationEmail($data['id'],$userData['apps_id']);
-                
+
+        $this->addUserRole(
+            $data['id'],
+            $role['role_code'],
+            1,
+            $role['has_auth_grant'],
+            false
+        );
+
+        if (isset($userData['email']))
+            $this->sendUserActivationEmail($data['id']);
+
         return $data;
     }
-    
-    public function registerFilter(Array $userData)
+
+    public function registerFilter(array $userData)
     {
         $validatorRule = [
             'name' => 'required|min:5|max:255',
         ];
-        if(isset($userData['password'])){
+        if (isset($userData['password'])) {
             $validatorRule['password'] = 'required|min:5|max:255';
         }
-        if(isset($userData['email'])){
+        if (isset($userData['email'])) {
             $validatorRule['email'] = 'required|email|min:5|max:255';
-        }        
+        }
+        if (isset($userData['username'])) {
+            $userData['username'] = str_replace(' ','',$userData['username']);
+            $validatorRule['username'] = 'required|min:5|max:255';
+        }
         $validator = Validator::make($userData, $validatorRule);
-        
+
         if ($validator->fails()) {
             $errors = $validator->errors();
             $err[] = '<ul>';
             foreach ($errors->all() as $message) {
-                $err[] = '<li>'.$message.'</li>';
+                $err[] = '<li>' . $message . '</li>';
             }
             $err[] = '</ul>';
             $this->error = implode('', $err);
             return false;
-        }        
-        
-        if(isset($userData['phone'])){
+        }
+
+        if (isset($userData['phone'])) {
             $userData['phone'] = $this->phoneFormat($userData['phone']);
         }
 
-        if(!isset($userData['has_auth_grant']))$userData['has_auth_grant']=0;
-                
         //jika tidak menyertakan role_id maka set default
-        if(!isset($userData['role'])){
-            if(config('cur_apps.default_role')){
-                 $userData['role'][1] = [
-                     'role_code'=>config('cur_apps.default_role'),
-                     'is_main_role'=>1,
-                     'has_auth_grant'=>0
-                     ];
-             }else{
-                 $userData['role'][1] = [
-                     'role_code'=>config('bssystem.default_apps.default_role'),
-                     'is_main_role'=>1,
-                     'has_auth_grant'=>0
-                     ];
-             }
+        if (!isset($userData['role_code'])) {
+            $userData['role_code'] = config('AppConfig.packageLocal.moduser.registration.default_role_code');
         }
-        
-        //pastikan rule nya ada
-        if(is_array($userData['role'])){
-            foreach ($userData['role'] as $key => $value) {
-                $role = Role::where('role_code',$value['role_code'])->first();
-                if(!$role){
-                    $this->error = 'Role not defined.';
-                    return false;
-                }
-            }
-        }else {
-            $role = Role::where('role_code',$userData['role'])->first();
-            if(!$role){
-                $this->error = 'Role not defined.';
-                return false;
-            }
-            $userData['role'][1] = [
-                'role_code'=>$userData['role'],
-                'is_main_role'=>1,
-                'has_auth_grant'=>0
-                ];
-        }
-        
 
-        if(isset($userData['email']) && $this->isEmailRegistered($userData['email'])){
+        //pastikan rule nya ada        
+        $role = Role::where('role_code', $userData['role_code'])->first();
+        if (!$role) {
+            $this->error = 'Role "'.$userData['role_code'].'" not defined.';
+            return false;
+        }
+        unset($userData['role_code']);
+
+        $userData['role'] = $role->toArray();
+        $userData['role']['has_auth_grant'] = 0;
+        $userData['level'] = $userData['role']['level'];
+
+        if (isset($userData['email']) && $this->isEmailRegistered($userData['email'])) {
             $this->error = 'Email already registered.';
             return false;
         }
-        
-        if(isset($userData['phone']) && $this->isPhoneRegistered($userData['phone'])){
+
+        if (isset($userData['phone']) && $this->isPhoneRegistered($userData['phone'])) {
             $this->error = 'Phone already registered.';
             return false;
         }
+        if (isset($userData['phone']) && $this->isUsernameRegistered($userData['phone'])) {
+            $this->error = 'Username already registered.';
+            return false;
+        }
+        
+        //pastikan tidak ada parameter yang ksosong
+        foreach ($userData as $key => $value) {
+            if(empty($value))unset($userData[$key]);
+        }
+
         return $userData;
     }
-    
+
     /**
      * 
      * @param array $userData gabungan data users & user_profile
      */
-    public function registerProfile(Array $userData)
+    public function registerProfile(array $userData)
     {
         $userData = $this->registerProfileFilter($userData);
-        
-        if(!$userData){
+        if (!$userData) {
             return false;
         }
-        
         UserProfile::create($userData);
     }
-    
+
     /**
      * 
      * @param array $userData
      * @return boolean
      */
-    public function registerProfileFilter(Array $userData)
+    public function registerProfileFilter(array $userData)
     {
+        
         $validatorRule = [
             'user_id' => 'required',
         ];
         $validator = Validator::make($userData, $validatorRule);
-        
+
         if ($validator->fails()) {
             $errors = $validator->errors();
             $err[] = '<ul>';
             foreach ($errors->all() as $message) {
-                $err[] = '<li>'.$message.'</li>';
+                $err[] = '<li>' . $message . '</li>';
             }
             $err[] = '</ul>';
             $this->error = implode('', $err);
             return false;
         }
+        
+        //pastikan tidak ada parameter yang ksosong
+        foreach ($userData as $key => $value) {
+            if(empty($value))unset($userData[$key]);
+        }
+
         return $userData;
     }
 
-    /**
-     * update format nomor telepon menja
-     * @param type $phone
-     * @return string
-     */
-    public function phoneFormat($phone)
-    {
-        $phone = ltrim($phone,'0');
-        //jika belum memasukan kode negara maka set indonesia
-        if(strpos($phone,'+')===false){
-            $phone = '+62'.$phone;
+    public function deleteUser($userId){
+        if(!$this->_exists(new User,[['id',$userId]])){
+            $this->error = 'user tidak ditemukan';
+            return false;
         }
-        return $phone;
+        $this->_delete(new User,[['id',$userId]]);
+        $this->_delete(new UserProfile,[['user_id',$userId]]);
+        $this->_delete(new UserRole,[['user_id',$userId]]);
+        return true;
     }
-    
+    /**
+     * 
+     * @param integer           $userId user id user yang akan diupdate
+     * @param array             $userData
+     *      role_code *optional string role_code, jika disertakan maka akan mengubah role utama
+     * 
+     * @return boolean
+     */
+    public function updateUser($userId, $userData)
+    {
+        if (isset($userData['_token'])) unset($userData['_token']);
+        if (isset($userData['_method'])) unset($userData['_method']);
+        if (isset($userData['password']) && $userData['password']) $userData['password'] = Hash::make($userData['password']);
+        
+        //jika menyertakan profile, maka proses update table profile
+        if(isset($userData['profile'])){
+            $this->updateProfile($userId, $userData['profile']);
+            unset($userData['profile']);
+        }
+        
+        //pastikan tidak ada parameter yang ksosong
+        foreach ($userData as $key => $value) {
+            if(empty($value))unset($userData[$key]);
+        }
+        
+        //upload avatar jika menyertakan avatar
+        if (isset($userData['avatar']) && !empty($userData['avatar'])) {
+            $userData['avatar'] = Storage::putFile('images/avatar', $userData['avatar']);
+            
+            $userTmp = $this->_getOne(new User, $userId);
+
+            if (!empty($userTmp['avatar'])) {
+                Storage::delete($userTmp['avatar']);
+            }
+        }
+
+        if(isset($userData['email']))$this->updateEmail($userId,$userData);
+        if(isset($userData['phone']))$this->updatePhone($userId,$userData);
+        
+        //jika tidak menyertakan role_id maka set default
+        if (isset($userData['role_code'])){            
+            $this->updateMainRole($userId,$userData['role_code']);
+            unset($userData['role_code']);
+        }
+
+        $this->_update(new User, $userId, $userData);
+
+        return true;
+    }
+
+
+    public function suspendUser($id)
+    {
+        return User::find($id)->update(['status' => 2]);
+    }
+
+    public function updateProfile($userId, $userData)
+    {
+        $userProfile = $this->_getOne(new UserProfile, ['user_id',$userId]);
+        if (!$userProfile) {
+            $this->error = 'User tidak ditemukan';
+            return false;
+        }
+
+        //pastikan tidak ada parameter yang ksosong
+        foreach ($userData as $key => $value) {
+            if(empty($value))unset($userData[$key]);
+        }
+        // foreach ($this->userProfileField as $value) {
+        //     if (isset($userData[$value])) $input[$value] = $userData[$value];
+        // }
+        $this->_update(new UserProfile, ['user_id',$userId], $userData);
+        
+    }
+
+    public function updatePhone($userId, $userData)
+    {
+        if (isset($userData['phone'])) {
+            $input = User::find($userId);
+            $input->phone = $this->phoneFormat($userData['phone']);
+            $input->phone_verified_at = null;
+            $input->update();
+        }
+
+        return true;
+    }
+
+    public function updateEmail($userId, $userData)
+    {
+        if (isset($userData['email'])) {
+            $input = User::find($userId);
+            $input->email = $userData['email'];
+            $input->email_verified_at = null;
+            $input->update();
+        }
+        return true;
+    }
+
     /**
      * reset password user
      * @param type $userId
      * @param type $newPassword
      */
-    public function resetPassword($userId,$newPassword)
-    {        
+    public function resetPassword($userId, $newPassword)
+    {
         $user = User::find($userId);
-        if(!$user){
+        if (!$user) {
             $this->error = __('User tidak ditemukan');
             return false;
-            
-        }            
-        $user->password= Hash::make($newPassword);
+        }
+        $user->password = Hash::make($newPassword);
         $user->save();
         return true;
     }
-    
-    /**
-     * cek apakah email sudah terdaftar sebelumnya
-     * 
-     * @param type $email
-     * @param type $except
-     * @return boolean
-     */
-    public function isEmailRegistered($email,$except_user_id=false)
+
+    public function activateUser($user_id)
     {
-        $user = User::where('email',$email);
-        
-        if($except_user_id){
-            $user = $user->where('id','!=',$except_user_id);
+        $userData = $this->model->find($user_id);
+
+        if (!$userData) {
+            $this->error = 'User not found.';
+            return false;
         }
-        
-        if($user->exists()){
-            return true;
-        }
-        
-        return false;
+
+        UserLogRepo::addActivityLog($user_id, 'activate');
+
+        return $userData->update(['status' => 1]);
     }
-    /**
-     * cek apakah phone sudah terdaftar sebelumnya
-     * 
-     * @param string $phone
-     * @param type $except
-     * @return boolean
-     */
-    public function isPhoneRegistered($phone,$except_user_id=false)
-    {
-        $user = User::where('phone',$phone);
-        
-        if($except_user_id){
-            $user = $user->where('id','!=',$except_user_id);
-        }
-        
-        if($user->exists()){
-            return true;
-        }
-                
-        return false;
-    }
-        
+
     /**
      * do email verification
      * 
@@ -467,14 +614,14 @@ class UserRepo extends BaseRepository
      * @param type $verifyCode
      * @return boolean
      */
-    public function varifyEmail($email,$verifyCode)
+    public function varifyEmail($email, $verifyCode)
     {
-        if($this->generateEmailVerfifyCode($email)==$verifyCode){
-            $user = User::where('email',$email)->whereNull('email_verified_at')->first();
-            if(!$user){
+        if ($this->generateEmailVerfifyCode($email) == $verifyCode) {
+            $user = User::where('email', $email)->whereNull('email_verified_at')->first();
+            if (!$user) {
                 $this->error = __('auth.emailverify_fail_mailnotfound');
-                return false;                
-            }            
+                return false;
+            }
             $user->{'email_verified_at'} = now()->toDateTimeString();
             $user->save();
             return true;
@@ -482,7 +629,7 @@ class UserRepo extends BaseRepository
         $this->error = __('auth.emailverify_fail_varificationcodeinvalid');
         return false;
     }
-    
+
     /**
      * do phone verification with OTP
      * 
@@ -490,15 +637,15 @@ class UserRepo extends BaseRepository
      * @param type $otpCode
      * @return boolean
      */
-    public function varifyPhone($phone,$otpCode)
+    public function varifyPhone($phone, $otpCode)
     {
-        if($this->isOTPValid($phone,$otpCode)){
+        if ($this->isOTPValid($phone, $otpCode)) {
             $phoneField = 'phone';
-            $user = User::where('phone',$phone)->whereNull('phone_verified_at')->first();
-            if(!$user){
+            $user = User::where('phone', $phone)->whereNull('phone_verified_at')->first();
+            if (!$user) {
                 $this->error = __('auth.phoneverify_fail_phonenotfound');
-                return false;                
-            }            
+                return false;
+            }
             $user->{'phone_verified_at'} = now()->toDateTimeString();
             $user->save();
             return true;
@@ -506,23 +653,45 @@ class UserRepo extends BaseRepository
         $this->error = __('auth.phoneverify_fail_verificationcodeinvalid');
         return false;
     }
-    
-    
-    public function varifyResetPasswordToken($email,$verifyCode,$delete=false)
+
+    public function varifyResetPasswordToken($email, $verifyCode, $delete = false)
     {
         //jika match
-        if($this->generateEmailVerfifyCode($email)==$verifyCode){
-            
-            $passwordReset = PasswordReset::where('email',$email)->where('token',$verifyCode)->first();
-            if(!$passwordReset){
+        if ($this->generateEmailVerfifyCode($email) == $verifyCode) {
+
+            $passwordReset = PasswordReset::where('email', $email)->where('token', $verifyCode)->first();
+            if (!$passwordReset) {
                 $this->error = __('auth.resetpassword_fail_mailnotfound');
-                return false;                
+                return false;
             }
-            if($delete)$passwordReset->delete();
+            if ($delete) $passwordReset->delete();
             return true;
         }
         $this->error = __('auth.resetpassword_fail_verificationcodeinvalid');
         return false;
+    }
+
+
+
+    /**
+     * general helper
+     * =======================================================================
+     */
+
+    
+    /**
+     * update format nomor telepon menja
+     * @param type $phone
+     * @return string
+     */
+    public function phoneFormat($phone)
+    {
+        $phone = ltrim($phone, '0');
+        //jika belum memasukan kode negara maka set indonesia
+        if (strpos($phone, '+') === false) {
+            $phone = '+62' . $phone;
+        }
+        return $phone;
     }
     /**
      * generate perkiraan user id selanjutanya
@@ -531,7 +700,7 @@ class UserRepo extends BaseRepository
      */
     public function nextUserId()
     {
-        $nextId = $this->model->select('id')->orderBy('id','DESC')->first()->toArray();
+        $nextId = $this->model->select('id')->orderBy('id', 'DESC')->first()->toArray();
         $nextId = $nextId['id'] + 1;
         return $nextId;
     }
@@ -543,164 +712,235 @@ class UserRepo extends BaseRepository
      */
     public function generateUserIdcode()
     {
-        $count = $this->model->whereDate('created_at', '=', Carbon::today()->toDateString())->count()+1;
+        $count = $this->model->whereDate('created_at', '=', Carbon::today()->toDateString())->count() + 1;
         $nextId = $this->nextUserId();
-        
-        $zero = str_repeat('0',8-strlen($count.$nextId));
-        
-        $idcode = Carbon::today()->format('Ymd').$nextId.$zero.$count;
+
+        $zero = str_repeat('0', 8 - strlen($count . $nextId));
+
+        $idcode = Carbon::today()->format('Ymd') . $nextId . $zero . $count;
         return $idcode;
     }
 
+    
+    
+    /**
+     * Manage USER ROLE
+     * -------------------------------------------------------------------------
+     */
+        
     /**
      * 
-     * @param integer           $userId user id user yang akan diupdate
-     * @param array             $userData
-     * @param booloean          $dispatchUpdater
-     * @return boolean
+     * @param type $userId
+     * @return boolean|array format mirip data role di APPSSession
      */
-    public function updateUser($userId, $userData, $dispatchUpdater=true)
+    public function getUserRole($userId,$withoutTime=true)
     {
-        if(isset($userData['role']) && is_array($userData['role'])){
-            $userRole = RoleRepo::getUserRoleCode($userId);
-            
+        $response = [];
+        $userRoleData = UserRole::where('user_id',$userId)->get();
+        if(!$userRoleData)return false;
+        foreach ($userRoleData as $key => $value) {
+            $roleData = Role::where('id',$value->role_id)->first();
+            if($roleData){
+                $roleData = $roleData->toArray();
+                $roleData['is_main_role'] = $value->is_main_role;
+                $roleData['has_auth_grant'] = $value->has_auth_grant;            
+
+                if($withoutTime){
+                    unset($roleData['created_at'],$roleData['updated_at']);
+                }
+                $response[$roleData['role_code']] = $roleData;
+            }
+        }
+        
+        return $response;
+    }
+    /**
+     * 
+     * @param type $userId
+     */
+    public function generateUserRole($userId)
+    {
+        $dataRole = UserRole::with(['role'])->where('user_id', $userId)->get()->toArray();
+        if(!$dataRole) return '';
+        foreach ($dataRole as $value) {
+            $data[] = $value['role']['role_code'];
+        }        
+        return ';'.implode(';', $data).';';
+    }
+    
+    
+    public function addUserRole($userId,$roleCode,$isMainRole=0,$hasAuthGrant=0)
+    {
+        $role = $this->_getOne(new Role,['role_code',$roleCode]);
+        if(!$role)return false;
+                
+        //cek pastikan user role belum terdaftar
+        $userRole = $this->_getOne(new UserRole,[['user_id',$userId],['role_id',$role['id']]]);
+        if($userRole)return false;
+        $this->_create(new UserRole, [
+            'user_id' => $userId,
+            'role_id' => $role['id'],
+            'is_main_role' =>$isMainRole,
+            'has_auth_grant'=>$hasAuthGrant,
+        ]);
+                        
+        //update role di table user
+        $this->updateUser($userId, [
+            'role'=> $this->generateUserRole($userId),
+            'level'=>$role->level
+            ]);
+        return $role;
+    }
+
+    /**
+     * untuk update main role user
+     */
+    public function updateMainRole($userId,$newRoleCode,$hasAuthGrant=0){
+        
+        //jika menyer
+        $role = Role::where('role_code', $newRoleCode)->first();
+        if (!$role) {
+            $this->error = 'Role "'.$newRoleCode.'" not defined.';
+            return false;
+        }
+        $roleData = $this->_update(new UserRole,[['user_id',$userId],['is_main_role',1]], [
+            'role_id' => $role->id,
+            'has_auth_grant'=>$hasAuthGrant,
+        ]);       
+                        
+        //update role di table user
+        $this->updateUser($userId, [
+            'role'=> $this->generateUserRole($userId),
+            'level'=>$role->level
+            ]);
+    }
+
+    /**
+     * belum dipakai
+     */
+    public function updateUserRole($key,$data)
+    {
+        //cek pastikan user role sudah terdaftar
+        $userRole = $this->_getOne(new UserRole, $key);
+        if(!$userRole)return false;
+        if(!isset($data['role_code'])){
+            $data['role_code'] = $userRole['role_code'];
+        }
+           
+        $roleData = $this->_update(new UserRole,['user_id'=>$userRole['user_id'],'role_code'=>$userRole['role_code']], [
+            'role_code' => $data['role_code'],
+            'is_main_role' =>isset($data['is_main_role'])&&$data['is_main_role']?1:0,
+            'has_auth_grant'=>isset($data['has_auth_grant'])&&$data['has_auth_grant']?1:0,
+        ]);       
+                        
+        //update role di table user
+        $this->updateUser($userRole['user_id'], ['role'=> $this->generateUserRole($userRole['user_id'])]);
+        return $roleData;
+    }
+    
+    public function deleteUserRole($userId,$roleCode)
+    {
+        $role = $this->getOne(['role_code',$roleCode]);
+        if(!$role)return false;
+        
+        //delete role dari user role
+        $roleData = $this->_delete(new UserRole,[
+            'user_id' => $userId,
+            'role_code' => $role['role_code']
+        ]);
+        
+        //delete role di table user
+        $this->updateUser($userId, ['role'=> $this->generateUserRole($userId)]);
+        
+        return $roleData;
+    }        
+    /**
+     * Belum selesai
+     */
+    public function setAuthGrant($userId,$roleCode)
+    {
+        $user = User::find($userId);
+        $user->roles()->where('has_auth_grant');
+        return User::find($userId)->update(['status' => 2]);
+    }
+
+    /**
+     * Belum selesai
+     */
+    public function updateRole($userId, $userData = null)
+    {
+        
+        if (isset($userData['role']) && is_array($userData['role'])) {
+            $userRole = UserRole::where('user_id', $userId)->pluck('role_code')->toArray();
+
             $hasIsMainRole = 0;
             foreach ($userData['role'] as $value) {
                 //simpan semua nama role yg dipilih untuk keperluan delete role yg tidak dipilih
                 $role[] = $value['role_code'];
-                if(isset($value['role_code']) && $value['role_code']){
+                if (isset($value['role_code']) && $value['role_code']) {
                     //tandai apakah ada is_main_role yg dipilih, jika tidak ada maka
                     //nanti di proses selanjutnya tambahkan is_main_role ke member
-                    if(isset($value['is_main_role'])&&$value['is_main_role']){
+                    if (isset($value['is_main_role']) && $value['is_main_role']) {
                         $hasIsMainRole++;
                     }
                     //inputkan role baru yang dipipilih
-                    if (!in_array($value['role_code'],$userRole)) {
-                        RoleRepo::addUserRole(
+                    if (!in_array($value['role_code'], $userRole)) {
+                        $this->addUserRole(
                             $userId,
                             $value['role_code'],
-                            isset($value['is_main_role'])&&$value['is_main_role']?1:0,
-                            isset($value['has_auth_grant'])&&$value['has_auth_grant']?1:0,
-                            false);
-                    //update role yang memang sebelumnya telah ada
-                    }else{
-                        
-                        RoleRepo::updateUserRole([
-                            'user_id'=>$userId,
-                            'role_code'=>$value['role_code']
-                            ],[
-                                'is_main_role'=>isset($value['is_main_role'])&&$value['is_main_role']?1:0,
-                                'has_auth_grant'=>isset($value['has_auth_grant'])&&$value['has_auth_grant']?1:0
-                            ]);
+                            isset($value['is_main_role']) && $value['is_main_role'] ? 1 : 0,
+                            isset($value['has_auth_grant']) && $value['has_auth_grant'] ? 1 : 0,
+                            false
+                        );
+                        //update role yang memang sebelumnya telah ada
+                    } else {
+
+                        $this->updateUserRole([
+                            'user_id' => $userId,
+                            'role_code' => $value['role_code']
+                        ], [
+                            'is_main_role' => isset($value['is_main_role']) && $value['is_main_role'] ? 1 : 0,
+                            'has_auth_grant' => isset($value['has_auth_grant']) && $value['has_auth_grant'] ? 1 : 0
+                        ]);
                     }
                 }
             }
-            
+
             foreach ($userRole as $value) {
                 //hapus role lama yang tidak dipilih
                 if (!in_array($value, $role)) {
-                    RoleRepo::deleteUserRole($userId, $value);
+                    $this->deleteUserRole($userId, $value);
                 }
             }
-            
+
             //jika tidak memilih main role atau yg dipilih lebih dari 1 maka
             //set members sebagai main role
-            if(!$hasIsMainRole || $hasIsMainRole > 1){
-                
-                RoleRepo::updateUserRole([
-                    'user_id'=>$userId,
-                    'role_code'=>'member'
-                    ],['is_main_role'=>1]);
+            if (!$hasIsMainRole || $hasIsMainRole > 1) {
+
+                $this->updateUserRole([
+                    'user_id' => $userId,
+                    'role_code' => 'member'
+                ], ['is_main_role' => 1]);
             }
             unset($userData['role']);
         }
 
-//        if(isset($userData['is_main_role']) && is_array($userData['has_auth_grant'])){
-//            foreach ($userData['role_code'] as $key => $value) {
-//                if(!in_array($value, $userData['has_auth_grant'])){
-//                    UserRole::where(['user_id' => $userId,'role_code' => $value])->update(['has_auth_grant'=>0]);
-//                }
-//            }
-//
-//            foreach ($userData['has_auth_grant'] as $item) {
-//                if(in_array($item, $userData['role_code'])){
-//                    UserRole::where(['user_id' => $userId,'role_code' => $item])->update(['has_auth_grant'=>1]);
-//                }
-//            }
-//
-//            UserRole::where('user_id', $userId)->update(['is_main_role'=>0]);
-//            UserRole::where(['user_id' => $userId,'role_code' => $userData['is_main_role']])->update(['is_main_role'=>1]);
-//        }
-                
-        if(isset($userData['is_main_role']))unset($userData['is_main_role']);
-        if(isset($userData['has_auth_grant']))unset($userData['has_auth_grant']);
-        if(isset($userData['role_code']))unset($userData['role_code']);
-        if(isset($userData['_token']))unset($userData['_token']);
-        if(isset($userData['_method']))unset($userData['_method']);
-        
-        if(isset($userData['password']))$userData['password']=Hash::make($userData['password']);
-        
-        $this->_update(new User, $userId, $userData);
-                
-        if($dispatchUpdater)
-            $this->userUpdatedJob($userId);
+        //        if(isset($userData['is_main_role']) && is_array($userData['has_auth_grant'])){
+        //            foreach ($userData['role_code'] as $key => $value) {
+        //                if(!in_array($value, $userData['has_auth_grant'])){
+        //                    UserRole::where(['user_id' => $userId,'role_code' => $value])->update(['has_auth_grant'=>0]);
+        //                }
+        //            }
+        //
+        //            foreach ($userData['has_auth_grant'] as $item) {
+        //                if(in_array($item, $userData['role_code'])){
+        //                    UserRole::where(['user_id' => $userId,'role_code' => $item])->update(['has_auth_grant'=>1]);
+        //                }
+        //            }
+        //
+        //            UserRole::where('user_id', $userId)->update(['is_main_role'=>0]);
+        //            UserRole::where(['user_id' => $userId,'role_code' => $userData['is_main_role']])->update(['is_main_role'=>1]);
+        //        }
 
-        return true;
     }
-
-    public function suspendUser($id)
-    {
-        return User::find($id)->update(['status'=>2]);
-    }
-
-    public function updateProfile($userId, $userData)
-    {
-        $userProfile = $this->_getOne(new UserProfile, $userId);
-        if(!$userProfile){
-            $this->error = 'User tidak ditemukan';
-            return false;
-        }
-        
-        if (isset($userData['avatar']) && !empty($userData['avatar'])) {
-            $input['avatar'] = Storage::putFile('images/avatar', $userData['avatar']);
-           
-            if ($userProfile['avatar'] != null) {
-                Storage::delete($userProfile['avatar']);
-            }
-            unset($userData['avatar']);
-        }
-        
-        foreach ($this->userProfileField as $value) {            
-            if(isset($userData[$value]))$input[$value] = $userData[$value];
-        }
-        
-        if(isset($input)){
-            $this->_update(new UserProfile, $userId, $input);           
-        }
-    }
-
-    public function updatePhone($userId, $userData)
-    {
-        if(isset($userData['phone'])){
-            $input = User::find($userId);
-            $input->phone = $userData['phone'];
-            $input->phone_verified_at = null; 
-            $input->update();
-        }
-        
-        return true;
-    }
-
-    public function updateEmail($userId, $userData)
-    {
-        if(isset($userData['email'])){
-            $input = User::find($userId);
-            $input->email = $userData['email'];
-            $input->email_verified_at = null; 
-            $input->update();    
-        }
-        return true;
-    }
-
-                    
 }

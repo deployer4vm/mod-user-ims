@@ -2,9 +2,9 @@
 
 namespace App\Modules\Auth\Controllers\Auth;
 use Facades\App\Services\AcSSOService;
-use Facades\BSSystem\LIBAccount\Services\SocialAuthSrv;
-use Facades\BSSystem\LIBAccount\Repositories\UserRepo;
-use Facades\BSSystem\LIBAccount\Repositories\AppsRepo;
+use Facades\hpsynapse\moduser\Services\SocialAuthSrv;
+use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use Facades\hpsynapse\moduser\Repositories\AppsRepo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;

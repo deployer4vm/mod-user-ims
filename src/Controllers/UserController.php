@@ -1,124 +1,198 @@
 <?php
 
-namespace App\Modules\User\Controllers;
+namespace hpsynapse\moduser\Controllers;
 
 use Illuminate\Http\Request;
-use Facades\BSSystem\LIBAccount\Repositories\UserRepo;
-use Facades\BSSystem\LIBAccount\Repositories\RoleRepo;
-
-use BSSystem\Core\Base\BaseController;
+use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use Facades\hpsynapse\moduser\Repositories\RoleRepo;
+use Facades\hpsynapse\moduser\Services\UserAuth;
+use App\Base\BaseController;
 
 class UserController extends BaseController
 {
     public function __construct()
-    { 
-        \Breadcrumb::add('Home', route('admin.dashboard'));
-        \Breadcrumb::add('User', route('user.index'));
+    {
+        $this->forceApiOutput();
     }
+    
+    public function readList(Request $request) {
+        
+        $filter = [
+            'q'=>$request->input('q', null)
+        ];
+
+        //jika menyertakan status
+        if($request->input('status', null))
+            $filter[] = ['status', $request->input('status')];
+        
+        if(UserAuth::isLogin()){
+            $filter[] = ['id','!=',UserAuth::user('id')];
+            $filter[] = ['level','>',UserAuth::user('level')];
+        }            
+        
+        $this->output['data']['offset'] = $request->input('offset', 0);
+        $this->output['data']['limit'] = $request->input('limit', 10);
+
+        $this->output['data'] = UserRepo::listUser(
+            $filter, $this->output['data']['offset'], $this->output['data']['limit']
+        );
+
+        return $this->done();
+    }
+    
+    public function readOne(Request $request)
+    {
+        $id = $request->route('id');
+        $this->output['data'] = UserRepo::getUser($id);
+        $this->output['data']['user_role'] = UserRepo::getUserRole($this->output['data']['id']);
+        foreach($this->output['data']['user_role'] as $key => $val) {
+            if($val['is_main_role']){
+                $this->output['data']['role_code'] = $key;
+            }
+        } 
+
+        return $this->done();
+    }
+
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * 
      */
-    public function index()
-    {
-        return view('acuser.list');
-    }
-
-    public function userDataTables()
-    {
-        return UserRepo::getUserDataTables();
-    }
-
-    public function create()
-    {
-        \Breadcrumb::add('Create User ', route('user.create'));
-
-        $data['mode'] = 'create';
-        $data['role'] = RoleRepo::listRole();
-        return view('acuser.form', $data);
-    }
-
-    public function store(Request $request)
+    public function create(Request $request)
     {
         $userData = $request->all();//$request->only(['name', 'email', 'password']);
-        // dd($userData);
-        $validator = \Validator::make($userData, [
+
+        $validator = [
             'name' => 'required|min:3|max:255',
             'email' => 'required|email|max:255',
-            'phone' => 'required|max:20',
-            'password' => 'required|min:5|max:255',
-            'role'=> 'required',
-//            'role_code'=> 'required'
-        ]);
+            'password' => 'required|min:5|max:255'
+        ];
 
-        if ($validator->fails()) {
-            return redirect()->route('user.create')->with('alert', ['type' => 'warning', 'message' => __('auth.registerfailed',['error' => $validator->messages()])])->withInput();
+        if(isset($userData['username'])){
+            $validator['username'] = 'required|min:3|max:255';
         }
 
-        $regUserData = UserRepo::register($userData);
+        $validator = \Validator::make($userData, $validator);
+
+        if ($validator->fails()) {       
+            $this->setError(__('validation.inputerror'),$validator->messages());
+            return $this->done();
+        }
         
         //jika berhasil
-        if ($regUserData) {            
+        if (UserRepo::register($userData,false)) {            
             $this->setAlert('Data Inserted successfully','success');
-            return redirect()->route('user.index');
-        }
+        }else{
+            $this->setError(UserRepo::error(),'success');
+        }        
         
-        return redirect()->route('user.create')->with('alert', ['type' => 'warning', 'message' => __('auth.registerfailed',['error' => UserRepo::error()])])->withInput();
+        return $this->done();
     }
 
-    public function edit($userId)
+    /**
+     * Update user
+     */
+    public function update(Request $request)
     {
-        $data['data'] = UserRepo::getUser($userId);
-        $data['mode'] = 'edit';
-        $data['role'] = RoleRepo::listRole(['user_level'=>98]); 
-        $data['data_role'] = RoleRepo::getRoleByUserId($userId);
-        $data['user_role'] = RoleRepo::getUserRoleCode($userId);
-        \Breadcrumb::add('Edit : '.$data['data']['name'], route('user.create'));
-        // foreach ($data['data_role'] as $key => $value) {
-        //     dd($value['has_auth_grant']);
-        // }
-        // dd($data);
-        return view('acuser.form', $data);
-    }
+        $id = $request->route('id');
 
-    public function update(Request $request, $id)
-    {
         $input = $request->all();
 
-        $validator = \Validator::make($input, [
-            'name' => 'required|min:3|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|max:20',
-            'role'=> 'required',
-//            'role_code'=> 'required',
-//            'is_main_role'=> 'required'
-        ]);
+        $validator = [];
 
-        if ($validator->fails()) {
-            $this->setError('Input Error :',$validator->messages(),400,true);
-            return $this->done();
+        if(isset($input['username'])){
+            $validator['username'] = 'required|min:3|max:255';
+        }
+        if(isset($input['name'])){
+            $validator['name'] = 'required|min:3|max:255';
+        }
+        if(isset($input['email'])){
+            $validator['email'] = 'required|email|min:3|max:255';
+        }
+        if(isset($input['phone'])){
+            $validator['phone'] = 'required|min:3|max:255';
+        }
+
+        if(!empty($validator)){
+            $validator = \Validator::make($input, $validator); 
+            if ($validator->fails()) {
+                $this->setError('Input Error :',$validator->messages(),400,true);
+                return $this->done();
+            }
         }
 
         if($input['banned_note'] == null){
             unset($input['banned_note']);
         }
 
-        // dd($input);
+        if(UserRepo::updateUser($id, $input)) {            
+            $this->setAlert('Data Updated successfully','success');
+        }else{
+            $this->setAlert(UserRepo::error(),'danger');
+            $this->setError(UserRepo::error());
+        }
 
-        UserRepo::updateUser($id, $input);
-        $this->setAlert('Data Updated successfully','success');
-        return redirect()->route('user.index');
+        return $this->done();
     }
+    
 
-    public function suspend($id)
+    public function updateProfile(Request $request)
     {
-        UserRepo::suspendUser($id);
-        return response()->json(['status' => 'ok', 'code' => 200]);
+        
+        if(UserAuth::isLogin()){
+            $id = UserAuth::user('id');
+        }else{
+            $this->setError('User belum login');
+            return $this->done();
+        }
+
+        $input = $request->all();
+
+        $validator = [];
+
+        if(isset($input['username'])){
+            $validator['username'] = 'required|min:3|max:255';
+        }
+        if(isset($input['name'])){
+            $validator['name'] = 'required|min:3|max:255';
+        }
+        if(isset($input['email'])){
+            $validator['email'] = 'required|email|min:3|max:255';
+        }
+        if(isset($input['phone'])){
+            $validator['phone'] = 'required|min:3|max:255';
+        }
+
+        if(!empty($validator)){
+            $validator = \Validator::make($input, $validator); 
+            if ($validator->fails()) {
+                $this->setError('Input Error :',$validator->messages(),400,true);
+                return $this->done();
+            }
+        }
+        
+        if(isset($input['role_code']))unset($input['role_code']);
+        if(isset($input['status']))unset($input['status']);
+
+        if(UserRepo::updateUser($id, $input)) {            
+            $this->setAlert('Data Updated successfully','success');
+        }else{
+            $this->setAlert(UserRepo::error(),'danger');
+            $this->setError(UserRepo::error());
+        }
+
+        return $this->done();
     }
-
-    public function password(Request $request, $id)
+    
+    /**
+     * update password
+     * 
+     * @param Request $request
+     *      password
+     *      password_confirmatin
+     */
+    public function updatePassword(Request $request)
     {
+        $id = $request->route('id');
         $userData = $request->all();
 
         $validator = \Validator::make($userData, [
@@ -133,15 +207,40 @@ class UserController extends BaseController
 
         $change = UserRepo::updateUser($id, $userData);
         if (!$change) {
-            return redirect()->route('user.create')->with('alert', ['type' => 'warning', 'message' => __('auth.registerfailed',['error' => 'Kata Sandi Lama Salah !'])])->withInput();
+            return $this->done();
         }
 
         $this->setAlert('Password Updated successfully','success');
-        return redirect()->route('user.index');
+        return $this->done();
     }
 
-    public function destroy($id)
+    public function suspend(Request $request)
     {
+        $id = $request->route('id');
+
+        UserRepo::suspendUser($id);
+        return $this->done();
+    }
+
+    public function delete(Request $request)
+    {
+
+        $id = $request->route('id');
+           
+        if(UserAuth::isLogin() && $id != UserAuth::user('id')){
+            $filter[] = ['id', $id];
+            $filter[] = ['level','>',UserAuth::user('level')];
+            $data = UserRepo::listUser($filter);
+            if($data['count']<=0){
+                $this->setError('Permission denied');
+                return $this->done();;
+            }
+        }   
+
+        if(!UserRepo::deleteUser($id)){
+            $this->setError('Error : '.UserRepo::error());
+        }
+        return $this->done();
            
     }
 }

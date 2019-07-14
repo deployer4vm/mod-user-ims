@@ -4,7 +4,7 @@ namespace App\Modules\Auth\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Facades\BSSystem\LIBAccount\Repositories\UserRepo;
+use Facades\hpsynapse\moduser\Repositories\UserRepo;
 use BSSystem\Core\Base\BaseController;
 
 class ResetPasswordController extends BaseController

@@ -62,7 +62,7 @@ const actions = {
   login({ commit, dispatch, state }, authData) {
     return globals().LocalApi
       .post(authPath + "/login", {
-        email: authData.email,
+        username: authData.username,
         password: authData.password
       })
       .then(res => {
@@ -97,15 +97,19 @@ const actions = {
   */
   implementAcl({ commit, state, dispatch }) {
     var aclItem, aclItemLv2, aclItemLv3;
-
-    _.forEach(globals().AppConfig.packageLocal, (vPackage, packageNamespace) => {
+    
+    _.forEach(globals().AppConfig.sidenav, (vPackage, packageNamespace) => {
       //----cek hak akses level 1
-      _.forEach(vPackage.access.children, (accessItem, aclId) => {
-
+      _.forEach(vPackage.children, (accessItem, aclId) => {
+        
         //jika tidak punya akses acl maka tolak (menu akan ditampilkan sesuai default ACL nya)
-        if(state.role[state.role_code]==undefined || state.role[state.role_code][packageNamespace]==undefined)return;
-
-        aclItem = state.role[state.role_code][packageNamespace][aclId];
+        if( !state.role[state.role_code] 
+          || !state.role[state.role_code]['rule']
+          || state.role[state.role_code]['rule'][packageNamespace]==undefined 
+          || state.role[state.role_code]['rule'][packageNamespace][aclId]==undefined)return;
+        
+        aclItem = state.role[state.role_code]['rule'][packageNamespace][aclId];
+        
         if (aclItem.has_access) {
           accessItem.active_acl = {
             has_access: aclItem.has_access,
@@ -180,7 +184,7 @@ var role = {
   role_code_1: {
     is_main_role:1,
     has_auth_grant:1,
-    rules: {
+    rule: {
       moduleNameSpace: {
         acl_key_1: {
           has_access: 1, //apakah punya akses secara keseluruhan terhadap fitur ini

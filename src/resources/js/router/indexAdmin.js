@@ -35,11 +35,17 @@ const UserList = resolve => {
     resolve(require("../views/admin/user/userlist"));
   });
 };
+const UserView = resolve => {
+  require.ensure(["../views/admin/user/userview"], () => {
+    resolve(require("../views/admin/user/userview"));
+  });
+};
 const UserForm = resolve => {
   require.ensure(["../views/admin/user/userform"], () => {
     resolve(require("../views/admin/user/userform"));
   });
 };
+
 const RoleList = resolve => {
   require.ensure(["../views/admin/role/rolelist"], () => {
     resolve(require("../views/admin/role/rolelist"));
@@ -88,9 +94,14 @@ export default [
         name: "user.add"
       },
       {
-        path: "edit",
+        path: "edit/:userId",
         component: UserForm,
         name: "user.edit"
+      },
+      {
+        path: "view/:userId",
+        component: UserView,
+        name: "user.view"
       },
       {
         path: "role",
@@ -107,7 +118,7 @@ export default [
             name: "role.add"
           },
           {
-            path: "edit/:route_id",
+            path: "edit/:roleId",
             component: RoleForm,
             name: "role.edit"
           },

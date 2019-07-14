@@ -18,7 +18,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $fillable = [
-        'user_idcode','name', 'email', 'phone', 'password','auth_password',
+        'user_idcode','name','username', 'email', 'phone', 'password','auth_password',
         'socialauth_facebook_id','socialauth_facebook_token','socialauth_facebook_data',
         'socialauth_google_id','socialauth_google_token','socialauth_google_data',
         'note', 'role',  'status', 'banned_note'
@@ -46,5 +46,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function profile()
     {
         return $this->hasOne('hpsynapse\moduser\Models\UserProfile','user_id');
+    }    
+    public function roles()
+    {
+        return $this->hasMany('hpsynapse\moduser\Models\UserRole','user_id');
     }    
 }

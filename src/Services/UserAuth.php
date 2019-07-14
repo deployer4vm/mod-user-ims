@@ -28,8 +28,8 @@ class UserAuth
             if(Auth::check()){
                 $userId = Auth::user()->user_id;
                 if($userId){
-                    $this->userData = UserRepo::getOneWithProfile($userId);
-                    $listUserRole = RoleRepo::getRoleByUserId($userId);
+                    $this->userData = UserRepo::getUser($userId);
+                    $listUserRole = UserRepo::getUserRole($userId);
                     $this->userRole = array_pop($listUserRole);
                 }
             }
@@ -94,7 +94,7 @@ class UserAuth
         $this->setSession([
             'token' => $apiTokenData,            
             'user' => $userData,
-            'role' => RoleRepo::getRoleByUserId($userData['id']),
+            'role' => UserRepo::getUserRole($userData['id']),
             'lastUpdate' => $sessionData['lastUpdate'],
             'validUntil' => $sessionData['validUntil']
         ]);
@@ -216,7 +216,7 @@ class UserAuth
 
     public function isGranted($roleCode=false)
     {
-        $data = RoleRepo::getRoleByUserId($this->userData['id']);
+        $data = UserRepo::getUserRole($this->userData['id']);
         
         if(!is_array($roleCode))$roleCode = [$roleCode];
         foreach ($data as $role)

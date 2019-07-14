@@ -114,21 +114,20 @@ class LoginController extends BaseController
      * 
      * @param Request $request
      *      
-     * @param type $apps_code
      * @return json array
      */
     public function apiLogin(Request $request)
     {
         $this->forceApiOutput();
 
-        $authParam = $request->only('email', 'password');
+        $authParam = $request->only('username', 'password');
 
-        if(!isset($authParam['email']) ||!isset($authParam['password'])){
+        if(!isset($authParam['username']) ||!isset($authParam['password'])){
             $this->setError(__('alert.incorect_parameter'));
             return $this->done();
         }        
         
-        if($user = UserRepo::loginCheck($authParam['email'],$authParam['password'],config('tenant.id'))){
+        if($user = UserRepo::loginCheck($authParam['username'],$authParam['password'],config('tenant.id'))){
             $pushParam = false;
             if($request->input('pushNotifToken')){
                 $pushParam = [
@@ -141,7 +140,7 @@ class LoginController extends BaseController
             $this->output['data'] = UserAuth::getCurTimeStamp();
             $this->output['data']['token'] =$token['api_token'];            
             $this->output['data']['user'] = $user;
-            $this->output['data']['role'] = RoleRepo::getRoleByUserId($user['id']);
+            $this->output['data']['role'] = UserRepo::getUserRole($user['id']);
             foreach($this->output['data']['role'] as $key => $val) {
                 if($val['is_main_role']){
                     $this->output['data']['role_code'] = $key;

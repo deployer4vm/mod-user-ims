@@ -1,13 +1,13 @@
 <?php
 
-namespace BSSystem\LIBAccount\Notifications;
+namespace hpsynapse\moduser\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-use BSSystem\LIBAccount\Channels\DbChannels;
+use hpsynapse\moduser\Channels\DbChannels;
 /**
  * broad cast message dari admin ke member
  */

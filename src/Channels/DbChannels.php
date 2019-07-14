@@ -4,7 +4,7 @@ namespace hpsynapse\moduser\Channels;
 
 use Illuminate\Notifications\Notification;
 
-//use BSSystem\LIBAccount\Service\FirebaseAPI;
+//use hpsynapse\moduser\Service\FirebaseAPI;
 
 class DbChannels
 {

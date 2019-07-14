@@ -1,9 +1,12 @@
 <?php
-
+// use Facades\hpsynapse\moduser\Repositories\RoleRepo;
 /**
  * Route API feature Auth
  */
-Route::group(['prefix'=>config('AppConfig.endpoint.api.auth')],function(){
+$groupAuth = [
+    'prefix' => config('AppConfig.endpoint.api.auth')
+];
+Route::group($groupAuth,function(){
     //Auth/LoginController
     Route::post('/login', 'Auth\LoginController@apiLogin')->name('auth.api.login');    
 
@@ -27,27 +30,44 @@ Route::group(['prefix'=>config('AppConfig.endpoint.api.auth')],function(){
 /**
  * Route API feature User Management
  */
-Route::group(['prefix'=>config('AppConfig.endpoint.api.moduser'),'middleware'=>['auth:api'] ],function(){
+$groupUser = [
+    'prefix' => config('AppConfig.endpoint.api.moduser'),
+    'middleware' => 'auth:api'
+];
+Route::group($groupUser,function(){
     
     /**
      * Feature User
      */
-    Route::get('/testing', function(){
-        $wekdut = new wekdut();
-        $query = Role::where('role','taeun');
-        $query = $wekdut->_setFilterWhere($query,[
-            ['wekdut','!=','taeun'],
-            ['or orwekdut','taeun'],
-            [
-                'or',
-                ['innested','yeah']
-            ]
-        ]);
-        dd($query->toSql());
-        // var_dump(Role::where('role_code','taeun')->first());
-    });
+        //read list resource
+        Route::get('/', 'UserController@readList')->name('user.readList'); 
+        //read one resource
+        Route::get('/{id}', 'UserController@readOne')->name('user.readOne');
+
+        //create resource
+        Route::post('/', 'UserController@create')->name('user.create');  
+        //update resource
+        Route::put('/profile', 'UserController@updateProfile')->name('user.update'); 
+        Route::put('/{id}', 'UserController@update')->name('user.update'); 
+        Route::put('/{id}/suspend', 'UserController@suspend')->name('user.suspend'); 
+        Route::put('/{id}/updatepassword', 'UserController@updatePassword')->name('user.updatePassword'); 
+        //delete resource
+        Route::delete('/{id}', 'UserController@delete')->name('user.delete');  
     
     /**
      * Module Role
      */
+    Route::group(['prefix'=>'role'],function(){ 
+        //read list resource
+        Route::get('/', 'RoleController@readList')->name('user.role.readList'); 
+        //read one resource
+        Route::get('/{id}', 'RoleController@readOne')->name('user.role.readOne');
+
+        //create resource
+        Route::post('/', 'RoleController@create')->name('user.role.create');  
+        //update resource
+        Route::put('/{id}', 'RoleController@update')->name('user.role.update'); 
+        //delete resource
+        Route::delete('/{id}', 'RoleController@delete')->name('user.role.delete');  
+    });  
 });

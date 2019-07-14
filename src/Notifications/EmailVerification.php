@@ -11,19 +11,17 @@ class EmailVerification extends Notification implements ShouldQueue
 {
     use Queueable;
     
-    protected $userId,$appsId,$isSecondary;
+    protected $userId,$isSecondary;
 
     /**
      * Create a new notification instance.
      *
      * @param type $userId
-     * @param type $appsId
      * @param type $isSecondary
      */
-    public function __construct($userId,$appsId,$isSecondary=false)
+    public function __construct($userId,$isSecondary=false)
     {
         $this->userId = $userId;
-        $this->appsId = $appsId;
         $this->isSecondary = $isSecondary;
         
         // $this->connection = config('bssystem.queue_connection_ac');
@@ -51,7 +49,7 @@ class EmailVerification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $email = new \hpsynapse\moduser\Mail\EmailVerification($this->userId,$this->appsId,$this->isSecondary);
+        $email = new \hpsynapse\moduser\Mail\EmailVerification($this->userId,$this->isSecondary);
         return $email->to($notifiable->email);        
     }
 

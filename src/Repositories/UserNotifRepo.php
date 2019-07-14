@@ -50,21 +50,19 @@ class UserNotifRepo extends BaseRepository
         $model = $user->notifications()->where('notifiable_id',$userId)
             ->orderBy('created_at','DESC');
         
-        $data = $this->_getList(
-            $model, [
-            'filter' => $filter,
-            'searchField' => ['name', 'email', 'phone'],
-            'filterFunction' => function($data, $filter) {
-                if(isset($filter['type'])&&$filter['type']){
-                    $data = $data->where(
-                        'type',
-                        'LIKE',
-                        '%\\Notifications\\'.$filter['type']
-                        );
-                }
-                return $data;
+        $filter['searchField'] = ['name', 'email', 'phone'];
+        $filter['filterFunction'] = function($data, $filter) {
+            if(isset($filter['type'])&&$filter['type']){
+                $data = $data->where(
+                    'type',
+                    'LIKE',
+                    '%\\Notifications\\'.$filter['type']
+                    );
             }
-            ], false, $offset, $limit
+            return $data;
+        };
+        $data = $this->_getList(
+            $model, $filter, false, $offset, $limit
         );
 
         return $data;

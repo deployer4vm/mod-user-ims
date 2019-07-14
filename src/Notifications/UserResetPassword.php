@@ -1,6 +1,6 @@
 <?php
 
-namespace BSSystem\LIBAccount\Notifications;
+namespace hpsynapse\moduser\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -10,7 +10,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 class UserResetPassword extends Notification implements ShouldQueue
 {
     use Queueable;
-    protected $userId,$appsId;
+    protected $userId;
 
     /**
      * Create a new notification instance.
@@ -20,10 +20,9 @@ class UserResetPassword extends Notification implements ShouldQueue
      * Data :
      * Link Reset Password
      */
-    public function __construct($userId,$appsId)
+    public function __construct($userId)
     {
         $this->userId = $userId;
-        $this->appsId = $appsId;
         
         // $this->connection = config('bssystem.queue_connection_ac');
         $this->queue = 'verification';
@@ -48,7 +47,7 @@ class UserResetPassword extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $email = new \hpsynapse\moduser\Mail\UserResetPassword($this->userId,$this->appsId);
+        $email = new \hpsynapse\moduser\Mail\UserResetPassword($this->userId);
         return $email->to($notifiable->email);
     }
 

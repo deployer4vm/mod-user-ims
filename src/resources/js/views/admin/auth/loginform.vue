@@ -25,10 +25,12 @@
           <alert />
           <!-- Form -->
           <b-form @submit="onSubmit" @reset="onReset">
-            <b-form-group :label="Trans.get('auth.login.emailcaption')" class="position-relative">
-              <b-input :state="$v.form.email.$error?'invalid':''" v-model.trim="form.email" @change="$v.form.email.$touch()" />
-              <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('auth.login.emailcaption')" />
+
+            <b-form-group :label="Trans.get('auth.login.usernamecaption')" class="position-relative">
+              <b-input :state="$v.form.username.$error?'invalid':''" v-model.trim="form.username" @change="$v.form.username.$touch()" />
+              <invalid-tooltip :inputItem="$v.form.username" :fieldName="Trans.get('auth.login.usernamecaption')" />
             </b-form-group>
+
             <b-form-group class="position-relative">
               <div slot="label" class="d-flex justify-content-between align-items-end">
                 <div>{{ Trans.get('auth.login.passwordcaption') }}</div>
@@ -36,7 +38,7 @@
                   tag="a"
                   :to="{name: 'forgotpassword'}"
                   class="d-block small"
-                  v-if="AppConfig.packageLocal.moduser.has_forgotpassword"
+                  v-if="AppConfig.packageLocal.moduser.login.forgotpassword"
                 >{{ Trans.get('auth.login.forgotpassword') }}</router-link>
               </div>
               <b-input type="password" :state="$v.form.password.$error?'invalid':''" v-model.trim="form.password" @change="$v.form.password.$touch()" />
@@ -47,16 +49,17 @@
               <b-check
                 v-model="form.rememberMe"
                 class="m-0"
-                v-if="AppConfig.packageLocal.moduser.has_rememberme"
+                v-if="AppConfig.packageLocal.moduser.login.rememberme"
               >{{ Trans.get('auth.login.remember_me') }}</b-check>
               <b-btn type="submit" variant="primary">{{ Trans.get('auth.login.sigincaption') }}</b-btn>
             </div>
           </b-form>
           <!-- / Form -->
         </div>
+
         <b-card-footer
           class="py-3 px-4 px-sm-5"
-          v-if="AppConfig.packageLocal.moduser.has_registration"
+          v-if="AppConfig.packageLocal.moduser.registration.enable"
         >
           <div class="text-center text-muted">
             {{ Trans.get('auth.login.dont_have_an_account') }}
@@ -84,16 +87,15 @@ export default {
   },
   data: () => ({
     form: {
-      email: "",
+      username: "",
       password: "",
       rememberMe: false
     }
   }),  
   validations: {
     form: {
-      email: {
-        required,
-        email
+      username: {
+        required
       },
       password: {
         required,
@@ -117,8 +119,9 @@ export default {
           text: this.Trans.get('alert.form_must_complete_text') 
           });
       }else{
+        console.log(this.form.username);
         this.UserAuth.login({
-          email: this.form.email,
+          username: this.form.username,
           password: this.form.password
         }).then((res)=>{          
           console.log('Login success');

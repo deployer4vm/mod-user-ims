@@ -26,7 +26,7 @@ trait UserMessageTraits
         //pilih semua level user system admin
         $users = User::where('role','LIKE',"%;1:%")->get();
         foreach ($users as $user) {
-            $user->notify(new \hpsynapse\moduser\Notifications\WarningReport($title,$content));
+            $user->notify($user['id'], new \hpsynapse\moduser\Notifications\WarningReport($title,$content));
         }
         return true;
     }
@@ -52,24 +52,23 @@ trait UserMessageTraits
     /**
      * 
      * @param type $userId
-     * @param type $appsId
      * @param type $isSecondary
      * @return type
      */
-    public function sendVerificationEmail($userId,$appsId,$isSecondary=false)
+    public function sendVerificationEmail($userId)
     {
         return $this->notify(
             $userId,
-            new \hpsynapse\moduser\Notifications\EmailVerification($userId,$appsId,$isSecondary)
+            new \hpsynapse\moduser\Notifications\EmailVerification($userId)
         );
     }    
     
     
-    public function sendUserActivationEmail($userId,$appsId,$isSecondary=false)
+    public function sendUserActivationEmail($userId)
     {
         return $this->notify(
             $userId,
-            new \hpsynapse\moduser\Notifications\UserActivation($userId,$appsId,$isSecondary)
+            new \hpsynapse\moduser\Notifications\UserActivation($userId)
         );
     }
 
@@ -77,7 +76,6 @@ trait UserMessageTraits
      * format data yg diperlukan untuk email verifikasi dan activasi
      * 
      * @param type $userId
-     * @param type $appsId
      * @param type $isSecondary
      * 
      * @return array $userData array record data user
@@ -85,7 +83,7 @@ trait UserMessageTraits
      *      email
      *      verifyCode
      */
-    public function verificationEmailDataFormat($userId,$appsId,$isSecondary=false)
+    public function verificationEmailDataFormat($userId,$isSecondary=false)
     {
         
         $user = User::find($userId);
@@ -107,15 +105,15 @@ trait UserMessageTraits
         return $userData;
     }
     
-    public function sendUserResetPasswordEmail($userId,$appsId)
+    public function sendUserResetPasswordEmail($userId)
     {
         return $this->notify(
             $userId,
-            new \hpsynapse\moduser\Notifications\UserResetPassword($userId,$appsId)
+            new \hpsynapse\moduser\Notifications\UserResetPassword($userId) 
         );
     }
     
-    public function resetPasswordEmailDataFormat($userId,$appsId)
+    public function resetPasswordEmailDataFormat($userId)
     {        
         $user = User::find($userId);
         if(!$user)return false; 
@@ -246,7 +244,7 @@ trait UserMessageTraits
     // {
     //     return $this->notify(
     //         $userId, 
-    //         new \BSSystem\LIBAccount\Notifications\Invoice($order)
+    //         new \hpsynapse\moduser\Notifications\Invoice($order)
     //         );
     // }        
     
