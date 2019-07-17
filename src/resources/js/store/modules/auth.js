@@ -99,14 +99,22 @@ const actions = {
     var aclItem, aclItemLv2, aclItemLv3;
     
     _.forEach(globals().AppConfig.sidenav, (vPackage, packageNamespace) => {
+
+      //jika tidak punya akses acl maka tolak (menu akan ditampilkan sesuai default ACL nya)
+      if( !state.role[state.role_code] 
+        || !state.role[state.role_code]['rule']
+        || state.role[state.role_code]['rule'][packageNamespace]==undefined)return;
+
+      vPackage.has_access = state.role[state.role_code]['rule'][packageNamespace]['has_access']==1?1:0;
+
+      //jika tidak punya specific rule maka tolak (menu akan ditampilkan sesuai default ACL nya)
+      if(vPackage.children==undefined)return;
+      
       //----cek hak akses level 1
       _.forEach(vPackage.children, (accessItem, aclId) => {
         
         //jika tidak punya akses acl maka tolak (menu akan ditampilkan sesuai default ACL nya)
-        if( !state.role[state.role_code] 
-          || !state.role[state.role_code]['rule']
-          || state.role[state.role_code]['rule'][packageNamespace]==undefined 
-          || state.role[state.role_code]['rule'][packageNamespace][aclId]==undefined)return;
+        if(state.role[state.role_code]['rule'][packageNamespace][aclId]==undefined)return;
         
         aclItem = state.role[state.role_code]['rule'][packageNamespace][aclId];
         
