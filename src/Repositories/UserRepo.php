@@ -542,10 +542,6 @@ class UserRepo extends BaseRepository
             return false;
         }
 
-        //pastikan tidak ada parameter yang ksosong
-        foreach ($userData as $key => $value) {
-            if(empty($value))unset($userData[$key]);
-        }
         // foreach ($this->userProfileField as $value) {
         //     if (isset($userData[$value])) $input[$value] = $userData[$value];
         // }
