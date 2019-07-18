@@ -786,8 +786,7 @@ class UserRepo extends BaseRepository
                         
         //update role di table user
         $this->updateUser($userId, [
-            'role'=> $this->generateUserRole($userId),
-            'level'=>$role['id']
+            'role'=> $this->generateUserRole($userId)
             ]);
         return $role;
     }
