@@ -410,7 +410,7 @@ class UserRepo extends BaseRepository
             $this->error = 'Phone already registered.';
             return false;
         }
-        if (isset($userData['phone']) && $this->isUsernameRegistered($userData['phone'])) {
+        if (isset($userData['username']) && $this->isUsernameRegistered($userData['username'])) {
             $this->error = 'Username already registered.';
             return false;
         }
