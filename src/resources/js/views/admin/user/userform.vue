@@ -2,7 +2,7 @@
   <div>
     
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
-      <router-link class="btn btn-outline-success d-block" :to="{name: 'pengajuan'}">
+      <router-link class="btn btn-outline-success d-block" :to="{name: 'user.list'}">
         <span class="ion ion-ios-arrow-back"></span>&nbsp; Kembali
       </router-link>
       <div>
@@ -102,17 +102,20 @@
           </b-form-group>
           
           <b-form-group label="Password">
-            <b-input class="mb-1" type="password" v-model="formPassword.password" />
+            <b-input class="mb-1" type="password" />
           </b-form-group>
           
           <b-form-group label="Password">
-            <b-input class="mb-1" type="password" v-model="formPassword.password" />
+            <b-input class="mb-1" type="password" />
           </b-form-group>
           
         </b-card-body>
       </b-tab>
       <b-tab title="Profile">
-        tauen
+        <b-card-body>
+            -
+        </b-card-body>
+        
       </b-tab>
     </b-tabs>
 
@@ -143,24 +146,24 @@ export default {
   data: () => ({
     form: {
       id: 3425433,
-      avatar: '5-small.png',
-      name: 'Nelle Maxwell',
-      username: 'nmaxwell',
-      email: 'nmaxwell@mail.com',
+      avatar: '',
+      name: '',
+      username: '',
+      email: '',
       verified: true,
-      phone: '081321346',
+      phone: '',
       verified: true,
       role: null,
       status: 1,
       profile: {
-        birthday: 'May 3, 1995',
-        country: 'Canada',
-        languages: ['English'],
-        phone: '+0 (123) 456 7891',
+        birthday: '',
+        country: '',
+        languages: '',
+        phone: '',
         website: ''
       }
     },
-    roles:{1: 'User', 2: 'Author', 3: 'Staff', 4: 'Admin'},
+    roles:{1: 'User', 2: 'Admin BPKA', 3: 'Staff', 4: 'Admin'},
     mode: 'create'
   }),
   computed: {    

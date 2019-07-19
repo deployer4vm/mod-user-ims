@@ -151,7 +151,7 @@ export default {
   data: () => ({
     // Options
     dataUrl: "json/pages_users_list.json",
-    searchKeys: ["id", "account", "email", "name"],
+    searchKeys: ["id", "username", "email", "name"],
     sortBy: "id",
     sortDesc: false,
     perPage: 10,
@@ -161,8 +161,8 @@ export default {
       { key: "username", sortable: true, tdClass: "align-middle" },
       { key: "email", sortable: true, tdClass: "align-middle" },
       { key: "name", sortable: true, tdClass: "align-middle" },
-      { key: "role", sortable: true, tdClass: "align-middle" },
-      { key: "status", sortable: true, tdClass: "align-middle" },
+      // { key: "role", sortable: true, tdClass: "align-middle" },
+      // { key: "status", sortable: true, tdClass: "align-middle" },
       {
         key: "actions",
         label: " ",
@@ -176,8 +176,18 @@ export default {
     filterStatus: "Any",
     filterLatestActivity: null,
 
-    usersData: [],
-    originalUsersData: [],
+    usersData: [
+      {id: 1, name: 'Admin Opd 1', username: 'adminopd1', email: "email1@email.com"},
+      {id: 2, name: 'Admin Unitkerja 1', username: 'adminuk1', email: "email2@email.com"},
+      {id: 3, name: 'Admin Unitkerja 2', username: 'adminuk2', email: "email3@email.com"},
+      {id: 4, name: 'Admin Opd 2', username: 'adminopd1', email: "email4@email.com"}
+    ],
+    originalUsersData: [
+      {id: 1, name: 'Admin Opd 1', username: 'adminopd1', email: "email1@email.com"},
+      {id: 2, name: 'Admin Unitkerja 1', username: 'adminuk1', email: "email2@email.com"},
+      {id: 3, name: 'Admin Unitkerja 2', username: 'adminuk2', email: "email3@email.com"},
+      {id: 4, name: 'Admin Opd 2', username: 'adminopd1', email: "email4@email.com"}
+    ],
 
     currentPage: 1
   }),
@@ -209,16 +219,7 @@ export default {
   },
 
   created() {
-    const req = new XMLHttpRequest();
-    req.open("GET", `${this.publicUrl}${this.dataUrl}`);
-
-    req.onload = () => {
-      const data = JSON.parse(req.response);
-      this.usersData = data;
-      this.originalUsersData = data.slice(0);
-    };
-
-    req.send();
+    
   }
 };
 </script>
