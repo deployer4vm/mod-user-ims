@@ -25,13 +25,13 @@ class DbChannels
         
         if(isset($data['link_web'])){
             $link_web = $data['link_web'];
-            if ($link_web['link']) {
-                $link_web['link'] = $link_web['link'];
-            } else if ($link_web['route'] && $link_web['parameter']) {
-                $link_web['link'] = route($link_web['route'], $link_web['parameter']);
-            } else {
-                $link_web['link'] = route('member.notification.detail', ['notificationId' => $notification->id]);
-            }
+            // if ($link_web['link']) {
+            //     $link_web['link'] = $link_web['link'];
+            // } else if ($link_web['route'] && $link_web['parameter']) {
+            //     $link_web['link'] = route($link_web['route'], $link_web['parameter']);
+            // } else {
+            //     $link_web['link'] = route('member.notification.detail', ['notificationId' => $notification->id]);
+            // }
             unset($data['link_web']);
         }
         if(isset($data['link_apps'])){

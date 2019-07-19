@@ -7,20 +7,22 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
+use hpsynapse\moduser\Channels\DbChannels;
+
 class SAMPLENOTIF extends Notification implements ShouldQueue
 {
     use Queueable;
     
-    protected $invoice;
+    protected $someData;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($invoice)
+    public function __construct($someData)
     {
-        $this->invoice = $invoice;
+        $this->someData = $someData;
         // $this->connection = config('bssystem.queue_connection_ac');
     }
 
@@ -32,7 +34,7 @@ class SAMPLENOTIF extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail','database'];
+        return ['mail',DbChannels::class];
     }
 
     /**
@@ -43,16 +45,31 @@ class SAMPLENOTIF extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+
+        //create email langsung
+        // return (new MailMessage)
+        //             ->line('The introduction to the notification.')
+        //             ->action('Notification Action', url('/'))
+        //             ->line('Thank you for using our application!');
+        
+        // //atau menggunakan class email
+        // $email = new \App\MainApp\Mail\PengajuanCreated($this->pengajuan);
+        // return $email->to($notifiable->email);
+        // //untuk render email template jika diperlukan
+        // //$email = (new MailInvoice($this->title,$this->invoice))->render();
     }
     
     public function toDatabase($notifiable)
     {
         return [
-            //
+            'subject' => $this->title,
+            'description' => 'Proses Packing Sudah selesai. Pesanan sedang dalam Pengiriman',
+            'link_web' => [//parameter wajib
+                'link' => '',
+                'route' => 'member.order.detail',
+                'parameter' => ['invoiceId' => $this->someData]
+            ],
+            'link_app' => ''//parameter wajib
         ];
     }
 
@@ -66,7 +83,13 @@ class SAMPLENOTIF extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
-            //
+            'subject' => $this->title,
+            'description' => 'Proses Packing Sudah selesai. Pesanan sedang dalam Pengiriman',
+            'link_web' => [
+                'link' => '',
+                'route' => 'member.order.detail',
+                'parameter' => ['invoiceId' => $this->invoice['invoice']]
+            ]
         ];
     }
 }

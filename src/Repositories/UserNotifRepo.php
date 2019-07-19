@@ -51,7 +51,7 @@ class UserNotifRepo extends BaseRepository
             ->orderBy('created_at','DESC');
         
         $filter['searchField'] = ['name', 'email', 'phone'];
-        $filter['filterFunction'] = function($data, $filter) {
+        $filter['function'] = function($data) use ($filter) {
             if(isset($filter['type'])&&$filter['type']){
                 $data = $data->where(
                     'type',
@@ -61,8 +61,10 @@ class UserNotifRepo extends BaseRepository
             }
             return $data;
         };
-        $data = $this->_getList(
-            $model, $filter, false, $offset, $limit
+        if(isset($filter['type']))unset($filter['type']);
+        if(isset($filter['readStatus']))unset($filter['readStatus']);
+        $data = $this->_list(
+            $model, $filter, $offset, $limit, false
         );
 
         return $data;

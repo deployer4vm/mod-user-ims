@@ -3,12 +3,12 @@
 namespace hpsynapse\moduser\Services;
 
 //use Yajra\DataTables\Facades\DataTables;
-use hpsynapse\moduser\Models\Notification as BSNotif;
+use hpsynapse\moduser\Models\Notification as MNotif;
 use hpsynapse\moduser\Models\User;
 use Facades\hpsynapse\moduser\Repositories\UserRepo;
 use Facades\hpsynapse\moduser\Repositories\UserNotifRepo;
 use hpsynapse\moduser\Repositories\UserMessageTraits;
-use hpsynapse\moduser\Models\NotificationMessage;
+// use hpsynapse\moduser\Models\NotificationMessage;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 
@@ -17,37 +17,22 @@ class UserNotifSrv
     use UserMessageTraits;
     
     //daftar jenis notifkasi, nama class notifiable yang ber channel databases
-    protected $notificationTypeAll = [
+    protected $notificationType = [
         'AdminMessage' => 'Pesan dari Billionaire',
         'Invoice' => 'Tagihan',
         'InvoicePaid' => 'Tagihan Lunas',
         'Promo' => 'Promo',
     ];
-    //daftar jenis notifkasi, nama class notifiable yang ber channel databases
-    protected $notificationTypeReseller = [
-        'ResellerCommissionPaid' => 'Komisi Reseller',
-    ];
 
-
-//    public function dataTable()
-//    {
-//        return Datatables::of(BSNotif::query())->make(true);
-//    }
-    public function listType($memberOnly=false)
+    public function listType()
     {
-        if($memberOnly){
-            $type = $this->notificationTypeAll;
-        }else{
-            $type = array_merge($this->notificationTypeAll,$this->notificationTypeReseller);
-        }
-        
-        return $type;
+        return $this->notificationType;
     }
     public function getSummary($userId)
     {
         return [
-            'count' => BSNotif::where('notifiable_id',$userId)->count(),
-            'unread_count' => BSNotif::where('notifiable_id',$userId)->whereNull('read_at')->count()
+            'count' => MNotif::where('notifiable_id',$userId)->count(),
+            'unread_count' => MNotif::where('notifiable_id',$userId)->whereNull('read_at')->count()
         ];
     }    
     
@@ -56,7 +41,7 @@ class UserNotifSrv
      */
     public function listNotifAll($userId,$offset=0,$limit=10)
     {
-        return $this->listNotif($userId,['status'=>0],$offset,$limit);
+        return $this->listNotif($userId,['status',0],$offset,$limit);
     }
     
     /**
@@ -64,7 +49,7 @@ class UserNotifSrv
      */
     public function listNotifNew($userId,$offset=0,$limit=10)
     {
-        return $this->listNotif($userId,['status'=>1],$offset,$limit);
+        return $this->listNotif($userId,['status',1],$offset,$limit);
     }
     
     /**
@@ -72,7 +57,7 @@ class UserNotifSrv
      */
     public function listNotifReaded($userId,$offset=0,$limit=10)
     {
-        return $this->listNotif($userId,['status'=>2],$offset,$limit);
+        return $this->listNotif($userId,['status',2],$offset,$limit);
     }
     
     /**
@@ -90,12 +75,14 @@ class UserNotifSrv
      */
     public function listNotif($userId,$filter=false,$offset=0,$limit=10)
     {
-        $collection = collect(UserNotifRepo::listNotif($userId,$filter,$offset,$limit));
+        $notif = UserNotifRepo::listNotif($userId,$filter,$offset,$limit);
+        $collection = collect($notif['data']);
         $collection->transform(function($i) {
             unset($i['notifiable_type'],$i['notifiable_id'],$i['updated_at']);
-            $i['type'] = strtolower(str_replace('BSSystem\\LIBAccount\\Notifications\\', '', $i['type']));
+            // $i['type'] = strtolower(str_replace('hpsynapse\\moduser\\Notifications\\', '', $i['type']));
             return $i;
         });
+        $notif['data'] = $collection->toArray();
         $this->lastNotificationList = $collection->toArray();
         return $this->lastNotificationList;
     }
@@ -132,7 +119,7 @@ class UserNotifSrv
         if($data){
             $data = $data->toArray();
             unset($data['notifiable_type'],$data['notifiable_id'],$data['updated_at']);
-            $data['type'] = strtolower(str_replace('BSSystem\\LIBAccount\\Notifications\\', '', $data['type']));
+            // $data['type'] = strtolower(str_replace('hpsynapse\\moduser\\Notifications\\', '', $data['type']));
             
         }else{
             $data = false;
@@ -146,8 +133,8 @@ class UserNotifSrv
         if(!$user)return false;
         $data = $user->notifications()->where('id',$notifId); 
         if($data){
-            $notifMessage = NotificationMessage::where('notification_id',$notifId);
-            if($notifMessage) $notifMessage->delete();            
+            // $notifMessage = NotificationMessage::where('notification_id',$notifId);
+            // if($notifMessage) $notifMessage->delete();            
             $data->delete();
             return true;
         }
@@ -174,9 +161,9 @@ class UserNotifSrv
                 $notif->markAsRead();
             }else{
                 if(is_array($notifId)){
-                    BSNotif::whereIn('id',$notifId)->update(['read_at' => NULL]);
+                    MNotif::whereIn('id',$notifId)->update(['read_at' => NULL]);
                 }else{
-                    BSNotif::where('id',$notifId)->update(['read_at' => NULL]);
+                    MNotif::where('id',$notifId)->update(['read_at' => NULL]);
                 }
             }
         }

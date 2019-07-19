@@ -37,24 +37,6 @@ $groupUser = [
 Route::group($groupUser,function(){
     
     /**
-     * Feature User
-     */
-        //read list resource
-        Route::get('/', 'UserController@readList')->name('user.readList'); 
-        //read one resource
-        Route::get('/{id}', 'UserController@readOne')->name('user.readOne');
-
-        //create resource
-        Route::post('/', 'UserController@create')->name('user.create');  
-        //update resource
-        Route::put('/profile', 'UserController@updateProfile')->name('user.update'); 
-        Route::put('/{id}', 'UserController@update')->name('user.update'); 
-        Route::put('/{id}/suspend', 'UserController@suspend')->name('user.suspend'); 
-        Route::put('/{id}/updatepassword', 'UserController@updatePassword')->name('user.updatePassword'); 
-        //delete resource
-        Route::delete('/{id}', 'UserController@delete')->name('user.delete');  
-    
-    /**
      * Module Role
      */
     Route::group(['prefix'=>'role'],function(){ 
@@ -70,4 +52,38 @@ Route::group($groupUser,function(){
         //delete resource
         Route::delete('/{id}', 'RoleController@delete')->name('user.role.delete');  
     });  
+
+    
+    Route::get('/notification/setnotif', 'NotificationController@setnotif')->name('user.notification.setnotif');
+    /**
+     * Module notif
+     */
+    Route::get('/notification', 'NotificationController@index')->name('user.notification');
+    Route::get('/notification/type', 'NotificationController@listType')->name('user.notification.listType');
+    Route::get('/notification/{notificationId}', 'NotificationController@detail')->name('user.notification.detail');    
+    Route::delete('/notification/{notificationId}', 'NotificationController@deleteNotif')->name('user.notification.delete');
+    Route::post('/notification/read', 'NotificationController@setRead')->name('user.notification.setReadBulk');
+    Route::post('/notification/{notificationId}/read', 'NotificationController@setRead')->name('user.notification.setRead');
+    Route::post('/notification/unread', 'NotificationController@setUnread')->name('user.notification.setUnreadBulk');
+    Route::post('/notification/{notificationId}/unread', 'NotificationController@setUnread')->name('user.notification.setUnread');
+
+    
+    /**
+     * Feature User
+     */
+    //read list resource
+    Route::get('/', 'UserController@readList')->name('user.readList'); 
+    //read one resource
+    Route::get('/{id}', 'UserController@readOne')->name('user.readOne');
+
+    //create resource
+    Route::post('/', 'UserController@create')->name('user.create');  
+    //update resource
+    Route::put('/profile', 'UserController@updateProfile')->name('user.update'); 
+    Route::put('/{id}', 'UserController@update')->name('user.update'); 
+    Route::put('/{id}/suspend', 'UserController@suspend')->name('user.suspend'); 
+    Route::put('/{id}/updatepassword', 'UserController@updatePassword')->name('user.updatePassword'); 
+    //delete resource
+    Route::delete('/{id}', 'UserController@delete')->name('user.delete');  
+    
 });

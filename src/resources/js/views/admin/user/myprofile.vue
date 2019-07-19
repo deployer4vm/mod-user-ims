@@ -49,15 +49,18 @@
               <b-alert variant="warning" show class="mt-3 mb-0" v-if="!form.email_verified_at">
                 Your email is not confirmed. Please check your inbox.
                 <br />
-                <a href="javascript:void(0)">Resend confirmation</a>
+                <a href="javascript:void(0)" v-if="false">Resend confirmation</a>
               </b-alert>
             </b-form-group>
-
+            
+            <div class="text-right mt-3">
+              <b-btn variant="primary">Save changes</b-btn>
+            </div>
           </b-card-body>
         </div>
 
         <div class="col-md-9" v-if="curTab === 'password'">
-          <b-card-body class="pb-2">
+          <b-card-body>
             <b-form-group label="Current password">
               <b-input type="password" />
             </b-form-group>
@@ -69,7 +72,11 @@
             <b-form-group label="Repeat new password">
               <b-input type="password" />
             </b-form-group>
+            <div class="text-right mt-3">
+              <b-btn variant="primary">Save changes</b-btn>
+            </div>
           </b-card-body>
+          
         </div>
 
         <div class="col-md-9" v-if="curTab === 'info'">
@@ -77,12 +84,9 @@
         </div>
 
       </div>
+
     </b-card>
 
-    <div class="text-right mt-3">
-      <b-btn variant="primary">Save changes</b-btn>&nbsp;
-      <b-btn variant="default">Cancel</b-btn>
-    </div>
 
   </div>
 </template>

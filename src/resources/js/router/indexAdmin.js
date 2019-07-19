@@ -30,6 +30,11 @@ const MyProfile = resolve => {
     resolve(require("../views/admin/user/myprofile"));
   });
 };
+const NotifList = resolve => {
+  require.ensure(["../views/admin/user/notiflist"], () => {
+    resolve(require("../views/admin/user/notiflist"));
+  });
+};
 const UserList = resolve => {
   require.ensure(["../views/admin/user/userlist"], () => {
     resolve(require("../views/admin/user/userlist"));
@@ -82,6 +87,11 @@ export default [
         path: "myprofile",
         component: MyProfile,
         name: "myprofile"
+      },
+      {
+        path: "notification",
+        component: NotifList,
+        name: "notification"
       },
       {
         path: "list",
