@@ -37,16 +37,16 @@
           <hr class="border-light m-0" />
           <b-card-body>
             <b-form-group label="Username">
-              <b-input v-model="form.username" />
+              <b-input v-model="userForm.username" />
             </b-form-group>
 
             <b-form-group label="Name">
-              <b-input v-model="form.name" />
+              <b-input v-model="userForm.name" />
             </b-form-group>
 
             <b-form-group label="Email">
-              <b-input v-model="form.email" />
-              <b-alert variant="warning" show class="mt-3 mb-0" v-if="!form.email_verified_at">
+              <b-input v-model="userForm.email" />
+              <b-alert variant="warning" show class="mt-3 mb-0" v-if="false">
                 Your email is not confirmed. Please check your inbox.
                 <br />
                 <a href="javascript:void(0)" v-if="false">Resend confirmation</a>
@@ -54,26 +54,22 @@
             </b-form-group>
             
             <div class="text-right mt-3">
-              <b-btn variant="primary">Save changes</b-btn>
+              <b-btn @click="saveUser" variant="primary">Save changes</b-btn>
             </div>
           </b-card-body>
         </div>
 
         <div class="col-md-9" v-if="curTab === 'password'">
           <b-card-body>
-            <b-form-group label="Current password">
-              <b-input type="password" />
-            </b-form-group>
-
             <b-form-group label="New password">
-              <b-input type="password" />
+              <b-input type="password" v-model="passwordForm.password" />
+            </b-form-group>
+            <b-form-group label="Repeat new password">
+              <b-input type="password" v-model="passwordForm.password_confirmation" />
             </b-form-group>
 
-            <b-form-group label="Repeat new password">
-              <b-input type="password" />
-            </b-form-group>
             <div class="text-right mt-3">
-              <b-btn variant="primary">Save changes</b-btn>
+              <b-btn @click="savePassword" variant="primary">Save changes</b-btn>
             </div>
           </b-card-body>
           
@@ -119,27 +115,37 @@ export default {
   data: () => ({
 
     curTab: "general",
-    form: {
-      id: 3425433,
-      avatar: '5-small.png',
-      name: 'Nelle Maxwell',
-      username: 'nmaxwell',
-      email: 'nmaxwell@mail.com',
+    passwordForm: {
+      password: '',
+      password_confirmation: ''
+    },
+    userForm: {
+      id: 0,
+      avatar: '',
+      name: '',
+      username: '',
+      email: '',
       verified: true,
-      phone: '081321346',
+      phone: '',
       role: null,
       status: 1,
-      profile: {
-        birthday: 'May 3, 1995',
-        country: 'Canada',
-        languages: ['English'],
-        phone: '+0 (123) 456 7891',
-        website: ''
-      }
+      profile: {}
     }
   }),
+  computed: {
+    
+    // userForm:{
+    //   get() {
+    //     return this.$store.state.user.userForm;
+    //   },
+    //   set(value) {
+    //     this.$store.commit('userStore/setUserForm', value);
+    //   }  
+    // }
+  },
   created() {
-    this.form = this.UserAuth.getUser();
+    this.userForm = this.UserAuth.getUser();
+    this.getUser(this.UserAuth.getUser('id'));
   },
   methods: {
     showUserField(field){
@@ -147,6 +153,44 @@ export default {
     },
     showProfileField(field){
       return !this.AppConfig.packageLocal.moduser.user_profiles.hide.includes(field);
+    },    
+    //-----
+    getUser(id) {
+        this.LocalApi.get(this.AppConfig.endpoint.api.moduser + "/" + id)
+            .then(res => {
+                this.userForm = res.data.data;
+                return res.data.data;
+            });
+    },
+    saveUser(){
+      this.LocalApi.put(this.AppConfig.endpoint.api.moduser + "/profile",{
+          id: this.userForm.id,
+          username: this.userForm.username,
+          name: this.userForm.name,
+          email: this.userForm.email,
+        })
+            .then(res => {
+                this.Web.showAlert({ text: "Profile berhasil disimpan" });
+            })
+        .catch(res => {
+          this.Web.showAlert({ text: "Simpan data gagal : " + res.message,type: "warning" });
+        });
+
+    },
+    savePassword(){
+      this.LocalApi.put(this.AppConfig.endpoint.api.moduser + "/" + this.userForm.id+ "/updatepassword",{
+          id: this.userForm.id,
+          password: this.passwordForm.password,
+          password_confirmation: this.passwordForm.password_confirmation,
+        })
+            .then(res => {
+                this.Web.showAlert({ text: "Password berhasil diganti" });
+                this.passwordForm.password = '';
+                this.passwordForm.password_confirmation = '';
+            })
+        .catch(res => {
+          this.Web.showAlert({ text: "Simpan data gagal : " + res.message,type: "warning" });
+        });
     }
   }
 };

@@ -32,7 +32,7 @@ Route::group($groupAuth,function(){
  */
 $groupUser = [
     'prefix' => config('AppConfig.endpoint.api.moduser'),
-    // 'middleware' => 'auth:api'
+    'middleware' => 'auth:api'
 ];
 Route::group($groupUser,function(){
     

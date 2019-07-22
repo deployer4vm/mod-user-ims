@@ -147,6 +147,10 @@ class UserController extends BaseController
 
         $input = $request->all();
 
+        if(isset($input['id']))unset($input['id']);
+        if(isset($input['created_at']))unset($input['created_at']);
+        if(isset($input['updated_at']))unset($input['updated_at']);
+
         $validator = [];
 
         if(isset($input['username'])){
@@ -172,7 +176,7 @@ class UserController extends BaseController
         
         if(isset($input['role_code']))unset($input['role_code']);
         if(isset($input['status']))unset($input['status']);
-
+        
         if(UserRepo::updateUser($id, $input)) {            
             $this->setAlert('Data Updated successfully','success');
         }else{
@@ -193,7 +197,7 @@ class UserController extends BaseController
     public function updatePassword(Request $request)
     {
         $id = $request->route('id');
-        $userData = $request->all();
+        $userData = $request->only(['password','password_confirmation']);
 
         $validator = \Validator::make($userData, [
             'password' => 'required|min:8|max:255',

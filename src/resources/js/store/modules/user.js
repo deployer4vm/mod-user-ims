@@ -47,11 +47,31 @@ const actions = {
         return globals()
             .LocalApi.get(userApi + "/" + id)
             .then(res => {
+                commit("setUserForm", res.data.data);
+                return res.data.data;
+            });
+    },
+    updateProfile({commit},data){
+        return globals()
+            .LocalApi.put(userApi + "/profile",data)
+            .then(res => {
                 commit("setUser", res.data.data);
                 return new Promise((resolve,err)=>{
                     resolve(true);
                 });
             });
+        
+    },
+    updatePassword({commit},data){
+        return globals()
+            .LocalApi.put(userApi + "/" + data.id + "/updatepassword",data)
+            .then(res => {
+                commit("setUser", res.data.data);
+                return new Promise((resolve,err)=>{
+                    resolve(true);
+                });
+            });
+        
     },
     register({commit},data) {
         return globals()
