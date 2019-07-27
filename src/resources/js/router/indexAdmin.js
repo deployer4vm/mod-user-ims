@@ -14,10 +14,20 @@ const LoginPage = resolve => {
     resolve(require("../views/admin/auth/loginform"));
   });
 };
+const LoginPage2 = resolve => {
+  require.ensure(["../views/admin/auth/loginform2"], () => {
+    resolve(require("../views/admin/auth/loginform2"));
+  });
+};
 
 const ForgotPasswordPage = resolve => {
   require.ensure(["../views/admin/auth/forgotpasswordform"], () => {
     resolve(require("../views/admin/auth/forgotpasswordform"));
+  });
+};
+const ForgotPasswordPage2 = resolve => {
+  require.ensure(["../views/admin/auth/forgotpasswordform2"], () => {
+    resolve(require("../views/admin/auth/forgotpasswordform2"));
   });
 };
 
@@ -61,23 +71,39 @@ const RoleForm = resolve => {
     resolve(require("../views/admin/role/roleform"));
   });
 };
+if(globals().AppConfig.packageLocal.moduser.auth_template.type==1){
+  var authPage = [
+    {
+      path: "login",
+      component: LoginPage2,
+      name: "login"
+    },
+    {
+      path: "forgot",
+      component: ForgotPasswordPage2,
+      name: "forgotpassword"
+    }
+  ];
+}else{
+  var authPage = [
+    {
+      path: "login",
+      component: LoginPage,
+      name: "login"
+    },
+    {
+      path: "forgot",
+      component: ForgotPasswordPage,
+      name: "forgotpassword"
+    }
+  ];
+}
 
 export default [
   {
     path: globals().AppConfig.endpoint.admin.auth,
     component: LayoutBlank,
-    children: [
-      {
-        path: "login",
-        component: LoginPage,
-        name: "login"
-      },
-      {
-        path: "forgot",
-        component: ForgotPasswordPage,
-        name: "forgotpassword"
-      }
-    ]
+    children: authPage
   },
   {
     path: globals().AppConfig.endpoint.admin.moduser,

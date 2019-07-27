@@ -82,25 +82,6 @@
         <hr class="border-light m-0" v-if="showUserField('avatar')">
         <b-card-body class="pb-2">
 
-          <b-form-group label="Username" v-if="showUserField('username')">
-            <b-input v-model="form.username" class="mb-1" />
-            <a href="javascript:void(0)" class="small">Reset password</a>
-          </b-form-group>
-
-          <b-form-group label="Email" v-if="showUserField('email')">
-            <b-input v-model="form.email" class="mb-1" />
-            <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
-          </b-form-group>
-
-          <b-form-group label="Phone" v-if="showUserField('phone')">
-            <b-input v-model="form.phone" class="mb-1" />
-            <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
-          </b-form-group>
-
-          <b-form-group label="Name">
-            <b-input v-model="form.name" />
-          </b-form-group>
-          
           <b-form-group label="Password">
             <b-input class="mb-1" type="password" />
           </b-form-group>
