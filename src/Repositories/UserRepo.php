@@ -15,6 +15,8 @@ use hpsynapse\moduser\Models\PasswordReset;
 use hpsynapse\moduser\Models\UserRole;
 use hpsynapse\moduser\Models\Role;
 // use hpsynapse\moduser\Models\ApiToken;
+
+use hpsynapse\moduser\Models\UserTenant;
 use App\Models\Tenant;
 
 use Validator;
@@ -296,8 +298,9 @@ class UserRepo extends BaseRepository
      * rigistrasi user baru
      * 
      * @param array $userData : seluruh field di table user dan :
+     *      all_tenant jika tidak disertakan maka dianggap 
      *      role_code * optional    string role_code, jika tidak dicantumkan akan menggunakan default role_code
-     *      tenant_id * optional
+     *      tenant_id * optional    array, jika disertakan dan diisi 0 berarti user tersebut bisa akses semua tenant
      *      user_id * optional      user id yang insert
      * 
      * @param boolean $generateToken 1 jika generate token, 0 jika tidak
@@ -318,7 +321,7 @@ class UserRepo extends BaseRepository
         $userData['password'] = isset($userData['password']) ? Hash::make($userData['password']) : '';
 
         $userData['user_idcode'] = $this->generateUserIdcode();
-        $userData['tenant_id'] = config('tenant.id') ? config('tenant.id') : 0;
+        if(!isset($userData['tenant_id']))$userData['tenant_id'] = config('tenant.id') ? config('tenant.id') : 0;//jika 0 berarti tanpa tenant atau bisa akses semua tenant
 
         //role dikosongin dahulu karena insert role di proses selanjutnya
         $role = $userData['role'];
@@ -326,6 +329,14 @@ class UserRepo extends BaseRepository
 
         $data = $this->model->create($userData);
         $data = $data->toArray();
+
+        //jika menyertakan tenant maka daftarkan user di tenant bersangkutan
+        if($userData['tenant_id']){
+            UserTenant::create([
+                'tenant_id' => $userData['tenant_id'],
+                'user_id' => $data['user_id']
+            ]);
+        }
 
         if ($generateToken) {
             $apiTokenData = $this->generateToken($data['id']);

@@ -71,6 +71,8 @@ const RoleForm = resolve => {
     resolve(require("../views/admin/role/roleform"));
   });
 };
+
+//style/tampilan auth page
 if(globals().AppConfig.packageLocal.moduser.auth_template.type==1){
   var authPage = [
     {

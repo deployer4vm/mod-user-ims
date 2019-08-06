@@ -92,7 +92,7 @@ const actions = {
   //---------------------------------------
   initAuth({ commit, state, dispatch }) {},
   /*
-  implement acl user yang online sekarang, baru bisa 3 level
+  implement acl user yang online sekarang ke sidebar, baru bisa 3 level
   un-elegan way, nanti ubah agar lebih efisien
   */
   implementAcl({ commit, state, dispatch }) {
@@ -113,7 +113,7 @@ const actions = {
       //----cek hak akses level 1
       _.forEach(vPackage.children, (accessItem, aclId) => {
         
-        //jika tidak punya akses acl maka tolak (menu akan ditampilkan sesuai default ACL nya)
+        //jika tidak punya akses acl maka tolak (menu akan ditampilkan sesuai default active_acl di packageConfig nya)
         if(state.role[state.role_code]['rule'][packageNamespace][aclId]==undefined)return;
         
         aclItem = state.role[state.role_code]['rule'][packageNamespace][aclId];
@@ -134,9 +134,9 @@ const actions = {
         if (accessItem.children != undefined) {
           _.forEach(accessItem.children, (accessItemLv2, aclIdLv2) => {
 
-            if(aclItemLv2.children[aclIdLv2]==undefined)return;
+            if(aclItem.children[aclIdLv2]==undefined)return;
 
-            aclItemLv2 = aclItemLv2.children[aclIdLv2];
+            aclItemLv2 = aclItem.children[aclIdLv2];
             if (aclItemLv2.has_access) {
               accessItemLv2.active_acl = {
                 has_access: aclItemLv2.has_access,
