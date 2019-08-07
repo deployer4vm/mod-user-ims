@@ -298,10 +298,8 @@ class UserRepo extends BaseRepository
      * rigistrasi user baru
      * 
      * @param array $userData : seluruh field di table user dan :
-     *      all_tenant jika tidak disertakan maka dianggap 
-     *      role_code * optional    string role_code, jika tidak dicantumkan akan menggunakan default role_code
-     *      tenant_id * optional    array, jika disertakan dan diisi 0 berarti user tersebut bisa akses semua tenant
-     *      user_id * optional      user id yang insert
+     *      all_tenant : jika tidak disertakan maka dianggap per tenant
+     *      role_code : * optional    string role_code, jika tidak dicantumkan akan menggunakan default role_code
      * 
      * @param boolean $generateToken 1 jika generate token, 0 jika tidak
      * 
@@ -331,9 +329,9 @@ class UserRepo extends BaseRepository
         $data = $data->toArray();
 
         //jika menyertakan tenant maka daftarkan user di tenant bersangkutan
-        if($userData['tenant_id']){
+        if(!(isset($userData['all_tenant']) && $userData['all_tenant']==1) && config('tenant.id') && config('tenant.id')!=0){
             UserTenant::create([
-                'tenant_id' => $userData['tenant_id'],
+                'tenant_id' => config('tenant.id'),
                 'user_id' => $data['user_id']
             ]);
         }
