@@ -93,13 +93,13 @@ class UserRepo extends BaseRepository
             $userData = User::where('email', $username)->first();
             if ($userData == null){
                 return false;
-            } 
-        } 
+            }
+        }
         if (!Hash::check($password, $userData->password)) return false;
         $user = $userData->toArray();
         //jika tidak punya akses all tenant maka cek tenant
-        if (!$user['all_tenant']) {
-            if (Tenant::where('id', $tenantId)->first() == null) {
+        if ($user['all_tenant']==0) {
+            if (UserTenant::where('tenant_id', $tenantId)->where('user_id',$user['id'])->first() == null) {
                 return false;
             }
         }

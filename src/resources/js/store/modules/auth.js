@@ -97,6 +97,8 @@ const actions = {
     */
     implementAcl({ commit, state, dispatch }) {
         var aclItem, aclItemLv2, aclItemLv3, curAclId;
+
+        globals().AppConfig.sidenav = JSON.parse(JSON.stringify(globals().AppConfig.sidenavOri));
         
         _.forEach(globals().AppConfig.sidenav, (vPackage, packageNamespace) => {
 
@@ -190,7 +192,7 @@ const actions = {
                 }
             });
         });
-
+        commit("setSidenavMenu");
     }
 };
 
