@@ -45,6 +45,9 @@ const mutations = {
         state.role = userData.role;
         state.role_code = userData.role_code;
     },
+    setAuthData(state, userData) {
+        eval('state.' + userData.key + ' = userData.value;');
+    },
     setLogout(state) {
         state.token = null;
         state.userId = null;
@@ -78,16 +81,26 @@ const actions = {
                 });
                 commit("setGroupApp",authData.group_app);
                 //set token di LocalApi
-                globals().LocalApi.defaults.headers.common['Authorization'] = 'Bearer ' + state.token;
+                globals().LocalApi.defaults.headers.common['Authorization'] = 'Bearer ' + state.token; 
+
+                EventBus.$emit('onLogin',JSON.parse(JSON.stringify(res.data.data)));
 
                 return dispatch("implementAcl");
             });
     },
-    logout({ commit }) {
+    logout({ commit, state }) {
         commit("setLogout");
 
         //delete autorization nya
         delete globals().LocalApi.defaults.headers.common['Authorization'];
+
+        let userData = {
+            token: state.token,
+            user: state.user,
+            role: state.role,
+            role_code: state.role_code
+        }
+        EventBus.$emit('onLogout',JSON.parse(JSON.stringify(userData)));
     },
     //---------------------------------------
     initAuth({ commit, state, dispatch }) {},
