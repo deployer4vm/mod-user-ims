@@ -19,6 +19,12 @@ const LoginPage2 = resolve => {
     resolve(require("../views/admin/auth/loginform2"));
   });
 };
+//custom
+const LoginPage3 = resolve => {
+  require.ensure(["node_modules/../app/MainApp/resources/js/views/auth/loginform"], () => {
+    resolve(require("node_modules/../app/MainApp/resources/js/views/auth/loginform"));
+  });
+};
 
 const ForgotPasswordPage = resolve => {
   require.ensure(["../views/admin/auth/forgotpasswordform"], () => {
@@ -28,6 +34,12 @@ const ForgotPasswordPage = resolve => {
 const ForgotPasswordPage2 = resolve => {
   require.ensure(["../views/admin/auth/forgotpasswordform2"], () => {
     resolve(require("../views/admin/auth/forgotpasswordform2"));
+  });
+};
+//custom
+const ForgotPasswordPage3 = resolve => {
+  require.ensure(["node_modules/../app/MainApp/resources/js/views/auth/forgotpasswordform"], () => {
+    resolve(require("node_modules/../app/MainApp/resources/js/views/auth/forgotpasswordform"));
   });
 };
 
@@ -83,6 +95,19 @@ if(globals().AppConfig.packageLocal.moduser.auth_template.type==1){
     {
       path: "forgot",
       component: ForgotPasswordPage2,
+      name: "forgotpassword"
+    }
+  ];
+}else if(globals().AppConfig.packageLocal.moduser.auth_template.type==2){
+  var authPage = [
+    {
+      path: "login",
+      component: LoginPage3,
+      name: "login"
+    },
+    {
+      path: "forgot",
+      component: ForgotPasswordPage3,
       name: "forgotpassword"
     }
   ];
