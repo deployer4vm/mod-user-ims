@@ -37,7 +37,7 @@ class NotificationController extends BaseController
     public function index(Request $request)
     {
 //        dd(parse_url('http://localhost/BS/APPS-Account/public/notification?limitStart=0'));
-        $userId = 1;//UserAuth::user('id');
+        $userId = UserAuth::user('id');
         
         $this->output['viewdata']['filter']['readStatus'] = $request->input('status',0);
         $this->output['viewdata']['filter']['type'] = $request->input('type',false);

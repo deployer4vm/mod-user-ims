@@ -34,6 +34,7 @@ $groupUser = [
     'prefix' => config('AppConfig.endpoint.api.moduser'),
     'middleware' => 'auth:api'
 ];
+Route::get('/notification/setnotif', 'NotificationController@setnotif')->name('user.notification.setnotif');
 Route::group($groupUser,function(){
     
     /**
@@ -54,7 +55,7 @@ Route::group($groupUser,function(){
     });  
 
     
-    Route::get('/notification/setnotif', 'NotificationController@setnotif')->name('user.notification.setnotif');
+    
     /**
      * Module notif
      */
