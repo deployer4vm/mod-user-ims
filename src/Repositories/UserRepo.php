@@ -83,26 +83,51 @@ class UserRepo extends BaseRepository
      * 
      * @param text $username
      * @param text $password
-     * @param integer $tenantId id tenant
-     * @return boolean
+     * @param integer|null $tenantId id tenant, atau null jika auto detect
+     * 
+     * @return false|array false jika user tidak ditemukan, atau jika berhasil array :
+     *      * record table user
+     *      profile :
+     *          * record table user_profile
+     *      tenant : * jika auto detect tenant, list tenant, false jika tidak terdaftar di tenant manapun
      */
-    public function loginCheck($username, $password, $tenantId = 0)
+    public function loginCheck($username, $password, $tenantId = null)
     {
         $userData = User::where('username', $username)->first();
-        if ($userData == null){
+
+        if ($userData == null) {
             $userData = User::where('email', $username)->first();
-            if ($userData == null){
+            if ($userData == null) {
                 return false;
             }
         }
+
         if (!Hash::check($password, $userData->password)) return false;
+
         $user = $userData->toArray();
-        //jika tidak punya akses all tenant maka cek tenant
-        if ($user['all_tenant']==0) {
-            if (UserTenant::where('tenant_id', $tenantId)->where('user_id',$user['id'])->first() == null) {
-                return false;
+
+        //user banned
+        if($user['status']==2){
+            return false;
+        }
+
+        //jika multitenant aktif
+        if (config('AppConfig.system.web_admin.multitenant.active')==1) {
+
+            //jika null berarti autodetect tenant
+            if (is_null($tenantId)) {
+                $user['tenant'] = UserTenant::where('user_id',$user['id'])->get();
+                if($user['tenant']->count()==0){
+                    $user['tenant'] = false;
+                }
+            //jika tidak punya akses all tenant maka cek tenant
+            } else if ($user['all_tenant']==0) {
+                if (UserTenant::where('tenant_id', $tenantId)->where('user_id',$user['id'])->first() == null) {
+                    return false;
+                }
             }
         }
+
         $user['profile'] = $userData->profile ? $userData->profile->toArray() : [];
         return $user;
     }
@@ -172,19 +197,22 @@ class UserRepo extends BaseRepository
 
         return false;
     }
+
     /**
      *  getter operation method
      * ==========================================================================
      */
 
      /**
+      * 
       * @param $filter array
       *     profile
+      *     tenant
       */
-    public function listUser($filter = false, $offset = 0, $limit = 0)
+    public function listUser($filter = false, $offset = 0, $limit = 0,$orderBy=false)
     {
         if (!$filter) $filter = [];
-        $filter['searchField'] = ['name'];
+        $filter['searchField'] = ['name','email','username'];
         $filter['hiddenColumn'] = ['created_at', 'updated_at', 'cached_at'];
 
         $user = User::with(['profile']);
@@ -195,15 +223,26 @@ class UserRepo extends BaseRepository
             });
             unset($filter['profile']);
         }
+
+        if(isset($filter['tenant'])){
+            // $user = $user->where('all_tenant');
+            $user->whereHas('userTenant', function($q) use ($filter){
+                $q = $this->_where($q,[['tenant_id',$filter['tenant']]]);
+            });
+            unset($filter['tenant']);
+
+        }
         
         $data = $this->_list(
             $user,
             $filter,
             $offset,
             $limit,
-            false
+            $orderBy
         );
+
         $data['data'] = array_map([$this,'_formatUser'],$data['data']);
+
         return $data;
     }
 
@@ -319,7 +358,7 @@ class UserRepo extends BaseRepository
         $userData['password'] = isset($userData['password']) ? Hash::make($userData['password']) : '';
 
         $userData['user_idcode'] = $this->generateUserIdcode();
-        if(!isset($userData['tenant_id']))$userData['tenant_id'] = config('tenant.id') ? config('tenant.id') : 0;//jika 0 berarti tanpa tenant atau bisa akses semua tenant
+        // if(!isset($userData['tenant_id']))$userData['tenant_id'] = config('tenant.id') ? config('tenant.id') : 0;//jika 0 berarti tanpa tenant atau bisa akses semua tenant
 
         //role dikosongin dahulu karena insert role di proses selanjutnya
         $role = $userData['role'];
@@ -329,11 +368,14 @@ class UserRepo extends BaseRepository
         $data = $data->toArray();
 
         //jika menyertakan tenant maka daftarkan user di tenant bersangkutan
-        if(!(isset($userData['all_tenant']) && $userData['all_tenant']==1) && config('tenant.id') && config('tenant.id')!=0){
-            UserTenant::create([
-                'tenant_id' => config('tenant.id'),
-                'user_id' => $data['user_id']
-            ]);
+        if(!(isset($userData['all_tenant']) && $userData['all_tenant']==1)){
+            if(config('tenant.id')){
+                UserTenant::create([
+                    'tenant_id' => config('tenant.id'),
+                    'user_id' => $data['id']
+                ]);
+                $userData['all_tenant'] = 0;
+            }
         }
 
         if ($generateToken) {
@@ -395,7 +437,12 @@ class UserRepo extends BaseRepository
 
         //jika tidak menyertakan role_id maka set default
         if (!isset($userData['role_code'])) {
-            $userData['role_code'] = config('AppConfig.packageLocal.moduser.registration.default_role_code');
+            if(config('AppConfig.system.web_admin.registration.default_role_code')){
+                $userData['role_code'] = config('AppConfig.packageLocal.moduser.registration.default_role_code');
+            }else{
+                $userData['role_code'] = config('AppConfig.packageLocal.moduser.registration.default_role_code');
+            }
+            
         }
 
         //pastikan rule nya ada        
@@ -471,9 +518,8 @@ class UserRepo extends BaseRepository
         
         //pastikan tidak ada parameter yang ksosong
         foreach ($userData as $key => $value) {
-            if(empty($value))unset($userData[$key]);
+            if(empty($value) || is_null($value)) unset($userData[$key]);
         }
-
         return $userData;
     }
 
@@ -538,9 +584,14 @@ class UserRepo extends BaseRepository
     }
 
 
-    public function suspendUser($id)
+    public function banUser($id,$banNote='')
     {
-        return User::find($id)->update(['status' => 2]);
+        return User::find($id)->update(['status' => 2,'banned_note'=>$banNote,'banned_at'=>now()]);
+    }
+
+    public function unbanUser($id)
+    {
+        return User::find($id)->update(['status' => 1]);
     }
 
     public function updateProfile($userId, $userData)
@@ -551,10 +602,11 @@ class UserRepo extends BaseRepository
             return false;
         }
 
-        // foreach ($this->userProfileField as $value) {
-        //     if (isset($userData[$value])) $input[$value] = $userData[$value];
-        // }
-        $this->_update(new UserProfile, ['user_id',$userId], $userData);
+        foreach ($this->userProfileField as $value) {
+            if (isset($userData[$value])) $input[$value] = $userData[$value];
+        }
+        
+        $this->_update(new UserProfile, ['user_id',$userId], $input);
         
     }
 
@@ -807,11 +859,12 @@ class UserRepo extends BaseRepository
             $this->error = 'Role "'.$newRoleCode.'" not defined.';
             return false;
         }
+
         $roleData = $this->_update(new UserRole,[['user_id',$userId],['is_main_role',1]], [
             'role_id' => $role->id,
             'has_auth_grant'=>$hasAuthGrant,
         ]);       
-                        
+                           
         //update role di table user
         $this->updateUser($userId, [
             'role'=> $this->generateUserRole($userId),

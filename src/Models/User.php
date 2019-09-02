@@ -50,5 +50,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function roles()
     {
         return $this->hasMany('hpsynapse\moduser\Models\UserRole','user_id');
+    }     
+    public function userTenant()
+    {
+        return $this->hasMany('hpsynapse\moduser\Models\UserTenant','user_id');
+    }   
+    public function tenant()
+    {
+        return $this->hasManyThrough(
+            'App\Models\Tenant', // table tujuan
+            'hpsynapse\moduser\Models\UserTenant', // table transaksi
+            'tenant_id', // Foreign key on table transaksi...
+            '', // Foreign key on table tujuan...
+            '', // Local key on main model table...
+            'user_id' // Local key on table transaksi...
+        );
     }    
 }

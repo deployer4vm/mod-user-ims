@@ -61,6 +61,7 @@
 
         <div class="col-md-9" v-if="curTab === 'password'">
           <b-card-body>
+              
             <b-form-group label="New password">
               <b-input type="password" v-model="passwordForm.password" />
             </b-form-group>
@@ -168,12 +169,10 @@ export default {
           username: this.userForm.username,
           name: this.userForm.name,
           email: this.userForm.email,
-        })
-            .then(res => {
-                this.Web.showAlert({ text: "Profile berhasil disimpan" });
-            })
-        .catch(res => {
-          this.Web.showAlert({ text: "Simpan data gagal : " + res.message,type: "warning" });
+        }).then(res => {
+            this.Web.showAlert({ text: "Profile berhasil disimpan" });
+        }).catch(res => {
+            this.Web.showAlert({ text: "Simpan data gagal : " + res.message,type: "warning" });
         });
 
     },
@@ -182,13 +181,11 @@ export default {
           id: this.userForm.id,
           password: this.passwordForm.password,
           password_confirmation: this.passwordForm.password_confirmation,
-        })
-            .then(res => {
+        }).then(res => {
                 this.Web.showAlert({ text: "Password berhasil diganti" });
                 this.passwordForm.password = '';
                 this.passwordForm.password_confirmation = '';
-            })
-        .catch(res => {
+        }).catch(res => {
           this.Web.showAlert({ text: "Simpan data gagal : " + res.message,type: "warning" });
         });
     }

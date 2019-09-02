@@ -23,7 +23,7 @@ const getters = {
 };
 
 const mutations = {
-    setListRole(state, data) {
+    setRoleList(state, data) {
         state.roleList = data;
     },
     setRole(state, data) {
@@ -32,17 +32,15 @@ const mutations = {
 };
 
 const actions = {
-    readList({ commit, dispatch, state }, filterParams) {
+    roleList({ commit, dispatch, state }, filterParams) {
         return globals()
             .LocalApi.get(userApi + "/role" , filterParams)
             .then(res => {
-                commit("setListRole", res.data.data);
-                return new Promise((resolve,err)=>{
-                    resolve(true);
-                });
+                commit("setRoleList", res.data.data);
+                return res.data.data;
             });
     },
-    readOne({ commit }, id) {
+    getRole({ commit }, id) {
         return globals()
             .LocalApi.get(masterApi + "/role/" + id)
             .then(res => {
@@ -79,4 +77,4 @@ const role = {
     getters
 };
 
-export default { role };
+export default role;

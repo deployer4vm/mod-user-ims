@@ -5,6 +5,8 @@ namespace hpsynapse\moduser\Controllers;
 use Illuminate\Http\Request;
 
 use Facades\hpsynapse\moduser\Repositories\RoleRepo;
+use Facades\hpsynapse\moduser\Services\UserAuth;
+
 use App\Base\BaseController;
 
 class RoleController extends BaseController
@@ -20,19 +22,48 @@ class RoleController extends BaseController
     public function readList(Request $request)
     {
 
-        $this->output['data']['filter'] = [
-            'q'=>$request->input('q', null)
-        ];
+        $orderBy = false;
+        $filter = [];
+
+        if($request->input('q', false))
+            $filter['q'] = $request->input('q');
 
         //jika menyertakan status
         if($request->input('status', null))
-            $this->output['data']['filter'][] = $request->input('status');
+            $filter[] = ['status', $request->input('status')];
 
-        $this->output['data']['offset'] = $request->input('offset', 0);
-        $this->output['data']['limit'] = $request->input('limit', 10);
+        if(UserAuth::isLogin()){
+            $roles = explode(';',trim(UserAuth::user('role'),';'));
+            foreach($roles as $role){
+                $filter[] = ['role_code','!=',$role];
+            }
+            $filter[] = ['level','>',UserAuth::user('level')];
+        }   
+        
+        //jika multitenatn aktif maka filter berdasarkan tenant nya
+        if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')) {
+            $filter[] = [
+                ['tenant_id', config('tenant.id')],
+                ['OR tenant_group_id',config('tenant.tenant_group_id')],
+                [
+                    'OR',
+                    ['tenant_id',0],['tenant_group_id',0]
+                ]
+            ];
+        }
 
-        $this->output['data'] = Master::listMitra(
-            $this->output['data']['filter'], $this->output['data']['offset'], $this->output['data']['limit']
+        //jika menyertakan order by
+        if ($request->input('orderBy', null))
+            $orderBy = [$request->input('orderBy'), $request->input('orderType', 'ASC')];
+        
+        $limit['offset'] = $request->input('offset', 0);
+        $limit['limit'] = $request->input('limit', 0);
+
+        $this->output['data'] = RoleRepo::listRole(            
+            $filter,
+            $limit['offset'],
+            $limit['limit'],
+            $orderBy
         );
 
         return $this->done();
@@ -41,7 +72,7 @@ class RoleController extends BaseController
     public function readOne(Request $request) {
 
         $id = $request->route('id');
-        $this->output['data'] = Master::getMitra($id);
+        $this->output['data'] = RoleRepo::getRole($id);
         if(!$this->output['data']){
             $this->setError('Data Not Found');
         }

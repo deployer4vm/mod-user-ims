@@ -113,6 +113,8 @@ class LoginController extends BaseController
      * create token user
      * 
      * @param Request $request
+     *      username
+     *      password
      *      
      * @return json array
      */
@@ -127,7 +129,7 @@ class LoginController extends BaseController
             return $this->done();
         }        
         
-        if($user = UserRepo::loginCheck($authParam['username'],$authParam['password'],config('tenant.id'))){
+        if($user = UserRepo::loginCheck($authParam['username'],$authParam['password'], config('tenant.id'))){
             $pushParam = false;
             if($request->input('pushNotifToken')){
                 $pushParam = [

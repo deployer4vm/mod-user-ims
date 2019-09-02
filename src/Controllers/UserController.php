@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Facades\hpsynapse\moduser\Repositories\UserRepo;
 use Facades\hpsynapse\moduser\Repositories\RoleRepo;
 use Facades\hpsynapse\moduser\Services\UserAuth;
+
 use App\Base\BaseController;
 
 class UserController extends BaseController
@@ -17,6 +18,7 @@ class UserController extends BaseController
     
     public function readList(Request $request) {
         
+        $orderBy = false;
         $filter = [
             'q'=>$request->input('q', null)
         ];
@@ -28,13 +30,29 @@ class UserController extends BaseController
         if(UserAuth::isLogin()){
             $filter[] = ['id','!=',UserAuth::user('id')];
             $filter[] = ['level','>',UserAuth::user('level')];
-        }            
+        }     
         
-        $this->output['data']['offset'] = $request->input('offset', 0);
-        $this->output['data']['limit'] = $request->input('limit', 10);
+        //jika menyertakan status
+        if($request->input('role_code', null))
+            $filter[] = ['role_code', 'LIKE', '%;'.$request->input('role_code').';%'];
 
+        //jika aktif maka filter berdasarkan tenant nya
+        if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')) {
+            $filter['tenant'] = [config('tenant.id')];
+        }
+        
+        //jika menyertakan order by
+        if ($request->input('orderBy', null))
+            $orderBy = [$request->input('orderBy'), $request->input('orderType', 'ASC')];
+        
+        $limit['offset'] = $request->input('offset', 0);
+        $limit['limit'] = $request->input('limit', 0);
+        
         $this->output['data'] = UserRepo::listUser(
-            $filter, $this->output['data']['offset'], $this->output['data']['limit']
+            $filter,
+            $limit['offset'],
+            $limit['limit'],
+            $orderBy
         );
 
         return $this->done();
@@ -43,8 +61,10 @@ class UserController extends BaseController
     public function readOne(Request $request)
     {
         $id = $request->route('id');
+
         $this->output['data'] = UserRepo::getUser($id);
         $this->output['data']['user_role'] = UserRepo::getUserRole($this->output['data']['id']);
+
         foreach($this->output['data']['user_role'] as $key => $val) {
             if($val['is_main_role']){
                 $this->output['data']['role_code'] = $key;
@@ -55,7 +75,12 @@ class UserController extends BaseController
     }
 
     /**
-     * 
+     * @param Request $request 
+     *      name
+     *      email
+     *      username
+     *      password
+     *      role_code
      */
     public function create(Request $request)
     {
@@ -79,11 +104,11 @@ class UserController extends BaseController
         }
         
         //jika berhasil
-        if (UserRepo::register($userData,false)) {            
+        if ($user = UserRepo::register($userData,false)) {
             $this->setAlert('Data Inserted successfully','success');
         }else{
             $this->setError(UserRepo::error(),'success');
-        }        
+        }
         
         return $this->done();
     }
@@ -218,11 +243,19 @@ class UserController extends BaseController
         return $this->done();
     }
 
-    public function suspend(Request $request)
+    public function ban(Request $request)
     {
         $id = $request->route('id');
+        UserRepo::banUser($id,$request->input('banned_note',''));
+        $this->setAlert('User banned successfully','success');
+        return $this->done();
+    }
 
-        UserRepo::suspendUser($id);
+    public function unban(Request $request)
+    {
+        $id = $request->route('id');
+        UserRepo::unbanUser($id);
+        $this->setAlert('User unbanned successfully','success');
         return $this->done();
     }
 

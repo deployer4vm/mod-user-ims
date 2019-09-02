@@ -22,6 +22,11 @@ class UserTenant extends Model
     
     public function user()
     {
-        return $this->belongsTo('hpsynapse\moduser\Models\User','role_id');
+        return $this->belongsTo('hpsynapse\moduser\Models\User','user_id');
+    }  
+
+    public function tenant()
+    {
+        return $this->belongsTo('App\Models\Tenant','tenant_id');
     }   
 }

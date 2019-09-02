@@ -10,7 +10,6 @@ const state = {
         currentPage: 1,
         pageCount: 1
     },
-    userForm: {},//for edit/view user
     user:{}//single user for other purpose
 };
 
@@ -24,30 +23,33 @@ const getters = {
 };
 
 const mutations = {
-    setListUser(state, data) {
+    setUserList(state, data) {
+        _.forEach(data.data,(v,i)=>{
+            v.roles = v.role.split(';');
+        });
         state.userList = data;
     },
-    setUserForm(state, data) {
-        state.userForm = data;
+    setUser(state, data) {
+        state.user = data;
     }
 };
 
 const actions = {
     userList({ commit, dispatch, state }, filterParams) {
         return globals()
-            .LocalApi.get(userApi , filterParams)
+            .LocalApi.get(userApi , {
+                params: filterParams,
+            })
             .then(res => {
-                commit("setListUser", res.data.data);
-                return new Promise((resolve,err)=>{
-                    resolve(true);
-                });
+                commit("setUserList", res.data.data);
+                return res.data.data;
             });
     },
     getUser({ commit }, id) {
         return globals()
             .LocalApi.get(userApi + "/" + id)
             .then(res => {
-                commit("setUserForm", res.data.data);
+                commit("setUser", res.data.data);
                 return res.data.data;
             });
     },
@@ -85,7 +87,7 @@ const actions = {
     },
     update({commit},data){
         return globals()
-            .LocalApi.post(userApi,data)
+            .LocalApi.put(userApi + "/" + data.id,data.data)
             .then(res => {
                 commit("setUser", res.data.data);
                 return new Promise((resolve,err)=>{
@@ -96,7 +98,7 @@ const actions = {
     },
     delete({commit},id){
         return globals()
-            .LocalApi.post(userApi + "/" + id)
+            .LocalApi.delete(userApi + "/" + id)
             .then(res => {
                 commit("setUser", res.data.data);
                 return new Promise((resolve,err)=>{
@@ -115,4 +117,4 @@ const user = {
     getters
 };
 
-export default { user };
+export default user;
