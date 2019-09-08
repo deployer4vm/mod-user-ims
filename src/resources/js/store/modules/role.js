@@ -15,7 +15,7 @@ const state = {
 
 const getters = {
     getRoleList(state) {
-        return state.userList;
+        return state.roleList;
     },
     getRole(state) {
         return state.roleForm;
@@ -34,7 +34,9 @@ const mutations = {
 const actions = {
     roleList({ commit, dispatch, state }, filterParams) {
         return globals()
-            .LocalApi.get(userApi + "/role" , filterParams)
+            .LocalApi.get(userApi + "/role" , {
+                params: filterParams,
+            })
             .then(res => {
                 commit("setRoleList", res.data.data);
                 return res.data.data;
@@ -42,30 +44,35 @@ const actions = {
     },
     getRole({ commit }, id) {
         return globals()
-            .LocalApi.get(masterApi + "/role/" + id)
+            .LocalApi.get(userApi + "/role/" + id)
             .then(res => {
                 commit("setRole", res.data.data);
-                return new Promise((resolve,err)=>{
-                    resolve(true);
-                });
+                return res.data.data;
             });
     },
     create({commit},data) {
-
         return globals()
-            .LocalApi.post(masterApi + "/role")
+            .LocalApi.post(userApi + "/role",data)
             .then(res => {
                 commit("setRole", res.data.data);
-                return new Promise((resolve,err)=>{
-                    resolve(true);
-                });
+                return res.data.data;
             });
     },
     update({commit},data){
-
+        return globals()
+            .LocalApi.put(userApi + "/role/" + data.id,data.data)
+            .then(res => {
+                commit("setRole", res.data.data);
+                return res.data.data;
+            });
     },
     delete({commit},id){
-
+        return globals()
+            .LocalApi.delete(userApi + "/role/" + id)
+            .then(res => {
+                commit("setRole", res.data.data);
+                return res.data.data;
+            });
     }
 };
 

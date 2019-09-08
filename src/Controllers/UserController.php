@@ -16,15 +16,20 @@ class UserController extends BaseController
         $this->forceApiOutput();
     }
     
+    /**
+     * GET /api/user
+     * 
+     */
     public function readList(Request $request) {
         
         $orderBy = false;
-        $filter = [
-            'q'=>$request->input('q', null)
-        ];
+        $filter = [];
+
+        if($request->input('q', false))
+            $filter['q'] = $request->input('q');
 
         //jika menyertakan status
-        if($request->input('status', null))
+        if($request->input('status', false))
             $filter[] = ['status', $request->input('status')];
         
         if(UserAuth::isLogin()){
@@ -33,16 +38,16 @@ class UserController extends BaseController
         }     
         
         //jika menyertakan status
-        if($request->input('role_code', null))
+        if($request->input('role_code', false))
             $filter[] = ['role_code', 'LIKE', '%;'.$request->input('role_code').';%'];
 
-        //jika aktif maka filter berdasarkan tenant nya
+        //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
         if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')) {
             $filter['tenant'] = [config('tenant.id')];
         }
         
         //jika menyertakan order by
-        if ($request->input('orderBy', null))
+        if ($request->input('orderBy', false))
             $orderBy = [$request->input('orderBy'), $request->input('orderType', 'ASC')];
         
         $limit['offset'] = $request->input('offset', 0);
@@ -58,6 +63,12 @@ class UserController extends BaseController
         return $this->done();
     }
     
+    /**
+     * GET /api/user/{id}
+     * 
+     * Route Param : 
+     *      id : route id
+     */
     public function readOne(Request $request)
     {
         $id = $request->route('id');
@@ -75,6 +86,8 @@ class UserController extends BaseController
     }
 
     /**
+     * POST /api/user/
+     * 
      * @param Request $request 
      *      name
      *      email

@@ -127,17 +127,12 @@
     </div>
   </div>
 </template>
-
-<style src="node_modules/vue-multiselect/dist/vue-multiselect.min.css"></style>
-<style src="@/vendor/libs/vue-multiselect/vue-multiselect.scss" lang="scss"></style>
-
 <!-- Page -->
 <style src="@/vendor/styles/pages/users.scss" lang="scss"></style>
 
 <script>
 import MaskedInput, { conformToMask } from "node_modules/vue-text-mask";
 import { emailMask } from "node_modules/text-mask-addons/dist/textMaskAddons";
-import Multiselect from 'node_modules/vue-multiselect';
 import { required, requiredIf, email, sameAs, minLength } from "node_modules/vuelidate/lib/validators";
 
 export default {
@@ -146,7 +141,6 @@ export default {
         title: 'User edit - Pages'
     },
     components: {
-        Multiselect,
         MaskedInput
     },
     validations() {

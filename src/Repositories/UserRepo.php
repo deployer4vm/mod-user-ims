@@ -788,7 +788,7 @@ class UserRepo extends BaseRepository
     /**
      * 
      * @param type $userId
-     * @return boolean|array format mirip data role di APPSSession
+     * @return boolean|array list role user, format mirip data role di APPSSession
      */
     public function getUserRole($userId,$withoutTime=true)
     {

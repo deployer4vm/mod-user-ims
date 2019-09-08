@@ -69,10 +69,10 @@ class UserAuth
     
     public function getUserSessionRole($field=false)
     {
-        if($field && session('APPSSession.user.'.$field)){
-            $data = session('APPSSession.user.'.$field);
+        if($field && session('APPSSession.role.'.$field)){
+            $data = session('APPSSession.role.'.$field);
         }else{
-            $data = session('APPSSession.user');
+            $data = session('APPSSession.role');
         }
         return $data;
     }
@@ -147,6 +147,17 @@ class UserAuth
      * @return type
      */
     public function user($field=false,$default=false)
+    {
+        if($field==false)return $this->userData;
+        return isset($this->userData[$field])?$this->userData[$field]:$default;
+    }
+    
+    /**
+     * GET data user dari Account Center
+     * @param type $field
+     * @return type
+     */
+    public function role($field=false,$default=false)
     {
         if($field==false)return $this->userData;
         return isset($this->userData[$field])?$this->userData[$field]:$default;

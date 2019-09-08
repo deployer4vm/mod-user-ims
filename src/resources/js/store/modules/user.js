@@ -104,8 +104,7 @@ const actions = {
                 return new Promise((resolve,err)=>{
                     resolve(true);
                 });
-            });
-        
+            });        
     }
 };
 

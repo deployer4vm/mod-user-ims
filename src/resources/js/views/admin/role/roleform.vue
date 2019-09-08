@@ -1,114 +1,314 @@
 <template>
-  <div>
+    <div>
         
-    <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
-      <router-link class="btn btn-outline-success d-block" :to="{name: 'role.list'}">
-        <span class="ion ion-ios-arrow-back"></span>&nbsp; Kembali
-      </router-link>
-      <div>
-        <span class="text-muted font-weight-light">Roles /</span>
-        Role Form
-      </div>
-    </h4>
+        <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
+            <router-link class="btn btn-outline-success d-block" :to="{name: 'role.list'}">
+                <span class="ion ion-ios-arrow-back"></span>&nbsp; Kembali
+            </router-link>
+            <div>
+                <span class="text-muted font-weight-light">Roles /</span>
+                Role Form
+            </div>
+        </h4>
 
-    <b-card>
-      <b-card-body class="pb-2">
+        <b-card>
+            <b-card-body class="pb-2">
 
-        <b-form-group label="Role Name">
-          <b-input />
-        </b-form-group>
+                <b-form-group label="Role Name">
+                    <b-input v-model="roleForm.name" />
+                </b-form-group>
 
-        <b-form-group label="Instansi">
-          <b-select value="1" :options="{1: 'ALL', 2: 'Owner (BPKA)', 3: 'Dinas', 4: 'Bidang', 5: 'Unit Kerja'}" />
-        </b-form-group>
+                <b-form-group label="Role Code">
+                    <b-input v-model="roleForm.role_code" @blur="formatRoleCode" />
+                </b-form-group>
 
-      </b-card-body>
+                <b-form-group :label="Trans.get('role.field_caption.tenant_group')">
+                    <b-select v-model="roleForm.tenant_group_id" :options="tenantGroupOption" />
+                </b-form-group>
+
+                
+                <b-form-group :label="Trans.get('role.field_caption.level')">
+                    <b-select  v-model="roleForm.level" :options="levelOption" />
+                </b-form-group>
+
+            </b-card-body>
       
-      <hr class="border-light m-0">
+            <hr class="border-light m-0">
 
-      <div class="table-responsive">
+            <div class="table-responsive">
 
-        <b-table :items="userData.permissions" class="card-table m-0">
-          <template slot="read" slot-scope="data">
-            <b-check v-model="data.item.read" class="px-2 m-0" />
-          </template>
-          <template slot="write" slot-scope="data">
-            <b-check v-model="data.item.write" class="px-2 m-0" />
-          </template>
-          <template slot="create" slot-scope="data">
-            <b-check v-model="data.item.create" class="px-2 m-0" />
-          </template>
-          <template slot="delete" slot-scope="data">
-            <b-check v-model="data.item.delete" class="px-2 m-0" />
-          </template>
-        </b-table>
+                <table class="table mb-0 table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Module</th>
+                            <th>Feature</th>
+                            <th>Create</th>
+                            <th>Read</th>
+                            <th>Update</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template v-for="(moduleRule,key,i) in AppConfig.acl">                    
+                            <tr class="table-primary">
+                                <th scope="row"><b>{{i+1}}</b></th>
+                                <td>
+                                    {{moduleRule.acl_caption}}
+                                    <div v-if="moduleRule.acl_description!=''"><i>{{moduleRule.acl_description}}</i></div>
+                                </td>
+                                <td colspan="5">                            
+                                    <div class="float-right">
+                                        <b-btn variant="primary" size="xs" :disabled="disabledModuleAccess[key]" @click="checkModuleAll(key)">Check all</b-btn> 
+                                        <b-btn variant="success" size="xs" :disabled="disabledModuleAccess[key]" @click="uncheckModuleAll(key)">Uncheck all</b-btn>
+                                    </div>             
+                                    <div class="float-left">
+                                        <b-check  :value="true" :unchecked-value="false" v-model="roleForm.rule[key].has_access" @change="setModule(key,$event)" class="px-2 m-0">
+                                            &nbsp;&nbsp;&nbsp;&nbsp;Has access ?
+                                        </b-check>
+                                    </div>
+                                </td>
+                            </tr>
+                            <template v-for="(rule,ruleKey,index) in moduleRule.children">
+                                <tr>
+                                    <th scope="row">{{index+1}}</th>
+                                    <td></td>
+                                    <td>
+                                        {{rule.acl_caption}}
+                                        <div v-if="rule.acl_description!=''"><i>{{rule.acl_description}}</i></div>
+                                    </td>
+                                    <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                    <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                    <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                    <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                </tr>
+                            </template>
+                        </template>
+                    </tbody>
+                </table>
 
-      </div>
+            </div>
       
-      <div class="text-right mt-3">
-        <b-btn variant="primary">Save changes</b-btn>&nbsp;
-        <b-btn variant="default">Cancel</b-btn>
-      </div>
-    </b-card>
-  </div>
+            <div class="text-right mt-3">
+                <b-btn variant="primary" @click="save">Save changes</b-btn>
+            </div>
+        </b-card>
+    </div>
 </template>
-
-<style src="node_modules/vue-multiselect/dist/vue-multiselect.min.css"></style>
-<style src="@/vendor/libs/vue-multiselect/vue-multiselect.scss" lang="scss"></style>
-
 <!-- Page -->
 <style src="@/vendor/styles/pages/users.scss" lang="scss"></style>
-
 <script>
-import Multiselect from 'node_modules/vue-multiselect'
+import { required } from "node_modules/vuelidate/lib/validators";
 
 export default {
-  name: 'pages-user-edit',
-  components: {
-    Multiselect
-  },
-  data: () => ({
-    userData: {
-      avatar: '5-small.png',
-      name: 'Nelle Maxwell',
-      username: 'nmaxwell',
-      email: 'nmaxwell@mail.com',
-      company: 'Company Ltd.',
-      id: 3425433,
-      verified: true,
-      role: 1,
-      status: 1,
-
-      permissions: [
-        { module: 'Master', read: true, write: false, create: false, delete: false },
-        { module: 'User Managemen', read: true, write: true, create: true, delete: false },
-        { module: 'Pengajuan', read: true, write: false, create: false, delete: true }
-      ],
-
-      info: {
-        birthday: 'May 3, 1995',
-        country: 'Canada',
-        languages: ['English'],
-        phone: '+0 (123) 456 7891',
-        website: '',
-        music: ['Rock', 'Alternative', 'Electro', 'Drum & Bass', 'Dance'],
-        movies: ['The Green Mile', 'Pulp Fiction', 'Back to the Future', 'WALL·E', 'Django Unchained', 'The Truman Show', 'Home Alone', 'Seven Pounds'],
-
-        twitter: 'https://twitter.com/user',
-        facebook: 'https://www.facebook.com/user',
-        google: '',
-        linkedin: '',
-        instagram: 'https://www.instagram.com/user'
-      }
-    }
-  }),
-  methods: {
-    addMusicTag (newTag) {
-      this.userData.info.music.push(newTag)
+    name: 'pages-role-form',
+    data: () => ({
+        permissions: [],//data acl
+        roleForm: {
+            id: 0,
+            name: '',
+            role_code: '',
+            level: 2,
+            tenant_group_id: 0,
+            tenant_id: 0,
+            rule: {}
+        },
+        moduleRolAccessData: {},
+        rulePerModule: {},
+        levelOption: [],
+        tenantOption: [],
+        tenantGroupOption: []
+    }),
+    validations() {
+        return {
+            roleForm: {
+                name: {
+                    required
+                },
+                role_code: {
+                    required
+                }
+            }
+        };
     },
-    addMovieTag (newTag) {
-      this.userData.info.movies.push(newTag)
+    computed: {
+        isAdd() {
+            return this.$route.params.roleId ? false : true;
+        },  
+        disabledModuleAccess: {
+            get() {
+                return this.moduleRolAccessData;
+            },
+            set(value) {
+                this.moduleRolAccessData = value;
+            }
+        },  
+        tenantGroup() {
+            return this.$store.state.tenant.listTenantGroup;
+        }
+    },
+    methods: {
+        setEmptyRole() {
+            let tmp = {};
+            _.forEach(this.AppConfig.acl,(v,k) => {
+                tmp[k] = {'has_access':false};
+
+                this.disabledModuleAccess[k] = true;
+                this.rulePerModule[k] = {}
+                _.forEach(v.children,(rule,ruleKey) => {
+                    tmp[ruleKey] = {
+                            "has_access":false,
+                            "c": false,
+                            "r": false,
+                            "u": false,
+                            "d": false
+                        };
+
+                    this.rulePerModule[k][ruleKey] = ruleKey;
+                });
+            });
+            this.roleForm.rule = tmp;
+        },
+        loadRole() {  
+            this.$store.dispatch(
+                    'role/getRole',this.$route.params.roleId                    
+                ).then((res)=>{
+
+                    _.forEach(res,(v,k) => {
+                        if(k!='rule')this.roleForm[k] = v;
+                    });
+
+                    let tmp = JSON.parse(JSON.stringify(this.roleForm.rule));
+
+                    if(res.rule!=null){
+                        _.forEach(this.roleForm.rule,(v,k) => {
+                            if(res.rule[k]!=undefined){
+                                tmp[k] = res.rule[k];
+                                if(tmp[k]['has_access'])
+                                    this.disabledModuleAccess[k] = false;
+                            }
+                        });
+                    }
+
+                    this.roleForm.rule = tmp;
+
+                }).catch((res)=>{
+                    console.log('get role error : ',res);
+                    this.Web.showAlert({text: "Get role Error",style: "warning"});
+                });
+        },
+        setModule(moduleKey,val){
+            let tmp = JSON.parse(JSON.stringify(this.disabledModuleAccess));
+            tmp[moduleKey] = val?false:true;
+            this.disabledModuleAccess = tmp;
+        },
+        //ceklis semua rule di module tertentu
+        checkModuleAll(moduleKey){
+            let tmp = JSON.parse(JSON.stringify(this.roleForm.rule));
+            _.forEach(this.rulePerModule[moduleKey],(v2,k2)=>{
+                tmp[k2] = {
+                    "has_access":true,
+                    "c": true,
+                    "r": true,
+                    "u": true,
+                    "d": true
+                };
+                _.forEach(this.AppConfig.acl[moduleKey]['children'][k2]['crud'],(v3,k3)=>{                    
+                    if(v3==0||v3==false)tmp[k2][k3]=false;
+                });
+            });
+            this.roleForm.rule = tmp;
+        },
+        //unceklis semua rule di module tertentu
+        uncheckModuleAll(moduleKey){
+            let tmp = JSON.parse(JSON.stringify(this.roleForm.rule));
+            _.forEach(this.rulePerModule[moduleKey],(v2,k2)=>{
+                tmp[k2] = {
+                    "has_access":false,
+                    "c": false,
+                    "r": false,
+                    "u": false,
+                    "d": false
+                };
+            });
+            this.roleForm.rule = tmp;
+        },
+        formatRoleCode(v){
+            this.roleForm.role_code = this.roleForm.role_code.replace(/[^a-zA-Z0-9_]/g, "_");
+        },
+        save() {
+            _.forEach(this.disabledModuleAccess,(v,k) => {
+                _.forEach(this.rulePerModule[k],(v2,k2)=>{
+                    //jika disabled maka uncheck semua hak akses nya
+                    if(v==true){
+                        this.roleForm.rule[k2] = {
+                            "has_access":false,
+                            "c": false,
+                            "r": false,
+                            "u": false,
+                            "d": false
+                        };
+                    }else{
+                        this.roleForm.rule[k2]['has_access'] = this.roleForm.rule[k2]['c']||this.roleForm.rule[k2]['r']||this.roleForm.rule[k2]['u']||this.roleForm.rule[k2]['d']?true:false;
+                    }
+                });
+            });
+
+            this.$v.$touch();  
+            if (this.$v.$invalid) {
+                this.Web.showAlert({
+                    type: 'danger', 
+                    title: this.Trans.get('alert.form_must_complete_title'),
+                    text: this.Trans.get('alert.form_must_complete_text') 
+                });
+            }else{
+
+                if(this.isAdd){
+                    this.$store.dispatch("role/create", this.roleForm).then((res)=>{
+                        this.Web.showAlert({type: 'info', text: 'Role Registered Successfully' });
+                        this.$router.push({name: 'role.list'});
+                    }).catch((err)=>{
+                        console.log('create role error : ',err);
+                        this.Web.showAlert({type: 'danger', text: 'Save data failed' });
+                    });
+                }else{
+
+                    this.$store.dispatch("role/update", {data: this.roleForm,id: this.roleForm.id}).then((res)=>{
+                        this.Web.showAlert({type: 'info', text: 'Role Updated Successfully' });
+                        this.$router.push({name: 'role.list'});
+                    }).catch((err)=>{
+                        console.log('update role error : ',err);
+                        this.Web.showAlert({type: 'danger', text: 'Save data failed' });
+                    });
+                }
+                
+            } 
+        }
+    },
+    created() {
+        this.setEmptyRole();
+
+        if(!this.isAdd){
+            this.loadRole();
+        }
+        
+        let startI = this.UserAuth.getUser('level') + 1;
+        //load level
+        for (let i = startI; i < 100; i++) {
+            this.levelOption[i] = i;
+        };
+
+        //load tenant group jika fitur multitenant aktif
+        if(this.AppConfig.system.web_admin.multitenant.active==1){
+            this.$store.dispatch('listTenantGroup').then((res)=>{
+                let tmp = {};
+                _.forEach(res,(v,k)=>{
+                    tmp[v.id] = v.name;
+                });
+                this.tenantGroupOption  = tmp;
+            });
+        }
+        
     }
-  }
 }
 </script>

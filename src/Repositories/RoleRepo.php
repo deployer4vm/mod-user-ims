@@ -17,17 +17,12 @@ class RoleRepo extends BaseRepository
         $this->model = $model;        
     }
     
-    public function getRole($where)
-    {
-        return $this->_getOne(new Role,$where);
-    }
-
     public function listRole($filter=false, $offset=0,$limit=0,$orderBy=false)
     {
         if (!$filter) $filter = [];
         $filter['searchField'] = ['name'];
         $filter['hiddenColumn'] = ['created_at','updated_at'];
-        $model = new Role;
+        $model = Role::with(['tenantGroup','tenant']);
 
         if (isset($filter['level']) && $filter['level']) {
             $model = $model->where('level', $filter['level']);
@@ -42,6 +37,25 @@ class RoleRepo extends BaseRepository
             $model, $filter, $offset, $limit, $orderBy
         );  
         return $data;
+    }
+
+    public function getRole($where)
+    {
+        return $this->_getOne(new Role,$where);
+    }
+
+    public function createRole($data)
+    {
+        return $this->_create(new Role, $data);
+    }
+    public function updateRole($where, $data)
+    {
+        return $this->_update(new Role, $where, $data);
+    }
+    public function deleteRole($id)
+    {
+        $this->_delete(new Role, ['id', $id]);
+        return true;
     }
    
     
