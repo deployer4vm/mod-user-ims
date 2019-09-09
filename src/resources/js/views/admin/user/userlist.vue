@@ -3,7 +3,7 @@
 
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
       <div>Users</div>
-      <router-link class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'user.add'}">
+      <router-link v-if="UserAuth.hasAccess('moduser.user','c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'user.add'}">
         <span class="ion ion-md-add"></span>&nbsp; Tambah User
       </router-link>
     </h4>
@@ -93,14 +93,16 @@
                     class="btn btn-default icon-btn btn-xs md-btn-flat"
                     title="Edit"
                     v-b-tooltip.hover
-                    :to="{name: 'user.edit', params: {userId: data.item.id}}"
+                    :to="{name: 'user.edit', params: {userId: data.item.id}}" 
+                    v-if="UserAuth.hasAccess('moduser.user','u')"
                 >
                     <span class="ion ion-md-create"></span>
                 </router-link>
                 <b-btn
                     class="btn btn-danger icon-btn btn-xs md-btn-flat"
                     title="Delete"
-                     @click="deleteUser(data.item.id)"
+                     @click="deleteUser(data.item.id)" 
+                     v-if="UserAuth.hasAccess('moduser.user','d')"
                     v-b-tooltip.hover
                 >
                     <span class="ion ion-md-close"></span>

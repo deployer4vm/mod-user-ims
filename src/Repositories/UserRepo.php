@@ -89,7 +89,7 @@ class UserRepo extends BaseRepository
      *      * record table user
      *      profile :
      *          * record table user_profile
-     *      tenant : * jika auto detect tenant, list tenant, false jika tidak terdaftar di tenant manapun
+     *      tenant : * jika auto detect tenant, tenant utama/defaul, false jika tidak terdaftar di tenant manapun
      */
     public function loginCheck($username, $password, $tenantId = null)
     {
@@ -116,9 +116,12 @@ class UserRepo extends BaseRepository
 
             //jika null berarti autodetect tenant
             if (is_null($tenantId)) {
-                $user['tenant'] = UserTenant::where('user_id',$user['id'])->get();
+                $user['tenant'] = UserTenant::with('tenant')->where('user_id',$user['id']);
                 if($user['tenant']->count()==0){
                     $user['tenant'] = false;
+                }else{
+                    $user['tenant'] = $user['tenant']->first()->toArray();
+                    $user['tenant'] = $user['tenant']['tenant'];
                 }
             //jika tidak punya akses all tenant maka cek tenant
             } else if ($user['all_tenant']==0) {

@@ -128,8 +128,11 @@ class LoginController extends BaseController
             $this->setError(__('alert.incorect_parameter'));
             return $this->done();
         }        
-        
-        if($user = UserRepo::loginCheck($authParam['username'],$authParam['password'], config('tenant.id'))){
+
+        $tenantId = config('tenant.id');
+        if (config('AppConfig.system.web_admin.multitenant.autodetect_login')==1) $tenantId = null;
+
+        if($user = UserRepo::loginCheck($authParam['username'],$authParam['password'], $tenantId)){
             $pushParam = false;
             if($request->input('pushNotifToken')){
                 $pushParam = [
@@ -142,6 +145,7 @@ class LoginController extends BaseController
             $this->output['data'] = UserAuth::getCurTimeStamp();
             $this->output['data']['token'] =$token['api_token'];            
             $this->output['data']['user'] = $user;
+            if(isset($user['tenant']))$this->output['data']['tenant'] = $user['tenant'];
             $this->output['data']['role'] = UserRepo::getUserRole($user['id']);
             foreach($this->output['data']['role'] as $key => $val) {
                 if($val['is_main_role']){

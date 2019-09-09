@@ -3,7 +3,7 @@
 
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
       <div>User Roles</div>
-      <router-link class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'role.add'}">
+      <router-link v-if="UserAuth.hasAccess('moduser.role','c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'role.add'}">
         <span class="ion ion-md-add"></span>&nbsp; Tambah Role
       </router-link>
     </h4>
@@ -71,8 +71,13 @@
           <template slot="tenant" slot-scope="data">
             {{data.item.tenant?data.item.tenant.name:''}}
           </template>
+          
           <template slot="tenant_group" slot-scope="data">
             {{data.item.tenant_group?data.item.tenant_group.name:''}}
+          </template>
+
+          <template slot="role_code" slot-scope="data">
+            <b-badge variant="outline-default">{{data.item.role_code}}</b-badge>
           </template>
 
           <template slot="actions" slot-scope="data">
@@ -81,7 +86,8 @@
                 class="btn btn-default icon-btn btn-xs md-btn-flat"
                 title="Edit"
                 v-b-tooltip.hover
-                :to="{name: 'role.edit', params: {roleId: data.item.id}}"
+                :to="{name: 'role.edit', params: {roleId: data.item.id}}" 
+                v-if="UserAuth.hasAccess('moduser.role','u')"
             >
               <span class="ion ion-md-create"></span>
             </router-link>
@@ -90,7 +96,8 @@
                 class="btn btn-danger icon-btn btn-xs md-btn-flat"
                 title="Delete"
                 @click="deleteRole(data.item.id)"
-                v-b-tooltip.hover
+                v-b-tooltip.hover 
+                v-if="UserAuth.hasAccess('moduser.role','d')"
             >
                 <span class="ion ion-md-close"></span>
             </b-btn>
@@ -280,15 +287,15 @@ export default {
         
         //jika tidak menggunakan system tenant maka hilangkan kolom tenant
         if(this.AppConfig.system.web_admin.multitenant.active==0){
-            this.fields.splice(2,2);
+            this.fields.splice(3,2);
         }else{  
-            if(this.AppConfig.packageLocal.moduser.role_list.hide_field.includes('tenant_group')){
+            if(this.AppConfig.packageLocal.moduser.role_hidden_field.includes('tenant_group')){
                 this.fields.splice(4,1);
             }          
-            if(this.AppConfig.packageLocal.moduser.role_list.hide_field.includes('tenant')){
+            if(this.AppConfig.packageLocal.moduser.role_hidden_field.includes('tenant')){
                 this.fields.splice(3,1);
             }
-            if(this.AppConfig.packageLocal.moduser.role_list.hide_field.includes('level')){
+            if(this.AppConfig.packageLocal.moduser.role_hidden_field.includes('level')){
                 this.fields.splice(2,1);
             }  
         }

@@ -5,6 +5,7 @@ var authPath = globals().AppConfig.endpoint.api.auth;
 const state = {
     token: null, //token akses API
     userId: null,
+    tenant: null,//aktif tenant
     user: null, //data komplit user
     role: null, //list access control user
     role_code: null, //main / active role
@@ -43,6 +44,7 @@ const mutations = {
         state.user = userData.user;
         state.userId = userData.user.id;
         state.role = userData.role;
+        state.tenant = userData.tenant;
         state.role_code = userData.role_code;
     },
     setAuthData(state, userData) {
@@ -53,6 +55,7 @@ const mutations = {
         state.userId = null;
         state.user = null;
         state.role = null;
+        state.tenant = null;
         state.role_code = null;
         state.group_app = null;
     },
@@ -77,14 +80,39 @@ const actions = {
                     token: res.data.data.token,
                     user: res.data.data.user,
                     role: res.data.data.role,
+                    tenant: res.data.data.tenant,
                     role_code: res.data.data.role_code
                 });
-                commit("setGroupApp",authData.group_app);
+                
                 //set token di LocalApi
                 globals().LocalApi.defaults.headers.common['Authorization'] = 'Bearer ' + state.token; 
 
                 EventBus.$emit('onLogin',JSON.parse(JSON.stringify(res.data.data)));
 
+                //jika auto detek login
+                if(globals().AppConfig.system.web_admin.multitenant.autodetect_login == 1 && res.data.data.tenant.group_app != authData.group_app){ 
+                    
+                    //load ulang tenant nya
+                    return globals().Web.loadTenant(res.data.data.tenant.group_app).then((val)=>{
+                        //jika tenant tidak ditemukan
+                        if(!val){                    
+                            //jika tenant yang tidak ditemukan adalah default tenant maka error
+                            if(to.params.group_app != globals().Web.getDefaultTenantRoute().params.group_app){
+                                alert('Tenant Api Error');                    
+                            }else{                        
+                                globals().Web.goToDefaultTenant();
+                            }
+                        }else{
+                            commit("setGroupApp",res.data.data.tenant.group_app);
+                            dispatch("implementAcl");
+                            globals().Web.goToTenant(res.data.data.tenant.group_app);
+                        }
+
+                    });                    
+                    
+                }
+
+                commit("setGroupApp",authData.group_app);
                 return dispatch("implementAcl");
             });
     },
@@ -98,6 +126,7 @@ const actions = {
             token: state.token,
             user: state.user,
             role: state.role,
+            tenant: state.tenant,
             role_code: state.role_code
         }
         EventBus.$emit('onLogout',JSON.parse(JSON.stringify(userData)));
@@ -109,6 +138,7 @@ const actions = {
     un-elegan way, nanti ubah agar lebih efisien
     */
     implementAcl({ commit, state, dispatch }) {
+        console.log('implementAcl');
         var aclItem, aclItemLv2, aclItemLv3, curAclId;
 
         globals().AppConfig.sidenav = JSON.parse(JSON.stringify(globals().AppConfig.sidenavOri));

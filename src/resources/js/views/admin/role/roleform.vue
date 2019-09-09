@@ -14,21 +14,40 @@
         <b-card>
             <b-card-body class="pb-2">
 
-                <b-form-group label="Role Name">
-                    <b-input v-model="roleForm.name" />
+                <b-form-group :label="Trans.get('role.field_caption.name')" class="col position-relative">
+                    <b-input 
+                        :state="$v.roleForm.name.$error?'invalid':''" 
+                        v-model="roleForm.name" @blur="formatRoleCodeFromRoleName"
+                    />
+                    <invalid-tooltip :inputItem="$v.roleForm.name" :fieldName="Trans.get('role.field_caption.name')" />
                 </b-form-group>
 
-                <b-form-group label="Role Code">
-                    <b-input v-model="roleForm.role_code" @blur="formatRoleCode" />
+                <b-form-group :label="Trans.get('role.field_caption.role_code')" class="col position-relative">
+                    <b-input 
+                        :state="$v.roleForm.role_code.$error?'invalid':''"
+                        v-model="roleForm.role_code" @blur="formatRoleCode"
+                    />
+                    <invalid-tooltip :inputItem="$v.roleForm.role_code" :fieldName="Trans.get('role.field_caption.role_code')" />
                 </b-form-group>
 
-                <b-form-group :label="Trans.get('role.field_caption.tenant_group')">
-                    <b-select v-model="roleForm.tenant_group_id" :options="tenantGroupOption" />
+                <b-form-group :label="Trans.get('role.field_caption.tenant_group')"  class="col position-relative">
+                    <b-select 
+                        :state="$v.roleForm.tenant_group_id.$error?'invalid':''" 
+                        v-model="roleForm.tenant_group_id" 
+                        :options="tenantGroupOption"
+                        
+                    />
+                    <invalid-tooltip :inputItem="$v.roleForm.tenant_group_id" :customAlert="{'minValue': 'validation.required'}" :fieldName="Trans.get('role.field_caption.tenant_group')" />
                 </b-form-group>
 
                 
-                <b-form-group :label="Trans.get('role.field_caption.level')">
-                    <b-select  v-model="roleForm.level" :options="levelOption" />
+                <b-form-group :label="Trans.get('role.field_caption.level')"  class="col position-relative">
+                    <b-select 
+                        :state="$v.roleForm.level.$error?'invalid':''" 
+                        v-model="roleForm.level" 
+                        :options="levelOption" 
+                    />
+                    <invalid-tooltip :inputItem="$v.roleForm.level" :fieldName="Trans.get('role.field_caption.level')" />
                 </b-form-group>
 
             </b-card-body>
@@ -63,8 +82,8 @@
                                         <b-btn variant="success" size="xs" :disabled="disabledModuleAccess[key]" @click="uncheckModuleAll(key)">Uncheck all</b-btn>
                                     </div>             
                                     <div class="float-left">
-                                        <b-check  :value="true" :unchecked-value="false" v-model="roleForm.rule[key].has_access" @change="setModule(key,$event)" class="px-2 m-0">
-                                            &nbsp;&nbsp;&nbsp;&nbsp;Has access ?
+                                        <b-check  :value="true" :unchecked-value="false" v-model="roleForm.rule[key].has_access" @change="setModule(key,$event)">
+                                            Has access
                                         </b-check>
                                     </div>
                                 </td>
@@ -76,11 +95,21 @@
                                     <td>
                                         {{rule.acl_caption}}
                                         <div v-if="rule.acl_description!=''"><i>{{rule.acl_description}}</i></div>
-                                    </td>
-                                    <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                    <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                    <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                    <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                    </td> 
+                                    <template v-if="rule.crud.c!=1&&rule.crud.r!=1&&rule.crud.u!=1&&rule.crud.d!=1">                                   
+                                        <td colspan="4">
+                                            <b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].has_access"
+                                            :disabled="disabledModuleAccess[key]">
+                                                Has access
+                                            </b-check>
+                                        </td>
+                                    </template>
+                                    <template v-else> 
+                                        <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                        <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                        <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                        <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                    </template>
                                 </tr>
                             </template>
                         </template>
@@ -98,7 +127,7 @@
 <!-- Page -->
 <style src="@/vendor/styles/pages/users.scss" lang="scss"></style>
 <script>
-import { required } from "node_modules/vuelidate/lib/validators";
+import { required, minLength, minValue } from "node_modules/vuelidate/lib/validators";
 
 export default {
     name: 'pages-role-form',
@@ -123,9 +152,18 @@ export default {
         return {
             roleForm: {
                 name: {
-                    required
+                    required,
+                    minLength: minLength(5)
                 },
                 role_code: {
+                    required,
+                    minLength: minLength(5)
+                },
+                tenant_group_id: {
+                    required,
+                    minValue: minValue(1)
+                },
+                level: {
                     required
                 }
             }
@@ -233,7 +271,14 @@ export default {
             });
             this.roleForm.rule = tmp;
         },
+        formatRoleCodeFromRoleName(v){
+            this.$v.roleForm.name.$touch();
+            if(this.roleForm.role_code==''){
+                this.roleForm.role_code = this.roleForm.name.toLowerCase().replace(/[^a-zA-Z0-9_]/g, "_");
+            }
+        },
         formatRoleCode(v){
+            this.$v.roleForm.role_code.$touch();
             this.roleForm.role_code = this.roleForm.role_code.replace(/[^a-zA-Z0-9_]/g, "_");
         },
         save() {
@@ -293,8 +338,10 @@ export default {
         }
         
         let startI = this.UserAuth.getUser('level') + 1;
+        let endI = this.AppConfig.packageLocal.moduser.user_level.max+1;
+        if(startI < this.AppConfig.packageLocal.moduser.user_level.min) startI = this.AppConfig.packageLocal.moduser.user_level.max;
         //load level
-        for (let i = startI; i < 100; i++) {
+        for (let i = startI; i < endI; i++) {
             this.levelOption[i] = i;
         };
 
@@ -307,6 +354,11 @@ export default {
                 });
                 this.tenantGroupOption  = tmp;
             });
+            if(this.AppConfig.packageLocal.moduser.role_hidden_field.includes('tenant_group')){
+                this.showTenantGroup = false;
+            } 
+        }else{
+            this.showTenantGroup = false;
         }
         
     }
