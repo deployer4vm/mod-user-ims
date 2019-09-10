@@ -2,6 +2,7 @@
 
 namespace hpsynapse\moduser\Repositories;
 
+use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Facades\hpsynapse\moduser\Repositories\UserLogRepo;
@@ -27,16 +28,6 @@ class UserRepo extends BaseRepository
 {
     use ApiTokenTraits, UserMessageTraits;
 
-
-    protected $userProfileField = [
-        'avatar',
-        'gender',
-        'date_of_birth',
-        'socnet_facebook',
-        'socnet_instagram',
-        'address',
-        'postal_code'
-    ];
 
     public function __construct(User $model)
     {
@@ -111,8 +102,8 @@ class UserRepo extends BaseRepository
             return false;
         }
 
-        //jika multitenant aktif
-        if (config('AppConfig.system.web_admin.multitenant.active')==1) {
+        //jika multitenant aktif dan user tidak all_tenant
+        if (config('AppConfig.system.web_admin.multitenant.active')==1 && $user['all_tenant']==0) {
 
             //jika null berarti autodetect tenant
             if (is_null($tenantId)) {
@@ -546,6 +537,7 @@ class UserRepo extends BaseRepository
      */
     public function updateUser($userId, $userData)
     {
+        
         if (isset($userData['_token'])) unset($userData['_token']);
         if (isset($userData['_method'])) unset($userData['_method']);
         if (isset($userData['password']) && $userData['password']) $userData['password'] = Hash::make($userData['password']);
@@ -605,12 +597,18 @@ class UserRepo extends BaseRepository
             return false;
         }
 
-        foreach ($this->userProfileField as $value) {
-            if (isset($userData[$value])) $input[$value] = $userData[$value];
+        $model = new UserProfile;
+        $input = [];
+        $userProfileField = Schema::getColumnListing($model->getTable());
+        
+        foreach ($userProfileField as $value) {
+            if (!in_array($value,['id','created_at','updated_at','user_id']) && isset($userData[$value]))
+                $input[$value] = $userData[$value];
         }
         
-        $this->_update(new UserProfile, ['user_id',$userId], $input);
-        
+        if($input!=[]){
+            $this->_update($model, ['user_id',$userId], $input);
+        }
     }
 
     public function updatePhone($userId, $userData)

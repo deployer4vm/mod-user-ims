@@ -90,7 +90,7 @@ const actions = {
                 EventBus.$emit('onLogin',JSON.parse(JSON.stringify(res.data.data)));
 
                 //jika auto detek login
-                if(globals().AppConfig.system.web_admin.multitenant.autodetect_login == 1 && res.data.data.tenant.group_app != authData.group_app){ 
+                if(globals().AppConfig.system.web_admin.multitenant.autodetect_login == 1 && res.data.data.tenant && res.data.data.tenant.group_app != authData.group_app){ 
                     
                     //load ulang tenant nya
                     return globals().Web.loadTenant(res.data.data.tenant.group_app).then((val)=>{

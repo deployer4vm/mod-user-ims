@@ -145,7 +145,9 @@ class LoginController extends BaseController
             $this->output['data'] = UserAuth::getCurTimeStamp();
             $this->output['data']['token'] =$token['api_token'];            
             $this->output['data']['user'] = $user;
+
             if(isset($user['tenant']))$this->output['data']['tenant'] = $user['tenant'];
+            
             $this->output['data']['role'] = UserRepo::getUserRole($user['id']);
             foreach($this->output['data']['role'] as $key => $val) {
                 if($val['is_main_role']){
