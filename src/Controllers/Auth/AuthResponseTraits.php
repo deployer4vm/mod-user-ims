@@ -13,9 +13,12 @@ trait AuthResponseTraits
      * 
      * @return redirect parameter yg di passing saat redirect :
      */
-    protected function authDone($param=[])
+    protected function authDone($param=[],$backlink=false)
     {   
-        return redirect()->away(config('cur_apps.session_grab_url').'?'.http_build_query($param));
+        if($backlink==false){
+            $backlink = config('cur_apps.session_grab_url');
+        }
+        return redirect()->away($backlink.'?'.http_build_query($param));
     }
     
     protected function filterAuthParam($param)

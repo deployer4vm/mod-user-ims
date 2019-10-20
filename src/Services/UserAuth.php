@@ -20,6 +20,7 @@ class UserAuth
     protected $userData;
     protected $userRoleList;
     protected $userRole;
+    protected $userRoleCode;
     
     public function setInit($isApiCall=false,$userData=false,$userRole=false)
     {
@@ -30,12 +31,21 @@ class UserAuth
                 if($userId){
                     $this->userData = UserRepo::getUser($userId);
                     $listUserRole = UserRepo::getUserRole($userId);
-                    $this->userRole = array_pop($listUserRole);
+                    
+                    foreach($listUserRole as $key => $val) {
+                        if($val['is_main_role']){
+                            $this->userRoleCode = $key;
+                            $this->userRole = $val;
+                            break;
+                        }
+                    }
+                    // $this->userRole = array_pop($listUserRole);
                 }
             }
         }else{
             $this->userData = $this->getUserSessionData();
             $this->userRole = $this->getUserSessionRole();
+            $this->userRoleCode = $this->getActiveUserRoleCode();
         }
     }
     
@@ -77,6 +87,11 @@ class UserAuth
         return $data;
     }
 
+    public function getActiveUserRoleCode()
+    {
+        return session('APPSSession.role_code');
+    }
+
     /**
      * set session saat login
      * 
@@ -89,16 +104,26 @@ class UserAuth
         }
         
         $sessionData = $this->getCurTimeStamp();
-        $userData = UserRepo::getOne($userId);
+        $userData = UserRepo::getUser($userId);
+        $role = UserRepo::getUserRole($userData['id']);
+        
+        foreach($role as $key => $val) {
+            if($val['is_main_role']){
+                $roleCode = $key;
+                break;
+            }
+        }
         
         $this->setSession([
             'token' => $apiTokenData,            
             'user' => $userData,
-            'role' => UserRepo::getUserRole($userData['id']),
+            'role' => $role,
+            'role_code' => $roleCode,
             'lastUpdate' => $sessionData['lastUpdate'],
             'validUntil' => $sessionData['validUntil']
         ]);
     }
+
     public function updateSessionId()
     {
         $this->setSession(['sessionId'=>session()->getId()]);
@@ -116,7 +141,8 @@ class UserAuth
             'lastUpdate' => $sessionData['lastUpdate'],
             'validUntil' => $sessionData['validUntil'],
             'user' => '',
-            'role' => ''
+            'role' => '',
+            'role_code' => ''
             ]);
     }
     
@@ -180,6 +206,18 @@ class UserAuth
         return false;
     }
     
+    /**
+     * cek status user apakah posisi tidak aktif / banned
+     * 
+     * @return boolean
+     */
+    public function isBanned()
+    {
+        if($this->localUser['status'] == 0){
+            return true;
+        }
+        return false;
+    }
     
     /**
      * ROLE CHECK
@@ -200,31 +238,24 @@ class UserAuth
         return false;
     }
     
-    public function isMember()
+    public function hasAccess($key, $subKey='has_access')
     {
-        if(isset($this->roleData['member'])){
-            return true;
+        if(isset($this->userRole[$this->userRoleCode])){
+            if(
+                isset($this->userRole[$this->userRoleCode]['rule'][$key][$subKey]) 
+                && $this->userRole[$this->userRoleCode]['rule'][$key][$subKey] == 0
+            ){
+                return false;
+            }
         }
-        return false;
+        return true;
     }
-    
-    /**
-     * cek status reseller apakah posisi tidak aktif / banned
-     * 
-     * @return boolean
-     */
-    public function isBanned()
-    {
-        if($this->localUser['status'] == 0){
-            return true;
-        }
-        return false;
-    }
-    
-    /*
-     * -------------------------------------------------------------------------
-     */
 
+    /**
+     * cek apakah user yang login memiliki grant access ke role_code
+     * 
+     * @param string $roleCode role_code yang dicek nya
+     */
     public function isGranted($roleCode=false)
     {
         $data = UserRepo::getUserRole($this->userData['id']);

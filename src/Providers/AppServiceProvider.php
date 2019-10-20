@@ -2,6 +2,9 @@
 namespace hpsynapse\moduser\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\AliasLoader;
+use Facades\hpsynapse\moduser\Services\UserAuth;
+
 // use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,8 +27,11 @@ class AppServiceProvider extends ServiceProvider
      * Register
      */
     public function register()
-    {
-        
+    {        
+        $this->app->booting(function() {
+            $loader = AliasLoader::getInstance();
+            $loader->alias('UserAuth', UserAuth::class);
+        });
     }
 
 }

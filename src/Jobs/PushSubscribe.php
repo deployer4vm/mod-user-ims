@@ -43,9 +43,9 @@ class PushSubscribe implements ShouldQueue
     public function handle()
     {
         if($this->isSubscribe){
-            UserNotifRepo::doSubscribeToChannel($channelId,$pushNotifToken);
+            UserNotifRepo::doSubscribeToChannel($this->channelId,$this->pushNotifToken);
         }else{
-            UserNotifRepo::doUnsubscribeToChannel($channelId,$pushNotifToken);
+            UserNotifRepo::doUnsubscribeToChannel($this->channelId,$this->pushNotifToken);
         }
         
     }

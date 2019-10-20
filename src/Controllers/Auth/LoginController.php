@@ -48,7 +48,7 @@ class LoginController extends BaseController
         $response['reff'] = 'login';
         
         $request->validate([
-            'email' => 'required|email|max:255',
+            'username' => 'required|max:255',
             'password' => 'required|min:3|max:255'
         ]);
 
@@ -56,32 +56,40 @@ class LoginController extends BaseController
             $this->fireLockoutEvent($request);
             return $this->sendLockoutResponse($request);
         }
+        
+        $authData = $request->only('username', 'password');
 
-        if (Auth::attempt(
-                $request->only('email', 'password'), $request->filled('remember')
-            )) {
+        $tenantId = config('tenant.id');
+        if (config('AppConfig.system.web_admin.multitenant.autodetect_login')==1) $tenantId = null;
+        
+
+        if($user = UserRepo::loginCheck($authData['username'],$authData['password'], $tenantId)){
+            if (Auth::attempt(
+                    ['username'=>$user['username'],'password'=>$authData['password']], $request->filled('remember')
+                ) || Auth::attempt(
+                    ['email'=>$user['email'],'password'=>$authData['password']], $request->filled('remember')
+                )) {
             
-            //$request->session()->regenerate();
-            $this->clearLoginAttempts($request);
-            $userData = Auth::user();
-            
-            //jika di banned
-            if($userData['status']==2){
-                return redirect()->route('auth.login', $returnParam)->with('alert', ['type' => 'danger', 'message' => 'Login Failed. Account Banned.']);
-            //jika pertama kali aktifikasi
-            }else if($userData['status']==0){
-                UserRepo::updateUser($userData['id'],['status'=>1]);
+                //$request->session()->regenerate();
+                $this->clearLoginAttempts($request);
+                $userData = Auth::user();
+                
+                //jika di banned
+                if($userData->status==2){
+                    return redirect()->route('auth.login', $returnParam)->with('alert', ['type' => 'danger', 'message' => 'Login Failed. Account Banned.']);
+                //jika pertama kali aktifikasi
+                }else if($userData->status==0){
+                    UserRepo::updateUser($userData->id,['status'=>1]);
+                    UserRepo::activateUser($userData->id);
+                }
+                
+                UserAuth::setUser($userData->id);
+                
+                $response['isLogin'] = 1;
+                $response['token'] = UserAuth::getToken();
+                                                    
+                return $this->authDone($response);
             }
-            
-            UserAuth::setUser($userData->id);
-            
-            $response['isLogin'] = 1;
-            $response['token'] = UserAuth::getToken();
-                        
-            //jika belum aktif, maka aktifkan
-            if($userData->status == '0')UserRepo::activateUser($userData->id);
-                        
-            return $this->authDone($response);
         }
 
         $this->incrementLoginAttempts($request);
@@ -100,7 +108,7 @@ class LoginController extends BaseController
         $response['reff'] = 'logout';
         $response['isLogin'] = 0;
         
-        return $this->authDone($response);
+        return $this->authDone($response,route('auth.login'));
     }
     
     /**

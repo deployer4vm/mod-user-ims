@@ -234,12 +234,19 @@ class UserRepo extends BaseRepository
             $limit,
             $orderBy
         );
+        $this->dataUserPagination = $this->pagination;
 
         $data['data'] = array_map([$this,'_formatUser'],$data['data']);
 
         return $data;
     }
 
+    public function getPaginationUser($path = '')
+    {
+        if(!isset($this->dataUserPagination))$this->dataUserPagination = $this->pagination;
+        return $this->_getPagination($path, $this->dataUserPagination);
+    }
+    
     /**
      * get 1 record user beserta profile nya
      * 
@@ -248,7 +255,18 @@ class UserRepo extends BaseRepository
      */
     public function getUser($userId)
     {
-        $user = User::with(['profile'])->find($userId);
+        $user = User::with(['profile']);
+
+        if(is_array($userId)){
+            if(count($userId)==2){
+                $user = $user->where($userId[0],$userId[1])->first();
+            }else{                
+                $user = $user->where($userId[0],$userId[1],$userId[2])->first();
+            }
+        }else{
+            $user = $user->find($userId);
+        }
+
         if ($user) {          
             return $this->_formatUser($user->toArray());
         }

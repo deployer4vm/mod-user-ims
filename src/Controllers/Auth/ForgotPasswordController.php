@@ -5,7 +5,6 @@ namespace hpsynapse\moduser\Controllers\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Facades\hpsynapse\moduser\Repositories\UserRepo;
-use Facades\hpsynapse\moduser\Repositories\AppsRepo;
 
 use App\Base\BaseController;
 
@@ -38,7 +37,7 @@ class ForgotPasswordController extends BaseController
         $this->data['data']['email'] = $request->input('email');
         $this->response = 'auth.forgotpasswordsuccess';
         
-        $user = AppsRepo::getUser(config('cur_apps.id'),'email',$this->data['data']['email']);
+        $user = UserRepo::getUser(['email',$this->data['data']['email']]);
         
         if(!$user || $user['status'] != 1){
             $this->data['status'] = 400;
