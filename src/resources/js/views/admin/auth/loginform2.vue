@@ -40,24 +40,30 @@
             <!-- Form -->
             <form class="my-5" @submit="onSubmit" @reset="onReset">
               
-              <b-form-group :label="Trans.get('auth.login.usernamecaption')" class="position-relative">
-                <b-input :state="$v.form.username.$error?'invalid':''" v-model.trim="form.username" @change="$v.form.username.$touch()" />
-                <invalid-tooltip :inputItem="$v.form.username" :fieldName="Trans.get('auth.login.usernamecaption')" />
-              </b-form-group>
+                <b-form-group :label="Trans.get('auth.login.usernamecaption')" class="position-relative">
+                    <b-input-group>
+                        <b-input-group-text slot="prepend"><i class="ion ion-md-contact"></i></b-input-group-text>
+                        <b-input :state="$v.form.username.$error?'invalid':''" v-model.trim="form.username" @change="$v.form.username.$touch()" />
+                    </b-input-group>
+                    <invalid-tooltip :inputItem="$v.form.username" :fieldName="Trans.get('auth.login.usernamecaption')" />
+                </b-form-group>
 
-              <b-form-group class="position-relative">
-                <div slot="label" class="d-flex justify-content-between align-items-end">
-                  <div>{{ Trans.get('auth.login.passwordcaption') }}</div>
-                  <router-link
-                    tag="a"
-                    :to="{name: 'forgotpassword'}"
-                    class="d-block small"
-                    v-if="AppConfig.packageLocal.moduser.login.forgotpassword"
-                  >{{ Trans.get('auth.login.forgotpassword') }}</router-link>
-                </div>
-                <b-input type="password" :state="$v.form.password.$error?'invalid':''" v-model.trim="form.password" @change="$v.form.password.$touch()" />
-                <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('auth.login.passwordcaption')" />
-              </b-form-group>
+                <b-form-group class="position-relative">
+                    <div slot="label" class="d-flex justify-content-between align-items-end">
+                        <div>{{ Trans.get('auth.login.passwordcaption') }}</div>
+                        <router-link
+                            tag="a"
+                            :to="{name: 'forgotpassword'}"
+                            class="d-block small"
+                            v-if="AppConfig.packageLocal.moduser.login.forgotpassword"
+                        >{{ Trans.get('auth.login.forgotpassword') }}</router-link>
+                    </div>
+                    <b-input-group>
+                        <b-input-group-text slot="prepend"><i class="ion ion-md-lock"></i></b-input-group-text>
+                        <b-input type="password" :state="$v.form.password.$error?'invalid':''" v-model.trim="form.password" @change="$v.form.password.$touch()" />
+                    </b-input-group>
+                    <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('auth.login.passwordcaption')" />
+                </b-form-group>
 
               <div class="d-flex justify-content-between align-items-center m-0">
                 <b-check

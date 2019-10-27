@@ -138,7 +138,8 @@ class LoginController extends BaseController
         }        
 
         $tenantId = config('tenant.id');
-        if (config('AppConfig.system.web_admin.multitenant.autodetect_login')==1) $tenantId = null;
+        if (config('AppConfig.system.web_admin.multitenant.autodetect_login')==1) 
+            $tenantId = null;
 
         if($user = UserRepo::loginCheck($authParam['username'],$authParam['password'], $tenantId)){
             $pushParam = false;
@@ -154,7 +155,8 @@ class LoginController extends BaseController
             $this->output['data']['token'] =$token['api_token'];            
             $this->output['data']['user'] = $user;
 
-            if(isset($user['tenant']))$this->output['data']['tenant'] = $user['tenant'];
+            if(isset($user['tenant']))
+                $this->output['data']['tenant'] = $user['tenant'];
             
             $this->output['data']['role'] = UserRepo::getUserRole($user['id']);
             foreach($this->output['data']['role'] as $key => $val) {

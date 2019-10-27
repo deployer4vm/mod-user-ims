@@ -88,20 +88,25 @@ const actions = {
                 globals().LocalApi.defaults.headers.common['Authorization'] = 'Bearer ' + state.token; 
 
                 EventBus.$emit('onLogin',JSON.parse(JSON.stringify(res.data.data)));
-
+                
                 //jika auto detek login
-                if(globals().AppConfig.system.web_admin.multitenant.autodetect_login == 1 && res.data.data.tenant && res.data.data.tenant.group_app != authData.group_app){ 
-                    
+                if(
+                    globals().AppConfig.system.web_admin.multitenant.autodetect_login == 1 &&
+                    res.data.data.tenant &&
+                    res.data.data.tenant.group_app != authData.group_app){ 
+
                     //load ulang tenant nya
                     return globals().Web.loadTenant(res.data.data.tenant.group_app).then((val)=>{
                         //jika tenant tidak ditemukan
                         if(!val){                    
                             //jika tenant yang tidak ditemukan adalah default tenant maka error
-                            if(to.params.group_app != globals().Web.getDefaultTenantRoute().params.group_app){
+                            if(to.params.group_app == globals().Web.getDefaultTenantRoute().params.group_app){
                                 alert('Tenant Api Error');                    
                             }else{                        
                                 globals().Web.goToDefaultTenant();
                             }
+
+                        //jika tenant ada maka redirect ke tenant
                         }else{
                             commit("setGroupApp",res.data.data.tenant.group_app);
                             dispatch("implementAcl");
