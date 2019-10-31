@@ -272,8 +272,8 @@ export default {
                         this.Web.showAlert({type: 'info', text: 'User Registered Successfully' });
                         this.$router.push({name: 'user.list'});
                     }).catch((err)=>{
-                        console.log('create user error : ',err);
-                        this.Web.showAlert({type: 'danger', text: 'Save data failed' });
+                        console.log('add User error : ',res);
+                        this.Web.showAlert({type: 'danger', text: 'Simpan data gagal : ' + err.message });
                     });
                 }else{
 
@@ -281,8 +281,8 @@ export default {
                         this.Web.showAlert({type: 'info', text: 'User Updated Successfully' });
                         this.$router.push({name: 'user.list'});
                     }).catch((err)=>{
-                        console.log('update user error : ',err);
-                        this.Web.showAlert({type: 'danger', text: 'Save data failed' });
+                        console.log('update user error : ',res);
+                        this.Web.showAlert({type: 'danger', text: 'Simpan data gagal : ' + err.message });
                     });
                 }
                 

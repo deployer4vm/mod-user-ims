@@ -173,7 +173,6 @@ export default {
             this.Web.showAlert({ text: "Profile berhasil disimpan" });
         }).catch(res => {
             let errMessage = "Simpan data gagal : ";
-            console.log(res.response);
             if(res.response.data && res.response.data.errors ){
                 _.forEach(res.response.data.errors,(v,i)=>{
                     errMessage += "<br> - " + v[0];
