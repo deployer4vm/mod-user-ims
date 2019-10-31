@@ -294,7 +294,12 @@ export default {
                             "d": false
                         };
                     }else{
-                        this.roleForm.rule[k2]['has_access'] = this.roleForm.rule[k2]['c']||this.roleForm.rule[k2]['r']||this.roleForm.rule[k2]['u']||this.roleForm.rule[k2]['d']?true:false;
+                        this.roleForm.rule[k2]['has_access'] = 
+                            this.roleForm.rule[k2]['has_access'] || 
+                            this.roleForm.rule[k2]['c'] ||
+                            this.roleForm.rule[k2]['r'] ||
+                            this.roleForm.rule[k2]['u'] ||
+                            this.roleForm.rule[k2]['d']?true:false;
                     }
                 });
             });

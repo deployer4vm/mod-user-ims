@@ -150,7 +150,6 @@ export default {
                     required
                 },
                 email: {
-                    required,
                     email
                 },
                 role_code: {

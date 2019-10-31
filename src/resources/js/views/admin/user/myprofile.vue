@@ -17,7 +17,7 @@
               @click="curTab = 'password'"
             >Change password</b-list-group-item>
 
-            <b-list-group-item button :active="curTab === 'info'" @click="curTab = 'info'">
+            <b-list-group-item button :active="curTab === 'info'" @click="curTab = 'info'" v-if="AppConfig.packageLocal.moduser.user_profile_tab.profile.show==1">
               {{AppConfig.packageLocal.moduser.user_profile_tab.profile.caption}}
             </b-list-group-item>
           </b-list-group>
@@ -37,7 +37,7 @@
           <hr class="border-light m-0" />
           <b-card-body>
             <b-form-group label="Username">
-              <b-input v-model="userForm.username" />
+              <b-input v-model="userForm.username" :readonly="true" />
             </b-form-group>
 
             <b-form-group label="Name">
@@ -172,7 +172,16 @@ export default {
         }).then(res => {
             this.Web.showAlert({ text: "Profile berhasil disimpan" });
         }).catch(res => {
-            this.Web.showAlert({ text: "Simpan data gagal : " + res.message,type: "warning" });
+            let errMessage = "Simpan data gagal : ";
+            console.log(res.response);
+            if(res.response.data && res.response.data.errors ){
+                _.forEach(res.response.data.errors,(v,i)=>{
+                    errMessage += "<br> - " + v[0];
+                });
+            }else{
+                errMessage += res.message;
+            }
+            this.Web.showAlert({ text: errMessage,type: "warning" });
         });
 
     },
@@ -186,7 +195,16 @@ export default {
                 this.passwordForm.password = '';
                 this.passwordForm.password_confirmation = '';
         }).catch(res => {
-          this.Web.showAlert({ text: "Simpan data gagal : " + res.message,type: "warning" });
+            let errMessage = "Simpan password gagal : ";
+            console.log(res.response);
+            if(res.response.data && res.response.data.errors ){
+                _.forEach(res.response.data.errors,(v,i)=>{
+                    errMessage += "<br> - " + v[0];
+                });
+            }else{
+                errMessage += res.message;
+            }
+            this.Web.showAlert({ text: errMessage,type: "warning" });
         });
     }
   }

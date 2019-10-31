@@ -249,7 +249,7 @@ export default {
             }
 
             if(this.filterRole!='all'){
-                this.loadParams.role_code = this.filterRole;
+                this.loadParams.role = this.filterRole;
             }
 
             if(this.filterStatus!='all'){

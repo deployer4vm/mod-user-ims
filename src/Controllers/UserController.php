@@ -38,11 +38,11 @@ class UserController extends BaseController
         }     
         
         //jika menyertakan status
-        if($request->input('role_code', false))
-            $filter[] = ['role_code', 'LIKE', '%;'.$request->input('role_code').';%'];
+        if($request->input('role', false))
+            $filter[] = ['role', 'LIKE', '%;'.$request->input('role').';%'];
 
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
-        if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')) {
+        if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')!=1) {
             $filter['tenant'] = [config('tenant.id')];
         }
         
