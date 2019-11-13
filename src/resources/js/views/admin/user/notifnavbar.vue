@@ -41,8 +41,9 @@ export default {
     },
     created() {
         this.loadNotif();
-        setInterval(()=>{
-            this.loadNotif();
+        this.invervalNotif = setInterval(()=>{
+            if(this.UserAuth.isLogin())
+                this.loadNotif();
         },60000);
     },
     methods: {

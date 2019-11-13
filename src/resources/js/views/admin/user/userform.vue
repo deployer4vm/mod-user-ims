@@ -3,25 +3,25 @@
     
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
       <router-link class="btn btn-outline-success d-block" :to="{name: 'user.list'}">
-        <span class="ion ion-ios-arrow-back"></span>&nbsp; Kembali
+        <span class="ion ion-ios-arrow-back"></span>&nbsp; {{Trans.get('lang.back')}}
       </router-link>
       <div>
-        <span class="text-muted font-weight-light">Users /</span>
+        <span class="text-muted font-weight-light">{{Trans.get('user.module_caption')}} /</span>
         {{ title }}
       </div>
     </h4>
 
     <b-tabs class="nav-tabs-top nav-responsive-sm">
 
-      <b-tab title="Account" active>
+      <b-tab :title="Trans.get('user.userform.tab_account_caption')" active>
         <b-card-body v-if="showUserField('avatar')">
 
           <div class="media align-items-center">
             <img :src="`${publicUrl}img/avatars/${userData.avatar}`" alt="" class="d-block ui-w-80">
             <div class="media-body ml-3">
-              <label class="form-label d-block mb-2">Avatar</label>
-              <b-btn variant="outline-primary" size="sm">Change</b-btn>&nbsp;
-              <b-btn variant="default md-btn-flat" size="sm">Reset</b-btn>
+              <label class="form-label d-block mb-2">{{Trans.get('user.field_caption.avatar')}}</label>
+              <b-btn variant="outline-primary" size="sm">{{Trans.get('lang.change')}}</b-btn>&nbsp;
+              <b-btn variant="default md-btn-flat" size="sm">{{Trans.get('lang.reset')}}</b-btn>
             </div>
           </div>
 
@@ -31,7 +31,7 @@
 
         <b-card-body class="pb-2">
 
-            <b-form-group label="Name" class="col position-relative">
+            <b-form-group :label="Trans.get('user.field_caption.name')" class="col position-relative">
                 <b-input 
                     :state="$v.form.name.$error?'invalid':''" 
                     @blur="$v.form.name.$touch()"
@@ -40,12 +40,12 @@
                 <invalid-tooltip :inputItem="$v.form.name" :fieldName="'Name'" />
             </b-form-group>
 
-            <b-form-group label="Username" v-if="showUserField('username')">
+            <b-form-group :label="Trans.get('user.field_caption.username')" class="col position-relative" v-if="showUserField('username')">
                 <b-input v-model="form.username"/>
-                <a href="javascript:void(0)" class="small">Reset password</a>
+                <!-- <a href="javascript:void(0)" class="small">Reset password</a> -->
             </b-form-group>
 
-            <b-form-group label="Email" class="col position-relative" v-if="showUserField('email')">
+            <b-form-group :label="Trans.get('user.field_caption.email')" class="col position-relative" v-if="showUserField('email')">
                 <masked-input
                     :class="{'form-control':true, 'is-invalid':$v.form.email.$error?true:false}" 
                     type="text"
@@ -54,7 +54,7 @@
                     v-model.trim="form.email"
                     placeholder="Email"
                 />
-                <invalid-tooltip :inputItem="$v.form.email" :fieldName="'Password'" />
+                <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('user.field_caption.password')" />
                 <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
             </b-form-group>
 
@@ -69,24 +69,24 @@
 
         <b-card-body class="pb-2">
           
-            <b-form-group label="Password" class="col position-relative">
+            <b-form-group :label="Trans.get('user.field_caption.password')" class="col position-relative">
                 <b-input type="password"
                     :state="$v.form.password.$error?'invalid':''"
                     v-model.trim="form.password"
                     @blur="$v.form.password.$touch()"
-                    placeholder="Password"
+                    :placeholder="Trans.get('user.field_caption.password')"
                 />
-                <invalid-tooltip :inputItem="$v.form.password" :fieldName="'Password'" />
+                <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('user.field_caption.password')" />
             </b-form-group>
 
-            <b-form-group label="Confirm Password" class="col position-relative">
+            <b-form-group :label="Trans.get('user.field_caption.confirm_password')" class="col position-relative">
                 <b-input type="password"
                     :state="$v.form.repassword.$error?'invalid':''"
                     v-model.trim="form.repassword"
                     @blur="$v.form.repassword.$touch()"
-                    placeholder="Confirm Password"
+                    :placeholder="Trans.get('user.field_caption.confirm_password')"
                 />
-                <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="'Confirm Password'" :customAlert="{sameAsPassword: 'Password not match'}"/>
+                <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="Trans.get('user.field_caption.confirm_password')" :customAlert="{sameAsPassword: Trans.get('user.alert.password_not_match')}"/>
             </b-form-group>
           
         </b-card-body>
@@ -95,25 +95,25 @@
 
         <b-card-body class="pb-2">
 
-            <b-form-group label="Role" class="col position-relative">
+            <b-form-group :label="Trans.get('user.field_caption.role')" class="col position-relative">
                 <b-select 
                     :state="$v.form.role_code.$error?'invalid':''" 
                     v-model="form.role_code" 
                     :options="roleItems" 
                     @blur="$v.form.role_code.$touch()"
                 />
-                <invalid-tooltip :inputItem="$v.form.role_code" :fieldName="'Role'" />
+                <invalid-tooltip :inputItem="$v.form.role_code" :fieldName="Trans.get('user.field_caption.role')" />
             </b-form-group>
 
-            <b-form-group label="Status" class="col position-relative">
-                <b-select v-model="form.status" :options="{1: 'Active', 2: 'Banned'}" />
+            <b-form-group :label="Trans.get('user.field_caption.status')" class="col position-relative">
+                <b-select v-model="form.status" :options="{1: Trans.get('user.field_caption.status_item.active'), 2: Trans.get('user.field_caption.status_item.banned')}" />
             </b-form-group>
 
         </b-card-body>
       </b-tab>
 
 
-      <b-tab title="Profile" v-if="showProfile">
+      <b-tab :title="Trans.get('user.userform.tab_profile_caption')" v-if="showProfile">
         <b-card-body>
             -
         </b-card-body>
@@ -122,7 +122,7 @@
     </b-tabs>
 
     <div class="text-right mt-3">
-      <b-btn variant="primary" @click="onSubmit">Save changes</b-btn>&nbsp;
+      <b-btn variant="primary" @click="onSubmit">{{Trans.get('lang.save_change')}}</b-btn>&nbsp;
       <!-- <b-btn variant="default">Cancel</b-btn> -->
     </div>
   </div>
@@ -137,8 +137,8 @@ import { required, requiredIf, email, sameAs, minLength } from "node_modules/vue
 
 export default {
     name: 'pages-user-edit',
-    metaInfo: {
-        title: 'User edit - Pages'
+    metaInfo() {
+        return {title: this.Trans.get('user.module_caption')}
     },
     components: {
         MaskedInput
@@ -211,7 +211,7 @@ export default {
             return this.$route.params.userId ? false : true;
         },  
         title() {
-            return this.isAdd ? "Tambah user baru" : "#" + this.form.name;
+            return this.isAdd ? this.Trans.get('user.userform.form_add_caption') : "#" + this.form.name;
         },
         oneData: {
             get() {
@@ -231,7 +231,7 @@ export default {
         this.$store.dispatch("role/roleList").then((res)=>{
             let tmpRoleItems = {};
             _.forEach(res.data,(v,i)=>{
-                tmpRoleItems[v.role_code] = v.name;
+                tmpRoleItems[v.role_code] = '[' + v.role_code + '] ' + v.name;
             })
             this.roleItems = tmpRoleItems;
         });

@@ -2,9 +2,9 @@
   <div>
 
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
-      <div>Users</div>
+      <div>{{Trans.get('user.module_caption')}}</div>
       <router-link v-if="UserAuth.hasAccess('moduser.user','c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'user.add'}">
-        <span class="ion ion-md-add"></span>&nbsp; Tambah User
+        <span class="ion ion-md-add"></span>&nbsp; {{Trans.get('user.userlist.add_new_user')}}
       </router-link>
     </h4>
 
@@ -12,12 +12,15 @@
     <div class="ui-bordered px-4 pt-4 mb-4">
       <div class="form-row align-items-center">        
         <div class="col-md mb-4">
-          <label class="form-label">Role</label>
+          <label class="form-label">{{Trans.get('user.field_caption.role')}}</label>
           <b-select v-model="filterRole" :options="roleItems" />
         </div>
         <div class="col-md mb-4">
-          <label class="form-label">Status</label>
-          <b-select v-model="filterStatus" :options="{'all':'Any','1':'Active','2':'Banned'}" />
+          <label class="form-label">{{Trans.get('user.field_caption.status')}}</label>
+          <b-select v-model="filterStatus" :options="{
+              'all':Trans.get('lang.view_all'),
+              '1':Trans.get('user.status_item.active'),
+              '2':Trans.get('user.status_item.banned')}" />
         </div>
         <!-- <div class="col-md col-xl-2 mb-4">
           <label class="form-label d-none d-md-block">&nbsp;</label>
@@ -32,7 +35,7 @@
       <b-card-body>
         <div class="row">
           <div class="col">
-            Per page: &nbsp;
+            {{Trans.get('pagination.per_page')}}: &nbsp;
             <b-select
               size="sm"
               v-model="perPage"
@@ -43,7 +46,7 @@
           <div class="col">
             <b-input
               size="sm"
-              placeholder="Search..."
+              :placeholder="Trans.get('lang.search') + '...'"
               class="d-inline-block w-auto float-sm-right"
               v-model="searchString"
             />
@@ -82,8 +85,8 @@
           </template>
 
           <template slot="status" slot-scope="data">
-            <b-badge variant="outline-success" v-if="data.item.status === 1 || data.item.status === 0">Active</b-badge>
-            <b-badge variant="outline-danger" v-if="data.item.status === 2">Banned</b-badge>
+            <b-badge variant="outline-success" v-if="data.item.status === 1 || data.item.status === 0">{{Trans.get('user.field_caption.status_item.active')}}</b-badge>
+            <b-badge variant="outline-danger" v-if="data.item.status === 2">{{Trans.get('user.field_caption.status_item.banned')}}</b-badge>
             <!-- <b-badge variant="outline-default" v-if="data.item.status === 0">Guest</b-badge> -->
           </template>
 
@@ -91,7 +94,7 @@
                 <!-- <b-btn variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit"><i class="ion ion-md-create"></i></b-btn> -->
                 <router-link
                     class="btn btn-default icon-btn btn-xs md-btn-flat"
-                    title="Edit"
+                    :title="Trans.get('lang.edit')"
                     v-b-tooltip.hover
                     :to="{name: 'user.edit', params: {userId: data.item.id}}" 
                     v-if="UserAuth.hasAccess('moduser.user','u')"
@@ -100,9 +103,9 @@
                 </router-link>
                 <b-btn
                     class="btn btn-danger icon-btn btn-xs md-btn-flat"
-                    title="Delete"
-                     @click="deleteUser(data.item.id)" 
-                     v-if="UserAuth.hasAccess('moduser.user','d')"
+                    :title="Trans.get('lang.delete')"
+                    @click="deleteUser(data.item.id)" 
+                    v-if="UserAuth.hasAccess('moduser.user','d')"
                     v-b-tooltip.hover
                 >
                     <span class="ion ion-md-close"></span>
@@ -123,7 +126,7 @@
             <b-card-body class="pt-0 pb-3">
                 <div class="row">
                     <div class="col-sm text-sm-left text-center pt-3">
-                        <span class="text-muted" v-if="listData.count">Page {{ curPage }} of {{ totalPages }}</span>
+                        <span class="text-muted" v-if="listData.count">{{ Trans.get('pagination.page_of',{curPage: curPage, totalPages: totalPages}) }}</span>
                     </div>
                     <div class="col-sm pt-3">
                         <b-pagination
@@ -149,8 +152,8 @@ import flatPickr from "node_modules/vue-flatpickr-component";
 
 export default {
     name: "pages-user-list",
-    metaInfo: {
-        title: "User list"
+    metaInfo() {
+        return {title: this.Trans.get('user.module_caption')}
     },
     components: {
         flatPickr
@@ -300,7 +303,7 @@ export default {
         this.$store.dispatch("role/roleList").then((res)=>{
             let tmpRoleItems = {'all':'Any'};
             _.forEach(res.data,(v,i)=>{
-                tmpRoleItems[v.role_code] = v.name;
+                tmpRoleItems[v.role_code] = '[' + v.role_code + '] ' + v.name;
             })
             this.roleItems = tmpRoleItems;
         });

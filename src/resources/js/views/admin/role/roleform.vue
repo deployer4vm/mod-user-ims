@@ -3,11 +3,11 @@
         
         <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
             <router-link class="btn btn-outline-success d-block" :to="{name: 'role.list'}">
-                <span class="ion ion-ios-arrow-back"></span>&nbsp; Kembali
+                <span class="ion ion-ios-arrow-back"></span>&nbsp; {{Trans.get('lang.back')}}
             </router-link>
             <div>
-                <span class="text-muted font-weight-light">Roles /</span>
-                Role Form
+                <span class="text-muted font-weight-light">{{Trans.get('role.module_caption')}} /</span>
+                {{ title }}
             </div>
         </h4>
 
@@ -60,12 +60,12 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Module</th>
-                            <th>Feature</th>
-                            <th>Create</th>
-                            <th>Read</th>
-                            <th>Update</th>
-                            <th>Delete</th>
+                            <th>{{Trans.get('role.roleform.module')}}</th>
+                            <th>{{Trans.get('role.roleform.feature')}}</th>
+                            <th>{{Trans.get('role.roleform.create')}}</th>
+                            <th>{{Trans.get('role.roleform.read')}}</th>
+                            <th>{{Trans.get('role.roleform.update')}}</th>
+                            <th>{{Trans.get('role.roleform.delete')}}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,17 +73,17 @@
                             <tr class="table-primary">
                                 <th scope="row"><b>{{i+1}}</b></th>
                                 <td>
-                                    {{moduleRule.acl_caption}}
-                                    <div v-if="moduleRule.acl_description!=''"><i>{{moduleRule.acl_description}}</i></div>
+                                    {{Trans.chose(moduleRule.acl_caption)}}
+                                    <div v-if="moduleRule.acl_description!=''"><i>{{Trans.chose(moduleRule.acl_description)}}</i></div>
                                 </td>
                                 <td colspan="5">                            
                                     <div class="float-right">
-                                        <b-btn variant="primary" size="xs" :disabled="disabledModuleAccess[key]" @click="checkModuleAll(key)">Check all</b-btn> 
-                                        <b-btn variant="success" size="xs" :disabled="disabledModuleAccess[key]" @click="uncheckModuleAll(key)">Uncheck all</b-btn>
+                                        <b-btn variant="primary" size="xs" :disabled="disabledModuleAccess[key]" @click="checkModuleAll(key)">{{Trans.get('role.roleform.check_all')}}</b-btn> 
+                                        <b-btn variant="success" size="xs" :disabled="disabledModuleAccess[key]" @click="uncheckModuleAll(key)">{{Trans.get('role.roleform.uncheck_all')}}</b-btn>
                                     </div>             
                                     <div class="float-left">
                                         <b-check  :value="true" :unchecked-value="false" v-model="roleForm.rule[key].has_access" @change="setModule(key,$event)">
-                                            Has access
+                                            {{Trans.get('role.roleform.has_access')}}
                                         </b-check>
                                     </div>
                                 </td>
@@ -93,14 +93,14 @@
                                     <th scope="row">{{index+1}}</th>
                                     <td></td>
                                     <td>
-                                        {{rule.acl_caption}}
-                                        <div v-if="rule.acl_description!=''"><i>{{rule.acl_description}}</i></div>
+                                        {{Trans.chose(rule.acl_caption)}}
+                                        <div v-if="rule.acl_description!=''"><i>{{Trans.chose(rule.acl_description)}}</i></div>
                                     </td> 
                                     <template v-if="rule.crud.c!=1&&rule.crud.r!=1&&rule.crud.u!=1&&rule.crud.d!=1">                                   
                                         <td colspan="4">
                                             <b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].has_access"
                                             :disabled="disabledModuleAccess[key]">
-                                                Has access
+                                                {{Trans.get('role.roleform.has_access')}}
                                             </b-check>
                                         </td>
                                     </template>
@@ -119,7 +119,7 @@
             </div>
       
             <div class="text-right mt-3">
-                <b-btn variant="primary" @click="save">Save changes</b-btn>
+                <b-btn variant="primary" @click="save">{{Trans.get('lang.save_change')}}</b-btn>
             </div>
         </b-card>
     </div>
@@ -172,7 +172,10 @@ export default {
     computed: {
         isAdd() {
             return this.$route.params.roleId ? false : true;
-        },  
+        },   
+        title() {
+            return this.isAdd ? this.Trans.get('role.roleform.form_add_caption') : "#" + this.roleForm.name;
+        },
         disabledModuleAccess: {
             get() {
                 return this.moduleRolAccessData;

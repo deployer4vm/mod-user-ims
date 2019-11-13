@@ -51,12 +51,6 @@
                 <b-form-group class="position-relative">
                     <div slot="label" class="d-flex justify-content-between align-items-end">
                         <div>{{ Trans.get('auth.login.passwordcaption') }}</div>
-                        <router-link
-                            tag="a"
-                            :to="{name: 'forgotpassword'}"
-                            class="d-block small"
-                            v-if="AppConfig.packageLocal.moduser.login.forgotpassword"
-                        >{{ Trans.get('auth.login.forgotpassword') }}</router-link>
                     </div>
                     <b-input-group>
                         <b-input-group-text slot="prepend"><i class="ion ion-md-lock"></i></b-input-group-text>
@@ -65,14 +59,21 @@
                     <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('auth.login.passwordcaption')" />
                 </b-form-group>
 
-              <div class="d-flex justify-content-between align-items-center m-0">
-                <b-check
-                  v-model="form.rememberMe"
-                  class="m-0"
-                  v-if="AppConfig.packageLocal.moduser.login.rememberme"
-                >{{ Trans.get('auth.login.remember_me') }}</b-check>
-                <b-btn type="submit" variant="primary">{{ Trans.get('auth.login.sigincaption') }}</b-btn>
-              </div>
+			    <div class="d-flex justify-content-between align-items-center m-0">
+					<b-check
+					  v-model="form.rememberMe"
+					  class="m-0"
+					  v-if="AppConfig.packageLocal.moduser.login.rememberme"
+					>{{ Trans.get('auth.login.remember_me') }}</b-check>
+					<b-btn type="submit" variant="primary">{{ Trans.get('auth.login.sigincaption') }}</b-btn>
+					
+                    <router-link
+                        tag="a"
+                        :to="{name: 'forgotpassword'}"
+                        class="d-block small"
+                        v-if="AppConfig.packageLocal.moduser.login.forgotpassword"
+                    >{{ Trans.get('auth.login.forgotpassword') }}</router-link>
+			    </div>
 
             </form>
             <!-- / Form -->

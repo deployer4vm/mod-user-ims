@@ -2,9 +2,9 @@
   <div>
 
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
-      <div>User Roles</div>
+      <div>{{Trans.get('role.module_caption')}}</div>
       <router-link v-if="UserAuth.hasAccess('moduser.role','c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'role.add'}">
-        <span class="ion ion-md-add"></span>&nbsp; Tambah Role
+        <span class="ion ion-md-add"></span>&nbsp; {{Trans.get('role.rolelist.add_new_role')}}
       </router-link>
     </h4>
 
@@ -32,7 +32,7 @@
       <b-card-body>
         <div class="row">
           <div class="col">
-            Per page: &nbsp;
+            {{Trans.get('pagination.per_page')}}: &nbsp;
             <b-select
               size="sm"
               v-model="perPage"
@@ -43,7 +43,7 @@
           <div class="col">
             <b-input
               size="sm"
-              placeholder="Search..."
+              :placeholder="Trans.get('lang.search') + '...'"
               class="d-inline-block w-auto float-sm-right"
               v-model="searchString"
             />
@@ -84,7 +84,7 @@
             <!-- <b-btn variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit"><i class="ion ion-md-create"></i></b-btn> -->
             <router-link
                 class="btn btn-default icon-btn btn-xs md-btn-flat"
-                title="Edit"
+                :title="Trans.get('lang.edit')"
                 v-b-tooltip.hover
                 :to="{name: 'role.edit', params: {roleId: data.item.id}}" 
                 v-if="UserAuth.hasAccess('moduser.role','u')"
@@ -94,7 +94,7 @@
 
             <b-btn
                 class="btn btn-danger icon-btn btn-xs md-btn-flat"
-                title="Delete"
+                :title="Trans.get('lang.delete')"
                 @click="deleteRole(data.item.id)"
                 v-b-tooltip.hover 
                 v-if="UserAuth.hasAccess('moduser.role','d')"
@@ -115,7 +115,7 @@
             <b-card-body class="pt-0 pb-3">
                 <div class="row">
                     <div class="col-sm text-sm-left text-center pt-3">
-                        <span class="text-muted" v-if="listData.count">Page {{ curPage }} of {{ totalPages }}</span>
+                        <span class="text-muted" v-if="listData.count">{{ Trans.get('pagination.page_of',{curPage: curPage, totalPages: totalPages}) }}</span>
                     </div>
                     <div class="col-sm pt-3">
                         <b-pagination
@@ -141,8 +141,8 @@ import flatPickr from "node_modules/vue-flatpickr-component";
 
 export default {
     name: "pages-role-list",
-    metaInfo: {
-        title: "User list"
+    metaInfo() {
+        return {title: this.Trans.get('role.module_caption')}
     },
     components: {
         flatPickr
@@ -270,7 +270,6 @@ export default {
     },
     created() {
         this.loadData(1);
-        
         this.fields = [
                 { key: "id", sortable: true, tdClass: "align-middle" },
                 { key: "name", label: this.Trans.get('role.field_caption.name'), sortable: true, tdClass: "align-middle" },
