@@ -58,7 +58,7 @@ class UserAuth
     {
         $now = now();
         $data['lastUpdate'] = $now->toDateTimeString();
-        $data['validUntil'] = $now->addHour(config('AppConfig.packageLocal.moduser.session_lifetime'))->toDateTimeString();
+        $data['validUntil'] = $now->addMinutes(config('session.lifetime'))->toDateTimeString();
         return $data;
     }
     
@@ -92,6 +92,16 @@ class UserAuth
         return session('APPSSession.role_code');
     }
 
+    public function getSessionLastUpdate()
+    {
+        return session('APPSSession.lastUpdate');
+    }
+
+    public function getSessionValidUntil()
+    {
+        return session('APPSSession.validUntil');
+    }
+    
     /**
      * set session saat login
      * 
