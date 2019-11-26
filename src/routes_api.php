@@ -81,6 +81,8 @@ Route::group($groupUser,function(){
     Route::post('/', 'UserController@create')->name('user.create');  
     //update resource
     Route::put('/profile', 'UserController@updateProfile')->name('user.update'); 
+    //ubah role user yang sedang loign
+    Route::get('/change_role/{role_code}', 'UserController@changeRole')->name('user.changerole'); 
     Route::put('/{id}', 'UserController@update')->name('user.update'); 
     Route::put('/{id}/ban', 'UserController@ban')->name('user.ban'); 
     Route::put('/{id}/unban', 'UserController@unban')->name('user.unban'); 

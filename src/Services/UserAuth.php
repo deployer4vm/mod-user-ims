@@ -134,6 +134,20 @@ class UserAuth
         ]);
     }
 
+    /**
+     * ganti role user yang sedang login
+     */
+    public function setActiveRole($roleCode)
+    {
+        if($this->role($roleCode)){
+            $this->setSession([
+                'role_code' => $roleCode
+            ]);
+            return true;
+        }
+        return false;
+    }
+    
     public function updateSessionId()
     {
         $this->setSession(['sessionId'=>session()->getId()]);

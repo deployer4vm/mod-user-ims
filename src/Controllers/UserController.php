@@ -293,4 +293,21 @@ class UserController extends BaseController
         return $this->done();
            
     }
+    
+    public function changeRole(Request $request)
+    {
+        $roleCode = $request->route('role_code');
+        $backLink = $request->input('backlink',false);
+        $this->response = $backLink?redirect($backLink):back();
+
+        if(UserAuth::setActiveRole($roleCode)){
+            $roleName = UserAuth::role($roleCode)['name'];
+            $this->setAlert('Role <b>'.$roleName.'</b> berhasil diaktifkan','success');
+
+        }else{
+            $this->setAlert('Role tidak ditemukan','danger');
+        }
+
+        return $this->done();
+    }
 }

@@ -66,7 +66,7 @@ class UserRepo extends BaseRepository
     {
         $role = Role::where('role_code', $roleCode)->first();
         if ($role)
-            return User::where('user_id', $userId)->where('role', 'LIKE', '%;' . $roleCode . ';%')->exists();
+            return User::where('id', $userId)->where('role', 'LIKE', '%;' . $roleCode . ';%')->exists();
     }
 
     /**
