@@ -101,18 +101,26 @@ class UserController extends BaseController
 
         $validator = [
             'name' => 'required|min:3|max:255',
-            'email' => 'required|email|max:255',
             'password' => 'required|min:5|max:255'
         ];
 
-        if(isset($userData['username'])){
+        if(isset($userData['username']) && $userData['username']!=''){
             $validator['username'] = 'required|min:3|max:255';
+        }
+
+        if(isset($userData['email']) && $userData['email']!=''){
+            $validator['email'] = 'required|email|max:255';
+        }
+
+        if(!isset($validator['username']) && !isset($validator['email'])){
+            $this->setError('Username atau email harus diisi');
+            return $this->done();
         }
 
         $validator = \Validator::make($userData, $validator);
 
         if ($validator->fails()) {       
-            $this->setError(__('validation.inputerror'),$validator->messages());
+            $this->setError('Data keliru',$validator->messages());
             return $this->done();
         }
         
@@ -120,7 +128,7 @@ class UserController extends BaseController
         if ($user = UserRepo::register($userData,false)) {
             $this->setAlert('Data Inserted successfully','success');
         }else{
-            $this->setError(UserRepo::error(),'success');
+            $this->setError(UserRepo::error());
         }
         
         return $this->done();

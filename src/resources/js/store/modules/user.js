@@ -59,17 +59,6 @@ const actions = {
             .then(res => {
                 commit("setUser", res.data.data);
                 return true;
-            })
-            .catch(res => {
-                let err = { status: 400, message: "request error",errors:[] };
-                //jika error server
-                if (!res.response.data) {
-                    err.message = res.response.message;
-                } else {
-                    err.message = res.response.data.message;
-                    err.status = res.response.data.status;
-                }
-                throw err;
             });
         
     },
@@ -79,18 +68,6 @@ const actions = {
             .then(res => {
                 commit("setUser", res.data.data);
                 return true;
-            })
-            .catch(res => {
-                let err = { status: 400, message: "request error",errors:[] };
-                //jika error server
-                if (!res.response.data) {
-                    err.message = res.response.message;
-                } else {
-                    err.message = res.response.data.message;
-                    err.status = res.response.data.status;
-                    err.errors = res.response.data.errors;
-                }
-                throw err;
             });
         
     },
@@ -100,18 +77,6 @@ const actions = {
             .then(res => {
                 commit("setUser", res.data.data);
                 return true;
-            })
-            .catch(res => {
-                let err = { status: 400, message: "request error",errors:[] };
-                //jika error server
-                if (!res.response.data) {
-                    err.message = res.response.message;
-                } else {
-                    err.message = res.response.data.message;
-                    err.status = res.response.data.status;
-                    err.errors = res.response.data.errors;
-                }
-                throw err;
             });
     },
     update({commit},data){
@@ -120,18 +85,6 @@ const actions = {
             .then(res => {
                 commit("setUser", res.data.data);
                 return true;
-            })
-            .catch(res => {
-                let err = { status: 400, message: "request error",errors:[] };
-                //jika error server
-                if (!res.response.data) {
-                    err.message = res.response.message;
-                } else {
-                    err.message = res.response.data.message;
-                    err.status = res.response.data.status;
-                    err.errors = res.response.data.errors;
-                }
-                throw err;
             });
         
     },
@@ -141,18 +94,6 @@ const actions = {
             .then(res => {
                 commit("setUser", res.data.data);
                 return true;
-            })
-            .catch(res => {
-                let err = { status: 400, message: "request error",errors:[] };
-                //jika error server
-                if (!res.response.data) {
-                    err.message = res.response.message;
-                } else {
-                    err.message = res.response.data.message;
-                    err.status = res.response.data.status;
-                    err.errors = res.response.data.errors;
-                }
-                throw err;
             });
     }
 };

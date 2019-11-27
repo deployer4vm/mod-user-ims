@@ -41,7 +41,7 @@
             </b-form-group>
 
             <b-form-group :label="Trans.get('user.field_caption.username')" class="col position-relative" v-if="showUserField('username')">
-                <b-input v-model="form.username"/>
+                <b-input v-model="form.username" :placeholder="Trans.get('user.field_caption.username')"/>
                 <!-- <a href="javascript:void(0)" class="small">Reset password</a> -->
             </b-form-group>
 
@@ -272,7 +272,7 @@ export default {
                         this.Web.showAlert({type: 'info', text: 'User Registered Successfully' });
                         this.$router.push({name: 'user.list'});
                     }).catch((err)=>{
-                        console.log('add User error : ',res);
+                        console.log('add User error : ',err);
                         this.Web.showAlert({type: 'danger', text: 'Simpan data gagal : ' + err.message });
                     });
                 }else{
@@ -281,7 +281,7 @@ export default {
                         this.Web.showAlert({type: 'info', text: 'User Updated Successfully' });
                         this.$router.push({name: 'user.list'});
                     }).catch((err)=>{
-                        console.log('update user error : ',res);
+                        console.log('update user error : ',err);
                         this.Web.showAlert({type: 'danger', text: 'Simpan data gagal : ' + err.message });
                     });
                 }

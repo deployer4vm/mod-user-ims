@@ -423,12 +423,21 @@ class UserRepo extends BaseRepository
         if (isset($userData['password'])) {
             $validatorRule['password'] = 'required|min:5|max:255';
         }
-        if (isset($userData['email'])) {
+        if (isset($userData['email']) && $userData['email']!='') {
             $validatorRule['email'] = 'required|email|min:5|max:255';
+        }else{
+            $userData['email'] = '';
         }
-        if (isset($userData['username'])) {
+        if (isset($userData['username']) && $userData['username']!='') {
             $userData['username'] = str_replace(' ','',$userData['username']);
             $validatorRule['username'] = 'required|min:5|max:255';
+        }else{
+            $userData['username'] = '';
+        }
+        
+        if(!isset($userData['username']) && !isset($userData['email'])){
+            $this->error = 'Username atau email harus diisi';
+            return false;
         }
         $validator = Validator::make($userData, $validatorRule);
 
@@ -469,16 +478,16 @@ class UserRepo extends BaseRepository
         $userData['role']['has_auth_grant'] = 0;
         $userData['level'] = $userData['role']['level'];
 
-        if (isset($userData['email']) && $this->isEmailRegistered($userData['email'])) {
+        if (isset($userData['email']) && $userData['email']!='' && $this->isEmailRegistered($userData['email'])) {
             $this->error = 'Email already registered.';
             return false;
         }
 
-        if (isset($userData['phone']) && $this->isPhoneRegistered($userData['phone'])) {
+        if (isset($userData['phone']) && $userData['phone']!='' && $this->isPhoneRegistered($userData['phone'])) {
             $this->error = 'Phone already registered.';
             return false;
         }
-        if (isset($userData['username']) && $this->isUsernameRegistered($userData['username'])) {
+        if (isset($userData['username']) && $userData['username']!='' && $this->isUsernameRegistered($userData['username'])) {
             $this->error = 'Username already registered.';
             return false;
         }
@@ -486,6 +495,13 @@ class UserRepo extends BaseRepository
         //pastikan tidak ada parameter yang ksosong
         foreach ($userData as $key => $value) {
             if(empty($value))unset($userData[$key]);
+        }
+        
+        if (!isset($userData['username'])) {
+            $userData['username'] = '';
+        }
+        if (!isset($userData['email'])) {
+            $userData['email'] = '';
         }
 
         return $userData;
