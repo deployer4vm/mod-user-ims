@@ -82,7 +82,7 @@
                                         <b-btn variant="success" size="xs" :disabled="disabledModuleAccess[key]" @click="uncheckModuleAll(key)">{{Trans.get('role.roleform.uncheck_all')}}</b-btn>
                                     </div>             
                                     <div class="float-left">
-                                        <b-check  :value="true" :unchecked-value="false" v-model="roleForm.rule[key].has_access" @change="setModule(key,$event)">
+                                        <b-check  :value="1" :unchecked-value="0" v-model="roleForm.rule[key].has_access" @change="setModule(key,$event)">
                                             {{Trans.get('role.roleform.has_access')}}
                                         </b-check>
                                     </div>
@@ -98,17 +98,17 @@
                                     </td> 
                                     <template v-if="rule.crud.c!=1&&rule.crud.r!=1&&rule.crud.u!=1&&rule.crud.d!=1">                                   
                                         <td colspan="4">
-                                            <b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].has_access"
+                                            <b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].has_access"
                                             :disabled="disabledModuleAccess[key]">
                                                 {{Trans.get('role.roleform.has_access')}}
                                             </b-check>
                                         </td>
                                     </template>
                                     <template v-else> 
-                                        <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                        <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                        <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                        <td><b-check :value="true" :unchecked-value="false" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
                                     </template>
                                 </tr>
                             </template>
@@ -227,6 +227,9 @@ export default {
                                 tmp[k] = res.rule[k];
                                 if(tmp[k]['has_access'])
                                     this.disabledModuleAccess[k] = false;
+                                _.forEach(res.rule[k],(v2,k2) => {
+                                    tmp[k][k2] = v2?1:0;
+                                });
                             }
                         });
                     }
@@ -346,8 +349,8 @@ export default {
         }
         
         let startI = this.UserAuth.getUser('level') + 1;
-        let endI = this.AppConfig.packageLocal.moduser.user_level.max+1;
-        if(startI < this.AppConfig.packageLocal.moduser.user_level.min) startI = this.AppConfig.packageLocal.moduser.user_level.max;
+        let endI = this.AppConfig.packageLocal.moduser.user_role.user_level.max+1;
+        if(startI < this.AppConfig.packageLocal.moduser.user_role.user_level.min) startI = this.AppConfig.packageLocal.moduser.user_role.user_level.max;
         //load level
         for (let i = startI; i < endI; i++) {
             this.levelOption[i] = i;

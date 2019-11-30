@@ -149,10 +149,9 @@ class LoginController extends BaseController
                     'type' => $request->input('pushType',1)
                 ];
             }
-            $token = UserRepo::generateToken($user['id'],1,$request->input('deviceId',''),$pushParam);
             $this->output['message'] = __('alert.auth_success');
             $this->output['data'] = UserAuth::getCurTimeStamp();
-            $this->output['data']['token'] =$token['api_token'];            
+            
             $this->output['data']['user'] = $user;
 
             if(isset($user['tenant']))
@@ -163,13 +162,11 @@ class LoginController extends BaseController
                 if($val['is_main_role']){
                     $this->output['data']['role_code'] = $key;
                 }
-            }          
-            
-            // if(!isset($this->output['data']['role_code'])){
-            //     $tmp = explode(';', trim($user['role'],";"));
-            //     $this->output['data']['role_code'] = $tmp[0];
-            // }
-            
+            }  
+            $this->output['data']['role'] = UserRepo::getUserRole($user['id']);        
+            $token = UserRepo::generateToken($user['id'],$this->output['data']['role_code'],1,$request->input('deviceId',''),$pushParam);
+            $this->output['data']['token'] = $token['api_token'];
+
             //subscribekan ke channel/topic berdasarkan user role nya
             if($request->input('pushNotifToken')){
                 $notifChannel[] = 'all';

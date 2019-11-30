@@ -209,7 +209,7 @@ class UserRepo extends BaseRepository
         $filter['searchField'] = ['name','email','username'];
         $filter['hiddenColumn'] = ['created_at', 'updated_at', 'cached_at'];
 
-        $user = User::with(['profile']);
+        $user = User::with(['profile','roles.role']);
 
         if(isset($filter['profile'])){
             $user->whereHas('profile', function($q) use ($filter){
@@ -373,8 +373,9 @@ class UserRepo extends BaseRepository
         // if(!isset($userData['tenant_id']))$userData['tenant_id'] = config('tenant.id') ? config('tenant.id') : 0;//jika 0 berarti tanpa tenant atau bisa akses semua tenant
 
         //role dikosongin dahulu karena insert role di proses selanjutnya
-        $role = $userData['role'];
-        $userData['role'] = '';
+        $roles = $userData['role_code'];
+        $mainRole = $userData['main_role'];
+        unset($userData['role_code'],$userData['main_role']);
 
         $data = $this->model->create($userData);
         $data = $data->toArray();
@@ -391,7 +392,7 @@ class UserRepo extends BaseRepository
         }
 
         if ($generateToken) {
-            $apiTokenData = $this->generateToken($data['id']);
+            $apiTokenData = $this->generateToken($data['id'],$mainRole['role_code']);
             $data['token'] = $apiTokenData['api_token'];
         }
 
@@ -401,13 +402,19 @@ class UserRepo extends BaseRepository
             $this->registerProfile($userData['profile']);
         }
 
-        $this->addUserRole(
-            $data['id'],
-            $role['role_code'],
-            1,
-            $role['has_auth_grant'],
-            false
-        );
+        //update role data
+        if (isset($userData['role_code'])){            
+            $this->updateUserRole($data['id'],$roles);
+            unset($userData['role_code']);
+        }
+
+        // $this->addUserRole(
+        //     $data['id'],
+        //     $role['role_code'],
+        //     1,
+        //     $role['has_auth_grant'],
+        //     false
+        // );
 
         if (isset($userData['email']))
             $this->sendUserActivationEmail($data['id']);
@@ -459,24 +466,29 @@ class UserRepo extends BaseRepository
         //jika tidak menyertakan role_id maka set default
         if (!isset($userData['role_code'])) {
             if(config('AppConfig.system.web_admin.registration.default_role_code')){
-                $userData['role_code'] = config('AppConfig.packageLocal.moduser.registration.default_role_code');
+                $userData['role_code'] = [config('AppConfig.packageLocal.moduser.registration.default_role_code')];
             }else{
-                $userData['role_code'] = config('AppConfig.packageLocal.moduser.registration.default_role_code');
+                $userData['role_code'] = [config('AppConfig.packageLocal.moduser.registration.default_role_code')];
             }
             
         }
 
+        if(!is_array($userData['role_code']))$userData['role_code'] = [$userData['role_code']];
         //pastikan rule nya ada        
-        $role = Role::where('role_code', $userData['role_code'])->first();
-        if (!$role) {
-            $this->error = 'Role "'.$userData['role_code'].'" not defined.';
+        $roles = Role::whereIn('role_code', $userData['role_code'])->get();
+        if ($roles->count() <=0 ) {
+            $this->error = 'Roles not defined.';
             return false;
         }
-        unset($userData['role_code']);
+        $userData['role_code'] = [];
+        foreach ($roles as $val) {  
+            $userData['role_code'][] = $val->role_code;
+            if($val['is_main_role']){
+                $userData['main_role'] = ['role_code'=>$val->role_code,'level'=>$val->level];
+            }
+        }
 
-        $userData['role'] = $role->toArray();
-        $userData['role']['has_auth_grant'] = 0;
-        $userData['level'] = $userData['role']['level'];
+        $userData['level'] = $userData['main_role']['level'];
 
         if (isset($userData['email']) && $userData['email']!='' && $this->isEmailRegistered($userData['email'])) {
             $this->error = 'Email already registered.';
@@ -601,9 +613,9 @@ class UserRepo extends BaseRepository
         if(isset($userData['email']))$this->updateEmail($userId,$userData);
         if(isset($userData['phone']))$this->updatePhone($userId,$userData);
         
-        //jika tidak menyertakan role_id maka set default
+        //jika update role data
         if (isset($userData['role_code'])){            
-            $this->updateMainRole($userId,$userData['role_code']);
+            $this->updateUserRole($userId,$userData['role_code']);
             unset($userData['role_code']);
         }
 
@@ -884,51 +896,75 @@ class UserRepo extends BaseRepository
     }
 
     /**
-     * untuk update main role user
+     * untuk update role user
      */
-    public function updateMainRole($userId,$newRoleCode,$hasAuthGrant=0){
+    public function updateUserRole($userId,$newRoleCode,$hasAuthGrant=0){
+        if(!is_array($newRoleCode))$newRoleCode = [$newRoleCode];
+
+        $roleIds = Role::whereIn('role_code', $newRoleCode)->orderBy('level','ASC')->get()->pluck('id');
         
-        //jika menyer
-        $role = Role::where('role_code', $newRoleCode)->first();
-        if (!$role) {
-            $this->error = 'Role "'.$newRoleCode.'" not defined.';
+        if (count($roleIds)<=0) {
+            $this->error = 'Role not defined.';
             return false;
         }
 
-        $roleData = $this->_update(new UserRole,[['user_id',$userId],['is_main_role',1]], [
-            'role_id' => $role->id,
-            'has_auth_grant'=>$hasAuthGrant,
-        ]);       
+        //delete semua role yang tidak terpilih
+        UserRole::where('user_id',$userId)->whereNotIn('role_id', $roleIds)->delete();
+
+        $roles = Role::whereIn('role_code', $newRoleCode)->orderBy('level','ASC')->get();        
+        $first = true;
+        $isMainRole = 1;
+        foreach ($roles as $role) {
+
+            if(UserRole::where('user_id',$userId)->where('role_id',$role->id)->exists()){
+                $this->_update(new UserRole,[['user_id',$userId],['role_id',$role->id]], [
+                    'has_auth_grant'=>$hasAuthGrant,
+                    'is_main_role'=>$isMainRole,
+                ]);
+            }else{
+                $this->_create(new UserRole, [
+                    'user_id'=>$userId,
+                    'role_id'=>$role->id,
+                    'has_auth_grant'=>$hasAuthGrant,
+                    'is_main_role'=>$isMainRole,
+                ]);
+            } 
+            
+            if($first){
+                $first = false;
+                $isMainRole = 0;
+            }     
+        }
                            
         //update role di table user
         $this->updateUser($userId, [
             'role'=> $this->generateUserRole($userId),
             'level'=>$role->level
-            ]);
+        ]);
     }
 
     /**
      * belum dipakai
      */
-    public function updateUserRole($key,$data)
-    {
-        //cek pastikan user role sudah terdaftar
-        $userRole = $this->_getOne(new UserRole, $key);
-        if(!$userRole)return false;
-        if(!isset($data['role_code'])){
-            $data['role_code'] = $userRole['role_code'];
-        }
+    // public function updateUserRole($key,$data)
+    // {
+    //     //cek pastikan user role sudah terdaftar
+    //     $userRole = $this->_getOne(new UserRole, $key);
+    //     if(!$userRole)return false;
+    //     if(!isset($data['role_code'])){
+    //         $data['role_code'] = $userRole['role_code'];
+    //     }
            
-        $roleData = $this->_update(new UserRole,['user_id'=>$userRole['user_id'],'role_code'=>$userRole['role_code']], [
-            'role_code' => $data['role_code'],
-            'is_main_role' =>isset($data['is_main_role'])&&$data['is_main_role']?1:0,
-            'has_auth_grant'=>isset($data['has_auth_grant'])&&$data['has_auth_grant']?1:0,
-        ]);       
+    //     $roleData = $this->_update(new UserRole,['user_id'=>$userRole['user_id'],'role_code'=>$userRole['role_code']], [
+    //         'role_code' => $data['role_code'],
+    //         'is_main_role' =>isset($data['is_main_role'])&&$data['is_main_role']?1:0,
+    //         'has_auth_grant'=>isset($data['has_auth_grant'])&&$data['has_auth_grant']?1:0,
+    //     ]);       
                         
-        //update role di table user
-        $this->updateUser($userRole['user_id'], ['role'=> $this->generateUserRole($userRole['user_id'])]);
-        return $roleData;
-    }
+    //     //update role di table user
+    //     $this->updateUser($userRole['user_id'], ['role'=> $this->generateUserRole($userRole['user_id'])]);
+    //     return $roleData;
+    // }
     
     public function deleteUserRole($userId,$roleCode)
     {

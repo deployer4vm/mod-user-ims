@@ -19,8 +19,8 @@
           <label class="form-label">{{Trans.get('user.field_caption.status')}}</label>
           <b-select v-model="filterStatus" :options="{
               'all':Trans.get('lang.view_all'),
-              '1':Trans.get('user.status_item.active'),
-              '2':Trans.get('user.status_item.banned')}" />
+              '1':Trans.get('user.field_caption.status_item.active'),
+              '2':Trans.get('user.field_caption.status_item.banned')}" />
         </div>
         <!-- <div class="col-md col-xl-2 mb-4">
           <label class="form-label d-none d-md-block">&nbsp;</label>
@@ -81,7 +81,7 @@
           </template>
 
           <template slot="role" slot-scope="data">
-            <b-badge variant="outline-default" v-for="(dRole) in data.item.roles" v-if="dRole!=''" :key="data.item.id+dRole">{{ dRole }}</b-badge>
+            <b-badge variant="info m-1" v-for="(dRole) in data.item.roles" :key="data.item.id + dRole.role.id">{{ dRole.role.name }}</b-badge>
           </template>
 
           <template slot="status" slot-scope="data">
@@ -260,14 +260,6 @@ export default {
             }
 
             this.$store.dispatch("user/userList", this.loadParams);
-            // .then((res)=>{
-            //     _.forEach(res.data,(v,i)=>{
-            //         v.roles = v.role.split(';');
-            //     });
-            //     this.listData.data = res.data;
-            //     // this.$store.commit("user/setUserList", this.listData);
-            //     // console.log('data : ',this.listData);
-            // });
         },
         setStatus(userId, status) {
             if(status==1){
@@ -301,7 +293,7 @@ export default {
 
         //load data role
         this.$store.dispatch("role/roleList").then((res)=>{
-            let tmpRoleItems = {'all':'Any'};
+            let tmpRoleItems = {'all':this.Trans.get('lang.view_all')};
             _.forEach(res.data,(v,i)=>{
                 tmpRoleItems[v.role_code] = '[' + v.role_code + '] ' + v.name;
             })

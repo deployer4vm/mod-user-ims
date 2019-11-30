@@ -66,7 +66,7 @@ trait ApiTokenTraits
      *      token
      * @return type
      */
-    public function generateToken($userId,$isMobileAppsToken=0,$deviceId='',$pushDetail=false)
+    public function generateToken($userId,$roleCode='',$isMobileAppsToken=0,$deviceId='',$pushDetail=false)
     {
         $data['api_token'] = hash('sha256', 'token'.$userId.'.'.now());
         $data['session_id'] = session()->exists('_token')?session()->getId():'';
@@ -79,6 +79,7 @@ trait ApiTokenTraits
             if(isset($pushDetail['token']))$data['push_token'] = $pushDetail['token'];
         }
         
+        $data['active_role_code'] = $roleCode;
         $data['user_id'] = $userId;
         
         $apiTokenData = ApiToken::create($data);

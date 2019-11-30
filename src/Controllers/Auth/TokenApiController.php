@@ -1,6 +1,6 @@
 <?php
 
-namespace hpsynapse\moduser\Auth\Controllers;
+namespace hpsynapse\moduser\Controllers\Auth;
 
 use Facades\hpsynapse\moduser\Repositories\UserNotifRepo;
 
@@ -18,7 +18,7 @@ class TokenApiController extends BaseController
     
     /**
      * API OUTPUT ONLY
-     * /auth/token/validate
+     * /api/auth/token/validate
      * 
      * validate token and get user data
      * 
@@ -61,5 +61,28 @@ class TokenApiController extends BaseController
         }
         
         return response()->json($response, 200);
+    }
+    
+    
+    /**
+     * GET
+     *      /auth/change_role/ROLE_CODE
+     *      /api/auth/change_role/ROLE_CODE
+     */
+    public function changeRole(Request $request)
+    {
+        $roleCode = $request->route('role_code');
+        $backLink = $request->input('backlink',false);
+        $this->response = $backLink?redirect($backLink):back();
+
+        if(UserAuth::setActiveRole($roleCode)){
+            $roleName = UserAuth::role($roleCode)['name'];
+            $this->setAlert('Role <b>'.$roleName.'</b> berhasil diaktifkan','success');
+
+        }else{
+            $this->setAlert('Role tidak ditemukan','danger');
+        }
+
+        return $this->done();
     }
 }

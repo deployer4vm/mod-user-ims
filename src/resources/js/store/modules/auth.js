@@ -7,7 +7,7 @@ const state = {
     userId: null,
     tenant: null,//aktif tenant
     user: null, //data komplit user
-    role: null, //list access control user
+    role: null, //list role user
     role_code: null, //main / active role
     group_app: null //group app saat login, agar jike berpindah akan di logout kan
 };
@@ -21,6 +21,12 @@ const getters = {
     },
     getAuthRole(state) {
         return state.role?state.role[state.role_code]:false;
+    },
+    getAuthRoleList(state) {
+        return state.role?state.role:false;
+    },
+    roleCount(state) {
+        return state.role?Object.keys(state.role).length:0;
     },
     getAuthToken(state) {
         return state.token;
@@ -46,6 +52,9 @@ const mutations = {
         state.role = userData.role;
         state.tenant = userData.tenant;
         state.role_code = userData.role_code;
+    },
+    setActiveRoleCode(state, roleCode) {
+        state.role_code = roleCode;
     },
     setAuthData(state, userData) {
         eval('state.' + userData.key + ' = userData.value;');
@@ -118,6 +127,14 @@ const actions = {
                 }
 
                 commit("setGroupApp",authData.group_app);
+                return dispatch("implementAcl");
+            });
+    },
+    changeRole({ commit, state, dispatch },roleCode) {
+        return globals().LocalApi
+            .get(authPath + "/change_role/" + roleCode).then(res => {
+                commit("setActiveRoleCode",roleCode);
+                EventBus.$emit('onChangeRole',roleCode);
                 return dispatch("implementAcl");
             });
     },

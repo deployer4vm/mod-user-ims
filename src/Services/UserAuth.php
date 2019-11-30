@@ -30,16 +30,8 @@ class UserAuth
                 $userId = Auth::user()->user_id;
                 if($userId){
                     $this->userData = UserRepo::getUser($userId);
-                    $listUserRole = UserRepo::getUserRole($userId);
-                    
-                    foreach($listUserRole as $key => $val) {
-                        if($val['is_main_role']){
-                            $this->userRoleCode = $key;
-                            $this->userRole = $val;
-                            break;
-                        }
-                    }
-                    // $this->userRole = array_pop($listUserRole);
+                    $this->userRole = UserRepo::getUserRole($userId);
+                    $this->userRoleCode = Auth::user()->acitve_role_code;
                 }
             }
         }else{
@@ -109,9 +101,6 @@ class UserAuth
      */
     public function setUser($userId,$apiTokenData=false)
     {
-        if(!$apiTokenData){
-            $apiTokenData = UserRepo::generateToken($userId);
-        }
         
         $sessionData = $this->getCurTimeStamp();
         $userData = UserRepo::getUser($userId);
@@ -122,6 +111,10 @@ class UserAuth
                 $roleCode = $key;
                 break;
             }
+        }
+
+        if(!$apiTokenData){
+            $apiTokenData = UserRepo::generateToken($userId,$roleCode);
         }
         
         $this->setSession([
@@ -140,9 +133,13 @@ class UserAuth
     public function setActiveRole($roleCode)
     {
         if($this->role($roleCode)){
-            $this->setSession([
-                'role_code' => $roleCode
-            ]);
+            if($this->isApiCall){
+                Auth::user()->update(['active_role_code'=>$roleCode]);
+            }else{
+                $this->setSession([
+                    'role_code' => $roleCode
+                ]);
+            }
             return true;
         }
         return false;
@@ -203,14 +200,14 @@ class UserAuth
     }
     
     /**
-     * GET data user dari Account Center
+     * GET data list role user yang sedang login
      * @param type $field
      * @return type
      */
     public function role($field=false,$default=false)
     {
-        if($field==false)return $this->userData;
-        return isset($this->userData[$field])?$this->userData[$field]:$default;
+        if($field==false)return $this->userRole;
+        return isset($this->userRole[$field])?$this->userRole[$field]:$default;
     }
     
     

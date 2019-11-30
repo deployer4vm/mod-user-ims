@@ -23,7 +23,9 @@ Route::group($groupAuth,function(){
         //Auth/LoginController
         Route::get('/logout', 'Auth\LoginController@apiLogout')->name('auth.api.logout');
         //TokenApiController
-        // Route::post('/token/validate', 'Auth\TokenApiController@validateToken')->name('auth.api.validatetoken');
+        Route::post('/token/validate', 'Auth\TokenApiController@validateToken')->name('auth.api.validatetoken');
+        //ubah role user yang sedang loign
+        Route::get('/change_role/{role_code}', 'Auth\TokenApiController@changeRole')->name('auth.api.changerole'); 
     });
 });
 
@@ -52,12 +54,11 @@ Route::group($groupUser,function(){
         Route::put('/{id}', 'RoleController@update')->name('user.role.update'); 
         //delete resource
         Route::delete('/{id}', 'RoleController@delete')->name('user.role.delete');  
-    });  
-
+    });
     
     
     /**
-     * Module notif
+     * fituf notif
      */
     Route::get('/notification', 'NotificationController@index')->name('user.notification');
     Route::get('/notification/type', 'NotificationController@listType')->name('user.notification.listType');
@@ -70,7 +71,7 @@ Route::group($groupUser,function(){
 
     
     /**
-     * Feature User
+     * fitur User
      */
     //read list resource
     Route::get('/', 'UserController@readList')->name('user.readList'); 
@@ -81,8 +82,6 @@ Route::group($groupUser,function(){
     Route::post('/', 'UserController@create')->name('user.create');  
     //update resource
     Route::put('/profile', 'UserController@updateProfile')->name('user.update'); 
-    //ubah role user yang sedang loign
-    Route::get('/change_role/{role_code}', 'UserController@changeRole')->name('user.changerole'); 
     Route::put('/{id}', 'UserController@update')->name('user.update'); 
     Route::put('/{id}/ban', 'UserController@ban')->name('user.ban'); 
     Route::put('/{id}/unban', 'UserController@unban')->name('user.unban'); 

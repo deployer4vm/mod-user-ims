@@ -4,6 +4,7 @@ namespace hpsynapse\moduser\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\AliasLoader;
 use Facades\hpsynapse\moduser\Services\UserAuth;
+use hpsynapse\moduser\Console\Commands\UpdateRoleFromJson;
 
 // use Illuminate\Support\Facades\Schema;
 
@@ -20,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app['router']->pushMiddlewareToGroup('web', \hpsynapse\moduser\Middleware\InitAuthWeb::class);
         $this->app['router']->pushMiddlewareToGroup('api', \hpsynapse\moduser\Middleware\InitAuthAPI::class);
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                UpdateRoleFromJson::class
+            ]);
+        }
     }
     
 

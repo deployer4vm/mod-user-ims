@@ -1,13 +1,21 @@
 <?php
 
-// $routeOpt = route_web_opt(config('bssystem.url.ac'),config('bssystem.url.acapi'));
-
-Route::group([], function(){
-    
+//Auth Route
+Route::group([
+    'prefix' => config('AppConfig.endpoint.web.auth')
+], function(){
     //VerificationController
     Route::get('/emailverify', 'Auth\VerificationController@verify')->name('auth.emailVerification');
     Route::get('/emailverify/success', 'Auth\VerificationController@verifySuccess')->name('auth.emailVerification.success');
     Route::get('/emailverify/fail', 'Auth\VerificationController@verifyFail')->name('auth.emailVerification.fail');
+    
+    Route::middleware('auth')->group(function(){
+        //Auth/LoginController
+        Route::get('/logout', 'Auth\LoginController@apiLogout')->name('auth.logout');
+        //TokenApiController
+        //ubah role user yang sedang loign
+        Route::get('/change_role/{role_code}', 'Auth\TokenApiController@changeRole')->name('auth.changerole'); 
+    });
 
 
 //         Route::get('/testing', function($apps_code) {

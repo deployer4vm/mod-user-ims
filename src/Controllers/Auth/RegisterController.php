@@ -109,12 +109,10 @@ class RegisterController extends BaseController
                         'type' => $request->input('pushType',1)
                     ];
                 }
-                $token = UserRepo::generateToken($regUserData['id'],1,$request->input('deviceId',''));
                 $response['status'] = 200;
                 $response['errors'] = null;
                 $response['message'] = __('auth.registersuccess');
                 $response['data'] = UserAuth::getCurTimeStamp();
-                $response['data']['token'] = $token['api_token'];
                 $response['data']['user'] = $regUserData;
                 $response['data']['role'] = UserRepo::getUserRole($regUserData['id']); 
                 foreach($this->output['data']['role'] as $key => $val) {
@@ -122,6 +120,8 @@ class RegisterController extends BaseController
                         $this->output['data']['role_code'] = $key;
                     }
                 }  
+                $token = UserRepo::generateToken($regUserData['id'],$this->output['data']['role_code'],1,$request->input('deviceId',''));
+                $response['data']['token'] = $token['api_token'];
                 //subscribekan ke channel/topic berdasarkan user role nya
                 if($request->input('pushNotifToken')){
                     $notifChannel[] = 'all';

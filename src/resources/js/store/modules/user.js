@@ -24,9 +24,9 @@ const getters = {
 
 const mutations = {
     setUserList(state, data) {
-        _.forEach(data.data,(v,i)=>{
-            v.roles = v.role.split(';');
-        });
+        // _.forEach(data.data,(v,i)=>{
+        //     v.roles = v.role.split(';');
+        // });
         state.userList = data;
     },
     setUser(state, data) {

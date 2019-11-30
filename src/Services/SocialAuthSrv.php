@@ -69,7 +69,8 @@ class SocialAuthSrv
             $authUser->update($regUserData);
             
             $userData = $authUser->toArray();
-            $apiTokenData = UserRepo::generateToken($userData['id']);
+            $role = $authUser->roles()->where('is_main_role',1)->first()->role()->first();
+            $apiTokenData = UserRepo::generateToken($userData['id'],$role->role_code);
             $userData['token_id'] = $apiTokenData['id'];
             $userData['token'] = $apiTokenData['api_token'];
             return $userData;

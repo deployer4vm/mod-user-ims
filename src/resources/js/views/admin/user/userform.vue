@@ -96,17 +96,22 @@
         <b-card-body class="pb-2">
 
             <b-form-group :label="Trans.get('user.field_caption.role')" class="col position-relative">
-                <b-select 
-                    :state="$v.form.role_code.$error?'invalid':''" 
-                    v-model="form.role_code" 
-                    :options="roleItems" 
-                    @blur="$v.form.role_code.$touch()"
-                />
+                <template v-if="AppConfig.packageLocal.moduser.user_role.multi_role">
+                    <b-check-group :state="$v.form.role_code.$error?'invalid':''" v-model="form.role_code" :options="roleItems" class="custom-controls-stacked" />
+                </template>
+                <template v-else>
+                    <b-select 
+                        :state="$v.form.role_code.$error?'invalid':''" 
+                        v-model="form.role_code" 
+                        :options="roleItems" 
+                        @blur="$v.form.role_code.$touch()"
+                    />
+                </template>
                 <invalid-tooltip :inputItem="$v.form.role_code" :fieldName="Trans.get('user.field_caption.role')" />
             </b-form-group>
 
             <b-form-group :label="Trans.get('user.field_caption.status')" class="col position-relative">
-                <b-select v-model="form.status" :options="{1: Trans.get('user.field_caption.status_item.active'), 2: Trans.get('user.field_caption.status_item.banned')}" />
+                    <b-select v-model="form.status" :options="{1: Trans.get('user.field_caption.status_item.active'), 2: Trans.get('user.field_caption.status_item.banned')}" />                
             </b-form-group>
 
         </b-card-body>
@@ -194,7 +199,7 @@ export default {
             phone: '',
             password: '',
             repassword:'',
-            role_code: null,
+            role_code: [],
             note: '',
             status: 1,
             profile: {
@@ -229,9 +234,9 @@ export default {
     created() {
         //load data role
         this.$store.dispatch("role/roleList").then((res)=>{
-            let tmpRoleItems = {};
+            let tmpRoleItems = [];
             _.forEach(res.data,(v,i)=>{
-                tmpRoleItems[v.role_code] = '[' + v.role_code + '] ' + v.name;
+                tmpRoleItems.push({value: v.role_code, text: '[' + v.role_code + '] ' + v.name});
             })
             this.roleItems = tmpRoleItems;
         });
@@ -245,7 +250,10 @@ export default {
                     'user/getUser',this.$route.params.userId                    
                 ).then((res)=>{
                     this.form = this.oneData;
-                    // this.form.role_code = 'superadmin_opd';
+                    this.form.role_code = [];
+                    _.forEach(this.form.user_role,(v,i)=>{
+                        this.form.role_code.push(v.role_code);
+                    })
                     this.form.password = '';
                     this.form.repassword = '';
                 }).catch((res)=>{
