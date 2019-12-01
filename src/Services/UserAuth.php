@@ -5,6 +5,8 @@ namespace hpsynapse\moduser\Services;
 use Facades\hpsynapse\moduser\Repositories\UserRepo;
 use Facades\hpsynapse\moduser\Repositories\RoleRepo;
 use Illuminate\Support\Facades\Auth;
+use hpsynapse\moduser\Models\ApiToken;
+use App\Base\RepoCacheTrait;
 
 /**
  * Library untuk akses SSO service
@@ -14,9 +16,10 @@ use Illuminate\Support\Facades\Auth;
  */
 class UserAuth
 {    
+    use RepoCacheTrait;
     protected $isLogin=false;
     protected $isApiCall=false;
-    protected $token;
+    protected $token='';
     protected $userData;
     protected $userRoleList;
     protected $userRole;
@@ -24,6 +27,7 @@ class UserAuth
     
     public function setInit($isApiCall=false,$userData=false,$userRole=false)
     {
+        $this->cacheActive = true;
         $this->isApiCall = $isApiCall;
         if($isApiCall){
             if(Auth::check()){
@@ -31,13 +35,15 @@ class UserAuth
                 if($userId){
                     $this->userData = UserRepo::getUser($userId);
                     $this->userRole = UserRepo::getUserRole($userId);
-                    $this->userRoleCode = Auth::user()->acitve_role_code;
+                    $this->userRoleCode = Auth::user()->active_role_code;
+                    $this->token = Auth::user()->api_token;
                 }
             }
         }else{
             $this->userData = $this->getUserSessionData();
             $this->userRole = $this->getUserSessionRole();
             $this->userRoleCode = $this->getActiveUserRoleCode();
+            $this->token = $this->getSesionToken();
         }
     }
     
@@ -55,6 +61,11 @@ class UserAuth
     }
     
     public function getToken()
+    {
+        return $this->token;
+    }
+
+    public function getSesionToken()
     {
         return session('APPSSession.token');
     }
@@ -179,7 +190,31 @@ class UserAuth
         }        
         session()->save();
     }
+    public function logoutAllExeptMe()
+    {
+        //delete semua token kecuali yg loign
+        if($this->getToken())ApiToken::where('api_token','!=',$this->getToken())->delete();
+    }
 
+    public function lockLoginExeptMe()
+    {
+        $config = [
+            'allow_login' => 0,
+            'allow_login_exept' => [],
+            'allow_login_only' => [$this->user('id')]
+        ]; 
+        $this->_saveCache('generalconfig','accesss',$config); 
+    }
+
+    public function unlockLogin()
+    {
+        $config = [
+            'allow_login' => 1,
+            'allow_login_exept' => [],
+            'allow_login_only' => []
+        ]; 
+        $this->_saveCache('generalconfig','accesss',$config); 
+    }
     /**
      * =============================================================================================
      */
