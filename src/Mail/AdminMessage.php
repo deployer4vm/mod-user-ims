@@ -1,0 +1,44 @@
+<?php
+
+namespace hpsynapse\moduser\Mail;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class AdminMessage extends Mailable
+{
+    use SerializesModels;
+
+    protected $body,$title;
+    
+    /**
+     * Create a new message instance.
+     *
+     * @return void
+     */
+    public function __construct($title,$body)
+    {
+        $this->title = $title;
+        $this->body = $body;
+    }
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->subject($this->title)->view('emails.adminMessage')->with([
+            'body' => $this->body
+        ]);
+//        ->attach(
+//            '/path/to/file', [
+//                'as' => 'name.pdf',
+//                'mime' => 'application/pdf',
+//        ]);
+    }
+
+}

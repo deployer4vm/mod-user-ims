@@ -20,7 +20,7 @@ class NotificationController extends BaseController
     }
     
     public function setnotif() {
-        dd(UserRepo::listUser(['profile'=>[['divisi_id',1]],['role','LIKE','%;superadmin;%']]));
+        // dd(UserRepo::listUser(['profile'=>[['divisi_id',1]],['role','LIKE','%;superadmin;%']]));
         UserRepo::notify(
                         1, 
                         new \App\MainApp\Notifications\PengajuanCreated(['id'=>1,'nama_pekerjaan'=>'Pengadaan wc umum'])
@@ -72,11 +72,9 @@ class NotificationController extends BaseController
      * @return type
      */
     public function detail(Request $request,$notificationId=false)
-    {
-        
-//        $userData = Auth::user()->toArray();
+    {        
         $userId = UserAuth::user('id');//isset($userData['user_id'])?$userData['user_id']:$userData['id'];
-        
+        $notificationId = $request->route('notificationId');
         $this->output['viewdata']['onIframe'] = false;
         //jika iframe
         if(true){//$this->hasReferer()){//&& $request->input('iframeInclude') ){
@@ -86,9 +84,9 @@ class NotificationController extends BaseController
             $this->response = redirect()->route('home');
         }
         
-        $this->output['listdata'] = UserNotifSrv::getNotif($userId,$notificationId);
+        $this->output['data'] = UserNotifSrv::getNotif($userId,$notificationId);
         
-        if(!$this->output['listdata']){
+        if(!$this->output['data']){
             $this->output['message'] = 'Notification Not Found';
             $this->response = redirect()->route('account.notification');
         }

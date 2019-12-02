@@ -240,12 +240,13 @@ trait UserMessageTraits
         if($user)return $user->notify($notification);
         return false;
     }
-    // public function notifyInvoice($userId,$order)
-    // {
-    //     return $this->notify(
-    //         $userId, 
-    //         new \hpsynapse\moduser\Notifications\Invoice($order)
-    //         );
-    // }        
+
+    public function sendAdminMessage($userId,$title,$message,$data)
+    {
+        return $this->notify(
+            $userId, 
+            new \hpsynapse\moduser\Notifications\AdminMessage($title,$message,$data)
+        );
+    }        
     
 }

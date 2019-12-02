@@ -402,11 +402,8 @@ class UserRepo extends BaseRepository
             $this->registerProfile($userData['profile']);
         }
 
-        //update role data
-        if (isset($userData['role_code'])){            
-            $this->updateUserRole($data['id'],$roles);
-            unset($userData['role_code']);
-        }
+        //update role data          
+        $this->updateUserRole($data['id'],$roles);
 
         // $this->addUserRole(
         //     $data['id'],
@@ -475,16 +472,18 @@ class UserRepo extends BaseRepository
 
         if(!is_array($userData['role_code']))$userData['role_code'] = [$userData['role_code']];
         //pastikan rule nya ada        
-        $roles = Role::whereIn('role_code', $userData['role_code'])->get();
+        $roles = Role::whereIn('role_code', $userData['role_code'])->orderBy('level','ASC')->get();
         if ($roles->count() <=0 ) {
             $this->error = 'Roles not defined.';
             return false;
         }
         $userData['role_code'] = [];
+        $isFirstRow=true;
         foreach ($roles as $val) {  
             $userData['role_code'][] = $val->role_code;
-            if($val['is_main_role']){
+            if($isFirstRow){
                 $userData['main_role'] = ['role_code'=>$val->role_code,'level'=>$val->level];
+                $isFirstRow=false;
             }
         }
 

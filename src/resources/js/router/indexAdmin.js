@@ -52,11 +52,6 @@ const MyProfile = resolve => {
     resolve(require("../views/admin/user/myprofile"));
   });
 };
-const NotifList = resolve => {
-  require.ensure(["../views/admin/user/notiflist"], () => {
-    resolve(require("../views/admin/user/notiflist"));
-  });
-};
 const UserList = resolve => {
   require.ensure(["../views/admin/user/userlist"], () => {
     resolve(require("../views/admin/user/userlist"));
@@ -82,6 +77,32 @@ const RoleForm = resolve => {
   require.ensure(["../views/admin/role/roleform"], () => {
     resolve(require("../views/admin/role/roleform"));
   });
+};
+
+const NotifList = resolve => {
+    require.ensure(["../views/admin/user/notiflist"], () => {
+      resolve(require("../views/admin/user/notiflist"));
+    });
+  };
+const NotifDetail = resolve => {
+require.ensure(["../views/admin/user/notifdetail"], () => {
+    resolve(require("../views/admin/user/notifdetail"));
+});
+};
+/*
+Broadcast
+----------------------------------------------------------------
+*/
+
+const BroadcastList = resolve => {
+    require.ensure(["../views/admin/broadcast/list"], () => {
+        resolve(require("../views/admin/broadcast/list"));
+    });
+};
+const BroadcastForm = resolve => {
+    require.ensure(["../views/admin/broadcast/form"], () => {
+        resolve(require("../views/admin/broadcast/form"));
+    });
 };
 
 //style/tampilan auth page
@@ -147,6 +168,11 @@ export default [
         name: "notification"
       },
       {
+        path: "notification/:notifId",
+        component: NotifDetail,
+        name: "notification.detail"
+      },
+      {
         path: "list",
         component: UserList,
         name: "user.list"
@@ -165,6 +191,16 @@ export default [
         path: "view/:userId",
         component: UserView,
         name: "user.view"
+      },
+      {
+        path: "broadcast",
+        component: BroadcastList,
+        name: "broadcast.list"
+      },
+      {
+        path: "broadcast/form",
+        component: BroadcastForm,
+        name: "broadcast.form"
       },
       {
         path: "role",

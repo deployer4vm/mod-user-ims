@@ -232,6 +232,9 @@ export default {
         }
     },
     created() {
+        if(this.AppConfig.packageLocal.moduser.user_role.multi_role==0){
+            this.form.role_code = '';
+        }
         //load data role
         this.$store.dispatch("role/roleList").then((res)=>{
             let tmpRoleItems = [];
@@ -250,10 +253,16 @@ export default {
                     'user/getUser',this.$route.params.userId                    
                 ).then((res)=>{
                     this.form = this.oneData;
+                    if(this.AppConfig.packageLocal.moduser.user_role.multi_role)
                     this.form.role_code = [];
                     _.forEach(this.form.user_role,(v,i)=>{
-                        this.form.role_code.push(v.role_code);
-                    })
+                        if(this.AppConfig.packageLocal.moduser.user_role.multi_role){
+                            this.form.role_code.push(v.role_code);
+                        }else{
+                            this.form.role_code = v.role_code;
+                            return true;                            
+                        }
+                    });
                     this.form.password = '';
                     this.form.repassword = '';
                 }).catch((res)=>{

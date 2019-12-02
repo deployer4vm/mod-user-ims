@@ -69,6 +69,11 @@ Route::group($groupUser,function(){
     Route::post('/notification/unread', 'NotificationController@setUnread')->name('user.notification.setUnreadBulk');
     Route::post('/notification/{notificationId}/unread', 'NotificationController@setUnread')->name('user.notification.setUnread');
 
+    /**
+     * fitur Broadcast notif
+     */
+    Route::get('/broadcast', 'BroadcastController@index')->name('user.broadcast');
+    Route::post('/broadcast', 'BroadcastController@sendBroadcast')->name('user.broadcast.send');
     
     /**
      * fitur User
