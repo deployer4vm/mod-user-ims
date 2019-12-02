@@ -18,7 +18,7 @@ class BroadcastNotif implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $users,$title,$message,$description;
+    protected $userId,$users,$title,$message,$description;
     
     /**
      * Create a new job instance.
@@ -26,8 +26,9 @@ class BroadcastNotif implements ShouldQueue
      * @param array $userData Data user yang diupdate
      * @return void
      */
-    public function __construct($users,$title,$description,$message)
+    public function __construct($userId,$users,$title,$description,$message)
     {
+        $this->userId = $userId;
         $this->users = $users;
         $this->title = $title;
         $this->description = $description;
@@ -46,7 +47,8 @@ class BroadcastNotif implements ShouldQueue
     {
         $users = UserRepo::listUser();
         foreach($users['data'] as $user){
-            UserRepo::sendAdminMessage($user['id'],$this->title,$this->message,['description'=>$this->description]);
+            if($this->userId!=$user['id'])
+                UserRepo::sendAdminMessage($user['id'],$this->title,$this->message,['description'=>$this->description]);
         }
         
     }

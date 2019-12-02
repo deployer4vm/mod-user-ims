@@ -26,7 +26,7 @@ class BroadcastController extends BaseController
     public function sendBroadcast(Request $request)
     {
         $input = $request->only(['title','description','message']);
-        BroadcastNotif::dispatch(false,$input['title'],$input['description'],$input['message']);
+        BroadcastNotif::dispatch(UserAuth::user('id'),false,$input['title'],$input['description'],$input['message']);
         $this->output['message'] = 'Broadcast berhasil dikirim';
         return $this->done();
     }
