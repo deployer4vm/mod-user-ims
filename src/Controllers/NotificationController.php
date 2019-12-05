@@ -19,7 +19,8 @@ class NotificationController extends BaseController
         $this->forceApiOutput();
     }
     
-    public function setnotif() {
+    public function setnotif() 
+    {
         // dd(UserRepo::listUser(['profile'=>[['divisi_id',1]],['role','LIKE','%;superadmin;%']]));
         UserRepo::notify(
                         1, 

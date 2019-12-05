@@ -3,10 +3,10 @@
     <template slot="button-content">
           <i class="ion ion-md-notifications-outline navbar-icon align-middle"></i>
           <span class="badge badge-danger badge-dot indicator" v-if="notif.summary.unread_count != 0"></span>
-          <span class="d-lg-none align-middle">&nbsp; Notifications</span>
+          <span class="d-lg-none align-middle">&nbsp; {{Trans.get('notif.notification_title')}}</span>
     </template>
 
-    <div class="bg-primary text-center text-white font-weight-bold p-3" v-if="notif.summary.unread_count != 0">{{notif.summary.unread_count}} Unread Notifications</div>
+    <div class="bg-primary text-center text-white font-weight-bold p-3" v-if="notif.summary.unread_count != 0">{{notif.summary.unread_count}} {{Trans.get('notif.unread_notification')}}</div>
 
     <b-list-group flush>
         <b-list-group-item class="media d-flex align-items-center" 
@@ -16,8 +16,8 @@
             <div :class="'ui-icon ui-icon-sm ion ion-ios-text border-0 text-white ' + (item.read_at==null?'bg-danger':'bg-secondary')"></div>
             <div class="media-body line-height-condenced ml-3">
                 <div :class="item.read_at==null?'text-dark font-weight-bold':'text-muted'">{{item.data.subject}}</div>
-                <div class="text-light small mt-1">{{item.data.description}}</div>
-                <div class="text-light small mt-1">{{item.created_at}}</div>
+                <div class="small mt-1">{{item.data.description}}</div>
+                <div class="small mt-1">{{item.created_at}}</div>
             </div>
         </b-list-group-item>
 
@@ -25,7 +25,7 @@
 
     <router-link :to="{name: 'notification'}"
       class="d-block text-center text-light small p-2 my-1"
-    >Show all notifications</router-link>
+    >{{Trans.get('notif.show_all_notification')}}</router-link>
   </b-nav-item-dropdown>
 </template>
 <script>
@@ -47,25 +47,36 @@ export default {
         this.invervalNotif = setInterval(()=>{
             if(this.UserAuth.isLogin())
                 this.loadNotif();
-        },60000);
+        },10000);
     },
     methods: {
         loadNotif() {
             var that = this;
-          let filterParams = {params: {limit: 5}};
-          this.LocalApi.get(this.AppConfig.endpoint.api.moduser + "/notification" , filterParams)
-            .then(res => {
-                that.notif = res.data.data;
-                if(that.notif.summary.unread_count > that.lastNotifCount){                    
-                    _.forEach(that.notif.notification,(v,i)=>{  
-                        if(v.read_at==null){
-                            that.Web.showAlert({ title:"Notifikasi Baru", text: v.data.subject });
-                            console.log(v);
-                        }
-                    });
-                }
-                that.lastNotifCount = that.notif.summary.unread_count;
-            });
+            let filterParams = {params: {limit: 5}};
+            this.LocalApi.get(this.AppConfig.endpoint.api.moduser + "/notification" , filterParams)
+                .then(res => {
+                    that.notif = res.data.data;
+                    var subject = '';
+                    var newNotifCount = that.notif.summary.unread_count - that.lastNotifCount;
+                    //jika unread notifnya bertambah maka tampilkan notif
+                    if(that.notif.summary.unread_count > that.lastNotifCount){ 
+                        var i=0;                   
+                        _.forEach(that.notif.notification,(v,i)=>{  
+                            if(v.read_at==null){
+                                i++;
+                                subject = subject + '<div class="p-1 pl-2">' + v.data.subject + '</div>';
+                                if(i>=newNotifCount)return false;
+                            }
+                        });
+                        if(subject != '')
+                            that.Web.showAlert({ 
+                                type: 'dark', 
+                                title: this.Trans.get('notif.new_notification_title') + ' <b class="text-danger">(' + newNotifCount + ') </b>', 
+                                text: '<br>' + subject , position: "default" 
+                            });
+                    }
+                    that.lastNotifCount = that.notif.summary.unread_count;
+                });
         }
     }
 };

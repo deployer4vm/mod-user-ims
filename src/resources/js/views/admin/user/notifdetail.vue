@@ -1,11 +1,11 @@
 <template>
-    <b-card :header="'Notification / ' + title">
+    <b-card :header="Trans.get('notif.notification_title') + ' / ' + title">
         <h3>{{ notif.data.subject}}</h3>  
         <b-card-text>
             {{ notif.data.body}}
         </b-card-text>
         <hr>
-        <b-button :to="{name: 'notification'}" variant="primary">Back</b-button>
+        <b-button :to="{name: 'notification'}" variant="primary">{{Trans.get('lang.back')}}</b-button>
     </b-card>
 </template>
 <script>
