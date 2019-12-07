@@ -192,11 +192,7 @@ export default {
         formEmpty: {
             id: 0,
             all_tenant: 0,
-            avatar: '',
             name: '',
-            username: '',
-            email: '',
-            phone: '',
             password: '',
             repassword:'',
             role_code: [],
@@ -231,10 +227,27 @@ export default {
             return this.AppConfig.packageLocal.moduser.user_profiles.hide_all==0;
         }
     },
-    created() {
+    created() {        
+        if(this.showUserField('username')){
+            this.formEmpty.username = '';
+        }        
+
+        if(this.showUserField('email')){
+            this.formEmpty.email = '';
+        }        
+
+        if(this.showUserField('avatar')){
+            this.formEmpty.avatar = '';
+        }  
+
+        if(this.showUserField('phone')){
+            this.formEmpty.phone = '';
+        }
+
         if(this.AppConfig.packageLocal.moduser.user_role.multi_role==0){
             this.form.role_code = '';
         }
+        
         //load data role
         this.$store.dispatch("role/roleList").then((res)=>{
             let tmpRoleItems = [];

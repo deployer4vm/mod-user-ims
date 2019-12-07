@@ -68,7 +68,7 @@ const mutations = {
         state.role_code = null;
         state.group_app = null;
     },
-    setGroupApp(state, groupApp) {
+    setGroupApp(state, groupApp) {        
         state.group_app = groupApp;
     }
 };
@@ -119,6 +119,7 @@ const actions = {
                         }else{
                             commit("setGroupApp",res.data.data.tenant.group_app);
                             dispatch("implementAcl");
+                            EventBus.$emit('onTenantChange',res.data.data.tenant);
                             globals().Web.goToTenant(res.data.data.tenant.group_app);
                         }
 
@@ -127,6 +128,7 @@ const actions = {
                 }
 
                 commit("setGroupApp",authData.group_app);
+                EventBus.$emit('onTenantChange',authData);
                 return dispatch("implementAcl");
             });
     },

@@ -215,6 +215,20 @@ class UserAuth
         ]; 
         $this->_saveCache('generalconfig','accesss',$config); 
     }
+
+    public function getAccessConfig()
+    {
+        
+        if(!($config = $this->_getCache('generalconfig','accesss'))){
+            $config = [
+                'allow_login' => 1,
+                'allow_login_exept' => [],
+                'allow_login_only' => []
+            ];           
+            $this->_saveCache('generalconfig','accesss',$config); 
+        }
+        return $config;
+    }
     /**
      * =============================================================================================
      */

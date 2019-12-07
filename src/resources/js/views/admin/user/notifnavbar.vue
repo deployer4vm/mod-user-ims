@@ -65,7 +65,7 @@ export default {
                             if(v.read_at==null){
                                 i++;
                                 subject = subject + '<div class="p-1 pl-2">' + v.data.subject + '</div>';
-                                if(i>=newNotifCount)return false;
+                                if(i>=newNotifCount)return true;
                             }
                         });
                         if(subject != '')
