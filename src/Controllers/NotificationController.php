@@ -22,10 +22,10 @@ class NotificationController extends BaseController
     public function setnotif() 
     {
         // dd(UserRepo::listUser(['profile'=>[['divisi_id',1]],['role','LIKE','%;superadmin;%']]));
-        UserRepo::notify(
-                        1, 
-                        new \App\MainApp\Notifications\PengajuanCreated(['id'=>1,'nama_pekerjaan'=>'Pengadaan wc umum'])
-                    );
+        // UserRepo::notify(
+        //                 1, 
+        //                 new \App\MainApp\Notifications\PengajuanCreated(['id'=>1,'nama_pekerjaan'=>'Pengadaan wc umum'])
+        //             );
         return $this->done();
     }
     /**
@@ -89,7 +89,7 @@ class NotificationController extends BaseController
         
         if(!$this->output['data']){
             $this->output['message'] = 'Notification Not Found';
-            $this->response = redirect()->route('account.notification');
+            $this->response = redirect()->route('user.notification');
         }
         
         //jika menyertakan set read

@@ -48,3 +48,16 @@ Route::group([
 //     //Social Sign On
 //     Route::get('/socialauth/{provider}/callback', 'Auth\SocialSignOnController@handleProviderCallback')->name('socialAuth.callback');
 });
+
+/**
+ * Module notif
+ */
+Route::get('/notification', 'NotificationController@index')->name('user.notification');
+Route::get('/notification/type', 'NotificationController@listType')->name('user.notification.listType');
+Route::get('/notification/{notificationId}', 'NotificationController@detail')->name('user.notification.detail');    
+Route::delete('/notification/{notificationId}', 'NotificationController@deleteNotif')->name('user.notification.delete');
+Route::post('/notification/read', 'NotificationController@setRead')->name('user.notification.setReadBulk');
+Route::post('/notification/{notificationId}/read', 'NotificationController@setRead')->name('user.api.notification.setRead');
+Route::post('/notification/unread', 'NotificationController@setUnread')->name('user.notification.setUnreadBulk');
+Route::post('/notification/{notificationId}/unread', 'NotificationController@setUnread')->name('user.notification.setUnread');
+

@@ -60,14 +60,14 @@ Route::group($groupUser,function(){
     /**
      * fituf notif
      */
-    Route::get('/notification', 'NotificationController@index')->name('user.notification');
-    Route::get('/notification/type', 'NotificationController@listType')->name('user.notification.listType');
-    Route::get('/notification/{notificationId}', 'NotificationController@detail')->name('user.notification.detail');    
-    Route::delete('/notification/{notificationId}', 'NotificationController@deleteNotif')->name('user.notification.delete');
-    Route::post('/notification/read', 'NotificationController@setRead')->name('user.notification.setReadBulk');
-    Route::post('/notification/{notificationId}/read', 'NotificationController@setRead')->name('user.notification.setRead');
-    Route::post('/notification/unread', 'NotificationController@setUnread')->name('user.notification.setUnreadBulk');
-    Route::post('/notification/{notificationId}/unread', 'NotificationController@setUnread')->name('user.notification.setUnread');
+    Route::get('/notification', 'NotificationController@index')->name('user.api.notification');
+    Route::get('/notification/type', 'NotificationController@listType')->name('user.api.notification.listType');
+    Route::get('/notification/{notificationId}', 'NotificationController@detail')->name('user.api.notification.detail');    
+    Route::delete('/notification/{notificationId}', 'NotificationController@deleteNotif')->name('user.api.notification.delete');
+    Route::post('/notification/read', 'NotificationController@setRead')->name('user.api.notification.setReadBulk');
+    Route::post('/notification/{notificationId}/read', 'NotificationController@setRead')->name('user.api.notification.setRead');
+    Route::post('/notification/unread', 'NotificationController@setUnread')->name('user.api.notification.setUnreadBulk');
+    Route::post('/notification/{notificationId}/unread', 'NotificationController@setUnread')->name('user.api.notification.setUnread');
 
     /**
      * fitur Broadcast notif

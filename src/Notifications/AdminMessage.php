@@ -80,7 +80,7 @@ class AdminMessage extends Notification implements ShouldQueue
                 'link' => '',
                 'route' => 'notification.detail',
                 'parameter' => [
-                    'notifId' => $notifiable->id
+                    'notifId' => $this->id
                 ]
             ],
             'link_apps' => isset($this->data['link_apps'])?$this->data['link_apps']:''
