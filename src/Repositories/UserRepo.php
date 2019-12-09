@@ -348,7 +348,7 @@ class UserRepo extends BaseRepository
     /**
      * rigistrasi user baru
      * 
-     * @param array $userData : seluruh field di table user dan :
+     * @param array $userData : seluruh field di table user (kecuali role) dan :
      *      all_tenant : jika tidak disertakan maka dianggap per tenant
      *      role_code : * optional    string role_code, jika tidak dicantumkan akan menggunakan default role_code
      * 
@@ -382,12 +382,12 @@ class UserRepo extends BaseRepository
 
         //jika menyertakan tenant maka daftarkan user di tenant bersangkutan
         if(!(isset($userData['all_tenant']) && $userData['all_tenant']==1)){
+            $userData['all_tenant'] = 0;
             if(config('tenant.id')){
                 UserTenant::create([
                     'tenant_id' => config('tenant.id'),
                     'user_id' => $data['id']
                 ]);
-                $userData['all_tenant'] = 0;
             }
         }
 

@@ -59,7 +59,7 @@ export default {
                     var subject = '';
                     var newNotifCount = that.notif.summary.unread_count - that.lastNotifCount;
                     //jika unread notifnya bertambah maka tampilkan notif
-                    if(that.notif.summary.unread_count > that.lastNotifCount){ 
+                    if(that.lastNotifCount!=0 && that.notif.summary.unread_count > that.lastNotifCount){ 
                         var i=0;                   
                         _.forEach(that.notif.notification,(v,i)=>{  
                             if(v.read_at==null){
