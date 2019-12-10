@@ -136,7 +136,7 @@ class RoleController extends BaseController
         }
         
         //jika berhasil
-        if ($user = RoleRepo::createRole($input,false)) {
+        if ($user = RoleRepo::createRole($input)) {
             $this->setAlert('Data Inserted successfully','success');
         }else{
             $this->setError(RoleRepo::error(),'success');

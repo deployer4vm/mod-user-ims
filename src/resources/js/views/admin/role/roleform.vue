@@ -82,7 +82,12 @@
                                         <b-btn variant="success" size="xs" :disabled="disabledModuleAccess[key]" @click="uncheckModuleAll(key)">{{Trans.get('role.roleform.uncheck_all')}}</b-btn>
                                     </div>             
                                     <div class="float-left">
-                                        <b-check  :value="1" :unchecked-value="0" v-model="roleForm.rule[key].has_access" @change="setModule(key,$event)">
+                                        <b-check 
+                                            :value="1" 
+                                            :unchecked-value="0" 
+                                            v-model="roleForm.rule[key].has_access" 
+                                            @change="setModule(key,$event)"
+                                        >
                                             {{Trans.get('role.roleform.has_access')}}
                                         </b-check>
                                     </div>
@@ -93,22 +98,25 @@
                                     <th scope="row">{{index+1}}</th>
                                     <td></td>
                                     <td :class="'rulekey-' + dotCount(ruleKey)">
+                                        <!-- <span class="ion ion-md-return-right" v-if="dotCount(ruleKey)>1"></span> -->
                                         {{Trans.chose(rule.acl_caption)}}
                                         <div v-if="rule.acl_description!=''"><i>{{Trans.chose(rule.acl_description)}}</i></div>
                                     </td> 
                                     <template v-if="rule.crud.c!=1&&rule.crud.r!=1&&rule.crud.u!=1&&rule.crud.d!=1">                                   
                                         <td colspan="4">
-                                            <b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].has_access"
-                                            :disabled="disabledModuleAccess[key]">
+                                            <b-check :value="1" :unchecked-value="0" 
+                                                v-model="roleForm.rule[ruleKey].has_access"
+                                                :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0"
+                                            >
                                                 {{Trans.get('role.roleform.has_access')}}
                                             </b-check>
                                         </td>
                                     </template>
                                     <template v-else> 
-                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
-                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key]" class="px-2 m-0" /></td>
+                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0" class="px-2 m-0" /></td>
+                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0" class="px-2 m-0" /></td>
+                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0" class="px-2 m-0" /></td>
+                                        <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0" class="px-2 m-0" /></td>
                                     </template>
                                 </tr>
                             </template>
@@ -203,14 +211,22 @@ export default {
             return (key.split(".").length - 1);
         },
         setEmptyRole() {
-            let tmp = {};
+            var tmp = {};
+            var lastCount = 0;
             _.forEach(this.AppConfig.acl,(v,k) => {
                 tmp[k] = {'has_access':0};
-
+                
                 this.disabledModuleAccess[k] = true;
-                console.log('isi',k,this.disabledModuleAccess[k])
-                this.rulePerModule[k] = {}
+                this.rulePerModule[k] = {};
+
                 _.forEach(v.children,(rule,ruleKey) => {
+
+                    if(lastCount==0)lastCount=this.dotCount(ruleKey);
+
+                    if(lastCount!=this.dotCount(ruleKey)){
+
+                    }
+
                     tmp[ruleKey] = {
                             "has_access":0,
                             "c": 0,
@@ -220,10 +236,10 @@ export default {
                         };
 
                     this.rulePerModule[k][ruleKey] = ruleKey;
+                    lastCount=this.dotCount(ruleKey);
                 });
             });
             this.roleForm.rule = tmp;
-            console.log('empty role : ',this.disabledModuleAccess,this.roleForm.rule);
         },
         loadRole() {  
             this.$store.dispatch(
@@ -239,8 +255,7 @@ export default {
                     if(res.rule!=null){
                         _.forEach(this.roleForm.rule,(v,k) => {
                             if(res.rule[k]!=undefined){
-                                tmp[k] = res.rule[k];
-                                if(tmp[k]['has_access'])
+                                if(res.rule[k]['has_access'] && this.disabledModuleAccess[k] != undefined)
                                     this.disabledModuleAccess[k] = false;
                                 _.forEach(res.rule[k],(v2,k2) => {
                                     tmp[k][k2] = v2?1:0;
@@ -250,15 +265,17 @@ export default {
                     }
 
                     this.roleForm.rule = tmp;
-                    console.log('not empty role : ',this.disabledModuleAccess,this.roleForm.rule);
                 }).catch((res)=>{
                     console.log('get role error : ',res);
                     this.Web.showAlert({text: "Get role Error",style: "warning"});
                 });
         },
+        /**
+         * enable/disable pilihan rule per module
+         */
         setModule(moduleKey,val){
             let tmp = JSON.parse(JSON.stringify(this.disabledModuleAccess));
-            tmp[moduleKey] = val?true:false;
+            tmp[moduleKey] = val?false:true;
             this.disabledModuleAccess = tmp;
         },
         //ceklis semua rule di module tertentu
@@ -303,6 +320,7 @@ export default {
             this.roleForm.role_code = this.roleForm.role_code.replace(/[^a-zA-Z0-9_]/g, "_");
         },
         save() {
+
             _.forEach(this.disabledModuleAccess,(v,k) => {
                 _.forEach(this.rulePerModule[k],(v2,k2)=>{
                     //jika disabled maka uncheck semua hak akses nya
@@ -316,11 +334,26 @@ export default {
                         };
                     }else{
                         this.roleForm.rule[k2]['has_access'] = 
-                            this.roleForm.rule[k2]['has_access'] || 
+                            (this.roleForm.rule[k2]['has_access'] || 
                             this.roleForm.rule[k2]['c'] ||
                             this.roleForm.rule[k2]['r'] ||
                             this.roleForm.rule[k2]['u'] ||
-                            this.roleForm.rule[k2]['d']?1:0;
+                            this.roleForm.rule[k2]['d'])?1:0;
+                    }
+                });
+            });
+
+            _.forEach(this.AppConfig.acl,(moduleRule,moduelName) => {
+                _.forEach(moduleRule.children,(rule,ruleKey)=>{
+                    //jika parent nya disable maka child nya juga di uncek
+                    if(!this.roleForm.rule[rule.parent].has_access){
+                        this.roleForm.rule[ruleKey] = {
+                            "has_access":0,
+                            "c": 0,
+                            "r": 0,
+                            "u": 0,
+                            "d": 0
+                        };
                     }
                 });
             });
