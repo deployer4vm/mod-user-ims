@@ -198,6 +198,7 @@ export default {
         }
     },
     methods: {
+        //
         dotCount(key) {
             return (key.split(".").length - 1);
         },
@@ -207,6 +208,7 @@ export default {
                 tmp[k] = {'has_access':0};
 
                 this.disabledModuleAccess[k] = true;
+                console.log('isi',k,this.disabledModuleAccess[k])
                 this.rulePerModule[k] = {}
                 _.forEach(v.children,(rule,ruleKey) => {
                     tmp[ruleKey] = {
@@ -221,6 +223,7 @@ export default {
                 });
             });
             this.roleForm.rule = tmp;
+            console.log('empty role : ',this.disabledModuleAccess,this.roleForm.rule);
         },
         loadRole() {  
             this.$store.dispatch(
@@ -247,7 +250,7 @@ export default {
                     }
 
                     this.roleForm.rule = tmp;
-
+                    console.log('not empty role : ',this.disabledModuleAccess,this.roleForm.rule);
                 }).catch((res)=>{
                     console.log('get role error : ',res);
                     this.Web.showAlert({text: "Get role Error",style: "warning"});
