@@ -15,7 +15,7 @@ return [
     'roleform' => [
         'form_add_caption' => 'Tambah role baru',
         'module' => 'Module',
-        'reature' => 'Feature',
+        'feature' => 'Feature',
         'create' => 'Create',
         'read' => 'Read',
         'update' => 'Update',

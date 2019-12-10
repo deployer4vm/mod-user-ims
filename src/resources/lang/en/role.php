@@ -15,7 +15,7 @@ return [
     'roleform' => [
         'form_add_caption' => 'Add new role',
         'module' => 'Module',
-        'reature' => 'Feature',
+        'feature' => 'Feature',
         'create' => 'Create',
         'read' => 'Read',
         'update' => 'Update',

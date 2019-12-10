@@ -92,7 +92,7 @@
                                 <tr>
                                     <th scope="row">{{index+1}}</th>
                                     <td></td>
-                                    <td>
+                                    <td :class="'rulekey-' + dotCount(ruleKey)">
                                         {{Trans.chose(rule.acl_caption)}}
                                         <div v-if="rule.acl_description!=''"><i>{{Trans.chose(rule.acl_description)}}</i></div>
                                     </td> 
@@ -126,6 +126,23 @@
 </template>
 <!-- Page -->
 <style src="@/vendor/styles/pages/users.scss" lang="scss"></style>
+<style scoped>
+    .rulekey-2 {
+        padding-left: 40px;
+    }
+    .rulekey-3 {
+        padding-left: 80px;
+    }
+    .rulekey-4 {
+        padding-left: 120px;
+    }
+    .rulekey-5 {
+        padding-left: 160px;
+    }
+    .rulekey-6 {
+        padding-left: 200px;
+    }
+</style>
 <script>
 import { required, minLength, minValue } from "node_modules/vuelidate/lib/validators";
 
@@ -142,7 +159,7 @@ export default {
             tenant_id: 0,
             rule: {}
         },
-        moduleRolAccessData: {},
+        disabledModuleAccess: {},
         rulePerModule: {},
         levelOption: [],
         tenantOption: [],
@@ -176,33 +193,28 @@ export default {
         title() {
             return this.isAdd ? this.Trans.get('role.roleform.form_add_caption') : "#" + this.roleForm.name;
         },
-        disabledModuleAccess: {
-            get() {
-                return this.moduleRolAccessData;
-            },
-            set(value) {
-                this.moduleRolAccessData = value;
-            }
-        },  
         tenantGroup() {
             return this.$store.state.tenant.listTenantGroup;
         }
     },
     methods: {
+        dotCount(key) {
+            return (key.split(".").length - 1);
+        },
         setEmptyRole() {
             let tmp = {};
             _.forEach(this.AppConfig.acl,(v,k) => {
-                tmp[k] = {'has_access':false};
+                tmp[k] = {'has_access':0};
 
                 this.disabledModuleAccess[k] = true;
                 this.rulePerModule[k] = {}
                 _.forEach(v.children,(rule,ruleKey) => {
                     tmp[ruleKey] = {
-                            "has_access":false,
-                            "c": false,
-                            "r": false,
-                            "u": false,
-                            "d": false
+                            "has_access":0,
+                            "c": 0,
+                            "r": 0,
+                            "u": 0,
+                            "d": 0
                         };
 
                     this.rulePerModule[k][ruleKey] = ruleKey;
@@ -243,7 +255,7 @@ export default {
         },
         setModule(moduleKey,val){
             let tmp = JSON.parse(JSON.stringify(this.disabledModuleAccess));
-            tmp[moduleKey] = val?false:true;
+            tmp[moduleKey] = val?true:false;
             this.disabledModuleAccess = tmp;
         },
         //ceklis semua rule di module tertentu
@@ -251,14 +263,14 @@ export default {
             let tmp = JSON.parse(JSON.stringify(this.roleForm.rule));
             _.forEach(this.rulePerModule[moduleKey],(v2,k2)=>{
                 tmp[k2] = {
-                    "has_access":true,
-                    "c": true,
-                    "r": true,
-                    "u": true,
-                    "d": true
+                    "has_access":1,
+                    "c": 1,
+                    "r": 1,
+                    "u": 1,
+                    "d": 1
                 };
                 _.forEach(this.AppConfig.acl[moduleKey]['children'][k2]['crud'],(v3,k3)=>{                    
-                    if(v3==0||v3==false)tmp[k2][k3]=false;
+                    if(v3==0||v3==0)tmp[k2][k3]=0;
                 });
             });
             this.roleForm.rule = tmp;
@@ -268,11 +280,11 @@ export default {
             let tmp = JSON.parse(JSON.stringify(this.roleForm.rule));
             _.forEach(this.rulePerModule[moduleKey],(v2,k2)=>{
                 tmp[k2] = {
-                    "has_access":false,
-                    "c": false,
-                    "r": false,
-                    "u": false,
-                    "d": false
+                    "has_access":0,
+                    "c": 0,
+                    "r": 0,
+                    "u": 0,
+                    "d": 0
                 };
             });
             this.roleForm.rule = tmp;
@@ -291,13 +303,13 @@ export default {
             _.forEach(this.disabledModuleAccess,(v,k) => {
                 _.forEach(this.rulePerModule[k],(v2,k2)=>{
                     //jika disabled maka uncheck semua hak akses nya
-                    if(v==true){
+                    if(v){
                         this.roleForm.rule[k2] = {
-                            "has_access":false,
-                            "c": false,
-                            "r": false,
-                            "u": false,
-                            "d": false
+                            "has_access":0,
+                            "c": 0,
+                            "r": 0,
+                            "u": 0,
+                            "d": 0
                         };
                     }else{
                         this.roleForm.rule[k2]['has_access'] = 
@@ -305,7 +317,7 @@ export default {
                             this.roleForm.rule[k2]['c'] ||
                             this.roleForm.rule[k2]['r'] ||
                             this.roleForm.rule[k2]['u'] ||
-                            this.roleForm.rule[k2]['d']?true:false;
+                            this.roleForm.rule[k2]['d']?1:0;
                     }
                 });
             });
