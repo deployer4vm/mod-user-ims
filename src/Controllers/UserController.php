@@ -11,6 +11,8 @@ use App\Base\BaseController;
 
 class UserController extends BaseController
 {
+    protected $accessRuleKey = 'moduser.user';
+
     public function __construct()
     {
         $this->forceApiOutput();
@@ -20,8 +22,13 @@ class UserController extends BaseController
      * GET /api/user
      * 
      */
-    public function readList(Request $request) {
-        
+    public function readList(Request $request) 
+    {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+
         $orderBy = false;
         $filter = [];
 
@@ -71,6 +78,11 @@ class UserController extends BaseController
      */
     public function readOne(Request $request)
     {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+
         $id = $request->route('id');
 
         $this->output['data'] = UserRepo::getUser($id);
@@ -97,6 +109,11 @@ class UserController extends BaseController
      */
     public function create(Request $request)
     {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'c')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+
         $userData = $request->all();//$request->only(['name', 'email', 'password']);
 
         $validator = [
@@ -139,6 +156,11 @@ class UserController extends BaseController
      */
     public function update(Request $request)
     {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+        
         $id = $request->route('id');
 
         $input = $request->all();
@@ -266,6 +288,11 @@ class UserController extends BaseController
 
     public function ban(Request $request)
     {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+
         $id = $request->route('id');
         UserRepo::banUser($id,$request->input('banned_note',''));
         $this->setAlert('User banned successfully','success');
@@ -274,6 +301,11 @@ class UserController extends BaseController
 
     public function unban(Request $request)
     {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+        
         $id = $request->route('id');
         UserRepo::unbanUser($id);
         $this->setAlert('User unbanned successfully','success');
@@ -282,7 +314,11 @@ class UserController extends BaseController
 
     public function delete(Request $request)
     {
-
+        if(!UserAuth::hasAccess($this->accessRuleKey,'d')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+        
         $id = $request->route('id');
            
         if(UserAuth::isLogin() && $id != UserAuth::user('id')){

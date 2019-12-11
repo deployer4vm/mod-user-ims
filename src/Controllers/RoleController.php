@@ -11,6 +11,8 @@ use App\Base\BaseController;
 
 class RoleController extends BaseController
 {
+    protected $accessRuleKey = 'moduser.role';
+    
     public function __construct()
     {
         $this->forceApiOutput();
@@ -26,6 +28,10 @@ class RoleController extends BaseController
      */
     public function readList(Request $request)
     {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
 
         $orderBy = false;
         $filter = [];
@@ -44,7 +50,6 @@ class RoleController extends BaseController
             }
             $filter[] = ['level','>',UserAuth::user('level')];
         }
-        
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
         if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')>1) {
             $filter[] = [
@@ -89,7 +94,12 @@ class RoleController extends BaseController
      * Route Param : 
      *      id : route id
      */
-    public function readOne(Request $request) {
+    public function readOne(Request $request) 
+    {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
 
         $id = $request->route('id');
         $this->output['data'] = RoleRepo::getRole($id);
@@ -115,6 +125,11 @@ class RoleController extends BaseController
      */
     public function create(Request $request) 
     {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'c')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+
         $input = $request->all();//$request->only(['name', 'email', 'password']);
 
         $validator = [
@@ -127,8 +142,22 @@ class RoleController extends BaseController
         $validator = \Validator::make($input, $validator);
 
         if(isset($input['id']))unset($input['id']);
-        if(!isset($input['tenant_id']))$input['tenant_id'] = 0;
-        if(!isset($input['tenant_group_id']))$input['tenant_group_id'] = 0;
+
+        if(config('AppConfig.system.web_admin.multitenant.active')){
+            //jika owner/main app maka bisa set sendiri tenant dan group tenant role nya
+            if(config('tenant.is_main')){
+                if(!isset($input['tenant_id']))$input['tenant_id'] = 0;
+                if(!isset($input['tenant_group_id']))$input['tenant_group_id'] = 0;
+
+            //jika bukan di aplikasi owner/main maka tidak bisa create rule lintas tenant
+            }else{
+                $input['tenant_id'] = config('tenant.id');
+                $input['tenant_id'] = config('tenant.tenant_group_id');
+            }
+        }else{
+            $input['tenant_id'] = 0;
+            $input['tenant_group_id'] = 0;
+        }
 
         if ($validator->fails()) {       
             $this->setError(__('validation.inputerror'),$validator->messages());
@@ -146,12 +175,31 @@ class RoleController extends BaseController
         
     }
 
-    public function update(Request $request) {
+    public function update(Request $request) 
+    {
         
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+
         $id = $request->route('id');
         $input = $request->all();
         
         if(isset($input['id']))unset($input['id']);
+
+        if(config('AppConfig.system.web_admin.multitenant.active')){
+            //jika owner/main app maka bisa set sendiri tenant dan group tenant role nya
+            if(config('tenant.is_main')){
+                if(!isset($input['tenant_id']))$input['tenant_id'] = 0;
+                if(!isset($input['tenant_group_id']))$input['tenant_group_id'] = 0;
+            }else{
+                $input['tenant_id'] = config('tenant.id');
+            }
+        }else{
+            if(isset($input['tenant_id']))unset($input['tenant_id']);
+            if(isset($input['tenant_group_id']))unset($input['tenant_group_id']);
+        }
 
         $this->output['message'] = 'Data berhasil diupdate';
         $this->output['data'] = RoleRepo::updateRole(['id',$id],$input);            
@@ -162,7 +210,13 @@ class RoleController extends BaseController
         return $this->done();
     }
 
-    public function delete(Request $request) {
+    public function delete(Request $request) 
+    {
+
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
 
         $id = $request->route('id');
            

@@ -13,6 +13,8 @@ use App\Base\BaseController;
 
 class BroadcastController extends BaseController
 {
+    protected $accessRuleKey = 'moduser.broadcast';
+
     public function __construct()
     {
         // $this->forceApiOutput();
@@ -25,6 +27,12 @@ class BroadcastController extends BaseController
     
     public function sendBroadcast(Request $request)
     {
+
+        if(!UserAuth::hasAccess($this->accessRuleKey,'c')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+
         $input = $request->only(['title','description','message']);
         BroadcastNotif::dispatch(UserAuth::user('id'),false,$input['title'],$input['description'],$input['message']);
         $this->output['message'] = 'Broadcast berhasil dikirim';

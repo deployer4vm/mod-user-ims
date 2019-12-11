@@ -2,7 +2,7 @@
   <div>
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
       <div>Prk</div>
-      <b-btn variant="success" @click="showForm()" class="d-block" v-if="access('c')">
+      <b-btn variant="success" @click="showForm()" class="d-block" v-if="UserAuth.hasAccess('moduser.broadcast','c')">
         <span class="ion ion-md-add"></span>&nbsp; Tambah Broadcast
       </b-btn>
     </h4>
@@ -56,10 +56,10 @@
           </template>
 
           <template slot="actions" slot-scope="data">
-            <b-btn @click="showForm(false,data.item.id)" variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit" v-if="access('u')">
+            <b-btn @click="showForm(false,data.item.id)" variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit" v-if="UserAuth.hasAccess('moduser.broadcast','u')">
               <i class="ion ion-md-create"></i>
             </b-btn>
-            <b-btn @click="deleteData(data.item.id)" variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Remove" v-if="access('d')">
+            <b-btn @click="deleteData(data.item.id)" variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Remove" v-if="UserAuth.hasAccess('moduser.broadcast','d')">
               <i class="ion ion-md-close"></i>
             </b-btn>
           </template>
@@ -182,121 +182,147 @@ export default {
     }
   },
 
-  methods: {
-    filter(value) {
-      const val = value.toLowerCase();
-      const filtered = this.listDataOriginal.data.filter(d => {
-        return (
-          Object.keys(d)
-            .filter(k => this.searchKeys.includes(k))
-            .map(k => String(d[k]))
-            .join("|")
-            .toLowerCase()
-            .indexOf(val) !== -1 || !val
-        );
-      });
-      this.listData.data = filtered;
-    },    
-    access(key) {
-        return this.UserAuth.hasAccess('Master.prk',key);
-    },
-    showForm(isAdd=true,id=0) {
-      this.isAdd = isAdd;
-      if(!isAdd){        
-        this.$store.dispatch('master/getPrk',id).then((res)=>{
-          
-          this.form.id = this.oneData.id;
-          this.form.judul = this.oneData.judul;
-          this.form.tahun = String(this.oneData.tahun);
-          this.form.no_prk = this.oneData.no_prk;
-          this.form.no_wbs = this.oneData.no_wbs;
-          this.form.nilai = this.Format.formatPrice(this.oneData.nilai);
+    methods: {
+        filter(value) {
+            const val = value.toLowerCase();
+            const filtered = this.listDataOriginal.data.filter(d => {
+                return (
+                Object.keys(d)
+                    .filter(k => this.searchKeys.includes(k))
+                    .map(k => String(d[k]))
+                    .join("|")
+                    .toLowerCase()
+                    .indexOf(val) !== -1 || !val
+                );
+            });
+            this.listData.data = filtered;
+        },    
+        access(key) {
+            return this.UserAuth.hasAccess('moduser.broadcast',key);
+        },
+        showForm(isAdd=true,id=0) {
+            this.isAdd = isAdd;
+            if(!isAdd){        
+                this.$store.dispatch('master/getPrk',id).then((res)=>{
+                
+                this.form.id = this.oneData.id;
+                this.form.judul = this.oneData.judul;
+                this.form.tahun = String(this.oneData.tahun);
+                this.form.no_prk = this.oneData.no_prk;
+                this.form.no_wbs = this.oneData.no_wbs;
+                this.form.nilai = this.Format.formatPrice(this.oneData.nilai);
 
-          this.$bvModal.show("modals-form");
+                this.$bvModal.show("modals-form");
 
-        }).catch((res)=>{
-          console.log('get Prk error : ',res)
-          this.Web.showAlert({text: "Get Data Error",type: "warning"});
-        });
-      }else{        
+                }).catch((res)=>{
+                console.log('get Prk error : ',res)
+                this.Web.showAlert({text: "Get Data Error",type: "warning"});
+                });
+            }else{        
 
-        this.form.id = 0;
-        this.form.judul = '';
-        this.form.tahun = '';
-        this.form.no_prk = '';
-        this.form.no_wbs = '';
-        this.form.nilai = '';
+                this.form.id = 0;
+                this.form.judul = '';
+                this.form.tahun = '';
+                this.form.no_prk = '';
+                this.form.no_wbs = '';
+                this.form.nilai = '';
 
-        this.$bvModal.show("modals-form");
-      }
-    },
-    formSubmitted(ev) {
-      ev.preventDefault();
-      this.$v.$touch();
-      if (this.$v.$invalid) {
-        this.Web.showAlert({text: "Please fix form error",title:"Alert",type: "warning"});
-        return false;
-      }
-      if(this.isAdd){
-        this.saveData({
-          judul: this.form.judul,
-          tahun: this.form.tahun,
-          no_prk: this.form.no_prk,
-          no_wbs: this.form.no_wbs,
-          nilai: this.form.nilai.replace(/\D+/g, '')
-        });
-      }else{
-        this.updateData({
-          id: this.form.id,          
-          judul: this.form.judul,
-          tahun: this.form.tahun,
-          no_prk: this.form.no_prk,
-          no_wbs: this.form.no_wbs,
-          nilai: this.form.nilai.replace(/\D+/g, '')
-        });
-      }
-    },
-    saveData(data) {
-      this.$store.dispatch('master/createPrk',data).then((res)=>{
-        this.Web.showAlert({text: "Data saved"});
-        this.$bvModal.hide("modals-form");
-      }).catch((res)=>{
-        this.Web.showAlert({text: "Save data failed",type: "warning"});
-      });
-    },
-    updateData(data) {
-      this.$store.dispatch('master/updatePrk',data).then((res)=>{
-        this.Web.showAlert({text: "Data updated"});
-        this.$bvModal.hide("modals-form");
-      }).catch((res)=>{
-        this.Web.showAlert({text: "Update data failed",type: "warning"});
-      });
-    },
-    deleteData(id) {
-      this.Web.showAlert({
-        styleType: "modal",
-        style: "warning",
-        title: "Delete Confirmation",
-        text: "Are you sure ?",
-        modalButtonCancel: "No",
-        modalButtonOk: "Yes",
-        onOk:()=>{
-          this.$store.dispatch('master/deletePrk',id).then((res)=>{
-            this.Web.showAlert({text: "Data deleted"});
-          }).catch((res)=>{
-            this.Web.showAlert({text: "Delete fail",type: "warning"});
-          });
+                this.$bvModal.show("modals-form");
+            }
+        },
+        formSubmitted(ev) {
+            ev.preventDefault();
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+                this.Web.showAlert({text: "Please fix form error",title:"Alert",type: "warning"});
+                return false;
+            }
+            if(this.isAdd){
+                this.saveData({
+                judul: this.form.judul,
+                tahun: this.form.tahun,
+                no_prk: this.form.no_prk,
+                no_wbs: this.form.no_wbs,
+                nilai: this.form.nilai.replace(/\D+/g, '')
+                });
+            }else{
+                this.updateData({
+                id: this.form.id,          
+                judul: this.form.judul,
+                tahun: this.form.tahun,
+                no_prk: this.form.no_prk,
+                no_wbs: this.form.no_wbs,
+                nilai: this.form.nilai.replace(/\D+/g, '')
+                });
+            }
+        },
+        saveData(data) {
+            if(!this.UserAuth.hasAccess('moduser.broadcast','c')) {
+                //goto dashboard current tenant
+                this.Web.goToCurrentTenant();
+                this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+                return false;
+            }
+            this.$store.dispatch('master/createPrk',data).then((res)=>{
+                this.Web.showAlert({text: "Data saved"});
+                this.$bvModal.hide("modals-form");
+            }).catch((res)=>{
+                this.Web.showAlert({text: "Save data failed",type: "warning"});
+            });
+        },
+        updateData(data) {
+            if(!this.UserAuth.hasAccess('moduser.broadcast','u')) {
+                //goto dashboard current tenant
+                this.Web.goToCurrentTenant();
+                this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+                return false;
+            }
+            this.$store.dispatch('master/updatePrk',data).then((res)=>{
+                this.Web.showAlert({text: "Data updated"});
+                this.$bvModal.hide("modals-form");
+            }).catch((res)=>{
+                this.Web.showAlert({text: "Update data failed",type: "warning"});
+            });
+        },
+        deleteData(id) {
+            if(!this.UserAuth.hasAccess('moduser.broadcast','d')) {
+                //goto dashboard current tenant
+                this.Web.goToCurrentTenant();
+                this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+                return false;
+            }
+            this.Web.showAlert({
+                styleType: "modal",
+                style: "warning",
+                title: "Delete Confirmation",
+                text: "Are you sure ?",
+                modalButtonCancel: "No",
+                modalButtonOk: "Yes",
+                onOk:()=>{
+                this.$store.dispatch('master/deletePrk',id).then((res)=>{
+                    this.Web.showAlert({text: "Data deleted"});
+                }).catch((res)=>{
+                    this.Web.showAlert({text: "Delete fail",type: "warning"});
+                });
+                }
+            });
         }
-      });
-    }
-  },
-    created() {
+    },
+    created() {        
+        
+        if(!this.UserAuth.hasAccess('moduser.broadcast')) {
+            //goto dashboard current tenant
+            this.Web.goToCurrentTenant();
+            this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+            return false;
+        }
+        
         this.$store.dispatch("master/listPrk", {}).then(res => {
             this.listDataOriginal.data = this.listData.data.slice(0);
             this.curPage = this.listData.currentPage;
         });
 
-        if(!this.access('d') && !this.access('u')){
+        if(!this.UserAuth.hasAccess('moduser.broadcast','d') && !this.UserAuth.hasAccess('moduser.broadcast','u')){
             this.fields = [
                 { key: "no_prk", sortable: true },
                 { key: "no_wbs", sortable: true },

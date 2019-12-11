@@ -3,7 +3,7 @@
 
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
       <div>{{Trans.get('role.module_caption')}}</div>
-      <router-link v-if="UserAuth.hasAccess('moduser.role','c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'role.add'}">
+      <router-link v-if="UserAuth.hasAccess(accessRuleKey,'c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'role.add'}">
         <span class="ion ion-md-add"></span>&nbsp; {{Trans.get('role.rolelist.add_new_role')}}
       </router-link>
     </h4>
@@ -87,7 +87,7 @@
                 :title="Trans.get('lang.edit')"
                 v-b-tooltip.hover
                 :to="{name: 'role.edit', params: {roleId: data.item.id}}" 
-                v-if="UserAuth.hasAccess('moduser.role','u')"
+                v-if="UserAuth.hasAccess(accessRuleKey,'u')"
             >
               <span class="ion ion-md-create"></span>
             </router-link>
@@ -97,7 +97,7 @@
                 :title="Trans.get('lang.delete')"
                 @click="deleteRole(data.item.id)"
                 v-b-tooltip.hover 
-                v-if="UserAuth.hasAccess('moduser.role','d')"
+                v-if="UserAuth.hasAccess(accessRuleKey,'d')"
             >
                 <span class="ion ion-md-close"></span>
             </b-btn>
@@ -150,6 +150,7 @@ export default {
     data() {
 
         return {
+            accessRuleKey: 'moduser.role',
             // START ----FI listing option
             sortBy: "id",
             sortDesc: false,
@@ -249,7 +250,15 @@ export default {
             //     // console.log('data : ',this.listData);
             // });
         },
-        deleteRole(roleId) {            
+        deleteRole(roleId) {    
+            
+            if(!this.UserAuth.hasAccess(this.accessRuleKey,'d')) {
+                //goto dashboard current tenant
+                this.Web.goToCurrentTenant();
+                this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+                return false;
+            }      
+              
             this.Web.showAlert({
                 styleType: "modal",
                 style: "warning",
@@ -269,6 +278,14 @@ export default {
         }
     },
     created() {
+
+        if(!this.UserAuth.hasAccess(this.accessRuleKey)) {
+            //goto dashboard current tenant
+            this.Web.goToCurrentTenant();
+            this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+            return false;
+        }
+
         this.loadData(1);
         this.fields = [
                 { key: "id", sortable: true, tdClass: "align-middle" },
@@ -284,6 +301,9 @@ export default {
                 }
             ];
         
+        if(!(this.UserAuth.hasAccess(this.accessRuleKey,'u') || this.UserAuth.hasAccess(this.accessRuleKey,'d'))){
+            this.fields.splice(5,1);
+        }
         //jika tidak menggunakan system tenant maka hilangkan kolom tenant
         if(this.AppConfig.system.web_admin.multitenant.active==0){
             this.fields.splice(3,2);

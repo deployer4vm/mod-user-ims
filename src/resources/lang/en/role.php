@@ -14,6 +14,7 @@ return [
     ],
     'roleform' => [
         'form_add_caption' => 'Add new role',
+        'tenant_group_select_all_group' => 'All tenant group',//value 0 text on tenant_group select
         'module' => 'Module',
         'feature' => 'Feature',
         'create' => 'Create',

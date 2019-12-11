@@ -162,7 +162,6 @@ const actions = {
     un-elegan way, nanti ubah agar lebih efisien
     */
     implementAcl({ commit, state, dispatch }) {
-        console.log('implementAcl');
         var aclItem, aclItemLv2, aclItemLv3, curAclId;
 
         globals().AppConfig.sidenav = JSON.parse(JSON.stringify(globals().AppConfig.sidenavOri));
@@ -172,19 +171,19 @@ const actions = {
             //jika tidak punya akses acl maka tolak (menu akan ditampilkan sesuai default ACL nya)
             if( !state.role[state.role_code] 
                 || !state.role[state.role_code]['rule']
-                || state.role[state.role_code]['rule'][packageNamespace]==undefined)return;
+                || state.role[state.role_code]['rule'][packageNamespace]==undefined)return true;
 
             vPackage.has_access = state.role[state.role_code]['rule'][packageNamespace]['has_access']==1?1:0;
 
             //jika tidak punya specific rule maka tolak (menu akan ditampilkan sesuai default ACL nya)
-            if(vPackage.children==undefined)return;
+            if(vPackage.children==undefined)return true;
             
             //----cek hak akses level 1
             _.forEach(vPackage.children, (accessItem, aclId) => {
                 curAclId = packageNamespace + '.' + aclId;
                 
                 //jika tidak punya akses acl maka tolak (menu akan ditampilkan sesuai default active_acl di packageConfig nya)
-                if(state.role[state.role_code]['rule'][curAclId]==undefined)return;
+                if(state.role[state.role_code]['rule'][curAclId]==undefined)return true;
                 
                 aclItem = state.role[state.role_code]['rule'][curAclId];
                 
@@ -206,7 +205,7 @@ const actions = {
 
                     curAclId = packageNamespace + '.' + aclId + '.' +aclIdLv2;
 
-                    if(state.role[state.role_code]['rule'][curAclId]==undefined)return;
+                    if(state.role[state.role_code]['rule'][curAclId]==undefined)return true;
 
                     aclItemLv2 = state.role[state.role_code]['rule'][curAclId];
 
@@ -233,7 +232,7 @@ const actions = {
 
                             curAclId = packageNamespace + '.' + aclId + '.' + aclIdLv2 + '.' + aclIdLv3;
 
-                            if(state.role[state.role_code]['rule'][curAclId]==undefined)return;
+                            if(state.role[state.role_code]['rule'][curAclId]==undefined)return true;
 
                             aclItemLv3 = state.role[state.role_code]['rule'][curAclId];
 

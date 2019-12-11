@@ -48,6 +48,14 @@ export default {
 
     methods: {
         sendBroadcast(){
+
+            if(!this.UserAuth.hasAccess('moduser.broadcast','c')) {
+                //goto dashboard current tenant
+                this.Web.goToCurrentTenant();
+                this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+                return false;
+            }   
+
             if(this.form.title == '' || this.form.message == ''){
                 this.Web.showAlert({text: "Judul dan isi notifikasi harus diisi",type: "warning"});
                 return false;
@@ -65,6 +73,13 @@ export default {
         }
     },
     created() {
+        if(!this.UserAuth.hasAccess('moduser.broadcast')) {
+            //goto dashboard current tenant
+            this.Web.goToCurrentTenant();
+            this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+            return false;
+        }   
+
         this.userApi = this.AppConfig.endpoint.api.moduser;
     }
 };

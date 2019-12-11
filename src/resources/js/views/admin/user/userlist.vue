@@ -3,7 +3,7 @@
 
     <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
       <div>{{Trans.get('user.module_caption')}}</div>
-      <router-link v-if="UserAuth.hasAccess('moduser.user','c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'user.add'}">
+      <router-link v-if="UserAuth.hasAccess(accessRuleKey,'c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{name: 'user.add'}">
         <span class="ion ion-md-add"></span>&nbsp; {{Trans.get('user.userlist.add_new_user')}}
       </router-link>
     </h4>
@@ -97,7 +97,7 @@
                     :title="Trans.get('lang.edit')"
                     v-b-tooltip.hover
                     :to="{name: 'user.edit', params: {userId: data.item.id}}" 
-                    v-if="UserAuth.hasAccess('moduser.user','u')"
+                    v-if="UserAuth.hasAccess(accessRuleKey,'u')"
                 >
                     <span class="ion ion-md-create"></span>
                 </router-link>
@@ -105,7 +105,7 @@
                     class="btn btn-danger icon-btn btn-xs md-btn-flat"
                     :title="Trans.get('lang.delete')"
                     @click="deleteUser(data.item.id)" 
-                    v-if="UserAuth.hasAccess('moduser.user','d')"
+                    v-if="UserAuth.hasAccess(accessRuleKey,'d')"
                     v-b-tooltip.hover
                 >
                     <span class="ion ion-md-close"></span>
@@ -159,7 +159,7 @@ export default {
         flatPickr
     },
     data: () => ({
-        
+        accessRuleKey: 'moduser.user',
         // START ----FI listing option
         sortBy: "id",
         sortDesc: false,
@@ -268,7 +268,15 @@ export default {
 
             }
         },
-        deleteUser(userId) {            
+        deleteUser(userId) {      
+
+            if(!this.UserAuth.hasAccess(this.accessRuleKey,'d')) {
+                //goto dashboard current tenant
+                this.Web.goToCurrentTenant();
+                this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+                return false;
+            }            
+            
             this.Web.showAlert({
                 styleType: "modal",
                 style: "warning",
@@ -288,6 +296,14 @@ export default {
         }
     },
     created() {
+        
+        if(!this.UserAuth.hasAccess(this.accessRuleKey)) {
+            //goto dashboard current tenant
+            this.Web.goToCurrentTenant();
+            this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+            return false;
+        }
+
         //load data user
         this.loadData(1); 
 
@@ -300,8 +316,11 @@ export default {
             this.roleItems = tmpRoleItems;
         });
 
-
         this.fields = JSON.parse(JSON.stringify(this.defaultFields));
+        
+        if(!(this.UserAuth.hasAccess(this.accessRuleKey,'u') || this.UserAuth.hasAccess(this.accessRuleKey,'d'))){
+            this.fields.splice(6,1);
+        }
 
         //jika username termasuk dari field yang dihide maka hide kolomnya
         if(this.AppConfig.packageLocal.moduser.users_hidden_field.includes('username')){

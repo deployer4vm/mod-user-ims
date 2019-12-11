@@ -187,6 +187,7 @@ export default {
         return data;
     },
     data: () => ({
+        accessRuleKey: 'moduser.user',
         emailMask: emailMask,
         form: {},
         formEmpty: {
@@ -227,7 +228,15 @@ export default {
             return this.AppConfig.packageLocal.moduser.user_profiles.hide_all==0;
         }
     },
-    created() {        
+    created() {    
+
+        if(!(this.UserAuth.hasAccess(this.accessRuleKey,'c') || this.UserAuth.hasAccess(this.accessRuleKey,'u'))) {
+            //goto dashboard current tenant
+            this.Web.goToCurrentTenant();
+            this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+            return false;
+        }    
+
         if(this.showUserField('username')){
             this.formEmpty.username = '';
         }        
@@ -298,6 +307,14 @@ export default {
             }else{
 
                 if(this.isAdd){
+
+                    if(!this.UserAuth.hasAccess(this.accessRuleKey,'c')) {
+                        //goto dashboard current tenant
+                        this.Web.goToCurrentTenant();
+                        this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+                        return false;
+                    }    
+
                     this.$store.dispatch("user/register", this.form).then((res)=>{
                         this.Web.showAlert({type: 'info', text: 'User Registered Successfully' });
                         this.$router.push({name: 'user.list'});
@@ -306,6 +323,13 @@ export default {
                         this.Web.showAlert({type: 'danger', text: 'Simpan data gagal : ' + err.message });
                     });
                 }else{
+
+                    if(!this.UserAuth.hasAccess(this.accessRuleKey,'u')) {
+                        //goto dashboard current tenant
+                        this.Web.goToCurrentTenant();
+                        this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
+                        return false;
+                    }    
 
                     this.$store.dispatch("user/update", {data: this.form,id: this.form.id}).then((res)=>{
                         this.Web.showAlert({type: 'info', text: 'User Updated Successfully' });

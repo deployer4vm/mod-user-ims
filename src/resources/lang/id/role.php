@@ -14,6 +14,7 @@ return [
     ],
     'roleform' => [
         'form_add_caption' => 'Tambah role baru',
+        'tenant_group_select_all_group' => 'All tenant group',//text value 0 pada input select tenant_group
         'module' => 'Module',
         'feature' => 'Feature',
         'create' => 'Create',
