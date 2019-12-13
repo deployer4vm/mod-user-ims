@@ -1,32 +1,37 @@
 <template>
-  <b-nav-item-dropdown no-caret :right="!isRTL" class="demo-navbar-notifications mr-lg-3">
-    <template slot="button-content">
-          <i class="ion ion-md-notifications-outline navbar-icon align-middle"></i>
-          <span class="badge badge-danger badge-dot indicator" v-if="notif.summary.unread_count != 0"></span>
-          <span class="d-lg-none align-middle">&nbsp; {{Trans.get('notif.notification_title')}}</span>
-    </template>
+    <b-nav-item-dropdown no-caret :right="!isRTL" class="demo-navbar-notifications mr-lg-3">
+        <template slot="button-content">
+            <i class="ion ion-md-notifications-outline navbar-icon align-middle"></i>
+            <span class="badge badge-danger badge-dot indicator" v-if="notif.summary.unread_count != 0"></span>
+            <span class="d-lg-none align-middle">&nbsp; {{Trans.get('notif.notification_title')}}</span>
+        </template>
 
-    <div class="bg-primary text-center text-white font-weight-bold p-3" v-if="notif.summary.unread_count != 0">{{notif.summary.unread_count}} {{Trans.get('notif.unread_notification')}}</div>
+        <div class="bg-primary text-center text-white font-weight-bold p-3" v-if="notif.summary.unread_count != 0">
+            {{notif.summary.unread_count}} {{Trans.get('notif.unread_notification')}}
+        </div>
 
-    <b-list-group flush>
-        <b-list-group-item class="media d-flex align-items-center" 
-            :to="{name: item.link_web.route, params: item.link_web.parameter}" 
-            v-for="item in notif.notification" :key="'navbarnotif-' + item.id"
+        <b-list-group flush>
+            <b-list-group-item class="media d-flex align-items-center" 
+                :to="{name: item.link_web.route, params: item.link_web.parameter}" 
+                v-for="item in notif.notification" :key="'navbarnotif-' + item.id"
+            >
+                <div :class="'ui-icon ui-icon-sm ion ion-ios-text border-0 text-white ' + (item.read_at==null?'bg-danger':'bg-secondary')"></div>
+                <div class="media-body line-height-condenced ml-3">
+                    <div :class="item.read_at==null?'text-dark font-weight-bold':'text-muted'">{{item.data.subject}}</div>
+                    <div class="small mt-1">{{item.data.description}}</div>
+                    <div class="small mt-1">{{item.created_at}}</div>
+                </div>
+            </b-list-group-item>
+
+        </b-list-group>
+
+        <router-link :to="{name: 'notification'}"
+            class="d-block text-center text-light small p-2 my-1"
         >
-            <div :class="'ui-icon ui-icon-sm ion ion-ios-text border-0 text-white ' + (item.read_at==null?'bg-danger':'bg-secondary')"></div>
-            <div class="media-body line-height-condenced ml-3">
-                <div :class="item.read_at==null?'text-dark font-weight-bold':'text-muted'">{{item.data.subject}}</div>
-                <div class="small mt-1">{{item.data.description}}</div>
-                <div class="small mt-1">{{item.created_at}}</div>
-            </div>
-        </b-list-group-item>
+            {{Trans.get('notif.show_all_notification')}}
+        </router-link>
 
-    </b-list-group>
-
-    <router-link :to="{name: 'notification'}"
-      class="d-block text-center text-light small p-2 my-1"
-    >{{Trans.get('notif.show_all_notification')}}</router-link>
-  </b-nav-item-dropdown>
+    </b-nav-item-dropdown>
 </template>
 <script>
 export default {
@@ -43,11 +48,8 @@ export default {
         };
     },
     created() {
-        this.loadNotif();
-        this.invervalNotif = setInterval(()=>{
-            if(this.UserAuth.isLogin())
-                this.loadNotif();
-        },10000);
+        if(this.UserAuth.isLogin())
+            this.loadNotif();
     },
     methods: {
         loadNotif() {
@@ -76,6 +78,9 @@ export default {
                             });
                     }
                     that.lastNotifCount = that.notif.summary.unread_count;
+                    setTimeout(function(){
+                        that.loadNotif();
+                    },10000);
                 });
         }
     }

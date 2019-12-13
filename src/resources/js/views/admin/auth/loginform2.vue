@@ -102,66 +102,68 @@
 import { required, minLength, email } from "node_modules/vuelidate/lib/validators";
 
 export default {
-  name: "pages-auth-login",
-  metaInfo: {
-    title: "Login"
-  },
-  data: () => ({
-    form: {
-      username: "",
-      password: "",
-      rememberMe: false
-    }
-  }),  
-  validations: {
-    form: {
-      username: {
-        required
-      },
-      password: {
-        required,
-        minLength: minLength(6)
-      }
-    }
-  },
-  computed: {
-    title() {      
-      return this.Web.getTenantName()?this.Web.getTenantName():this.Web.getAdminTitle();
-    }
-  },
-  methods: {
-    onSubmit(evt) {
-      evt.preventDefault();
-      
-      if(this.$v.form.$error){
-        this.Web.showAlert({
-          type: 'danger', 
-          title: this.Trans.get('alert.form_must_complete_title'),
-          text: this.Trans.get('alert.form_must_complete_text') 
-          });
-      }else{
-        console.log(this.form.username);
-        this.UserAuth.login({
-          username: this.form.username,
-          password: this.form.password
-        }).then((res)=>{          
-          console.log('Login success');
-          this.Web.showAlert({type: 'success', text: this.Trans.get('alert.auth_success') });
-          this.UserAuth.goToDashboard();
-        }).catch((err)=>{
-          console.log('Login error : ',err);
-          this.Web.showAlert({type: 'danger', text: this.Trans.get('alert.auth_failed') });
-        });
-      }      
+    name: "pages-auth-login",
+    metaInfo: {
+        title: "Login"
     },
-    onReset(evt) {
-      evt.preventDefault();
-      // Reset our form values
-      this.form.email = "";
-      this.form.password = "";
-      this.form.rememberMe = false;
-    }
-  },
-  created() {}
+    data: () => ({
+        form: {
+        username: "",
+        password: "",
+        rememberMe: false
+        }
+    }),  
+    validations: {
+        form: {
+            username: {
+                required
+            },
+            password: {
+                required,
+                minLength: minLength(6)
+            }
+        }
+    },
+    computed: {
+        title() {      
+            return this.Web.getTenantName()?this.Web.getTenantName():this.Web.getAdminTitle();
+        }
+    },
+    methods: {
+        onSubmit(evt) {
+            evt.preventDefault();
+            
+            if(this.$v.form.$error){
+                this.Web.showAlert({
+                    type: 'danger', 
+                    title: this.Trans.get('alert.form_must_complete_title'),
+                    text: this.Trans.get('alert.form_must_complete_text') 
+                });
+            }else{
+                this.Web.setLoadingPage(true);
+                this.UserAuth.login({
+                    username: this.form.username,
+                    password: this.form.password
+                }).then((res)=>{          
+                    this.Web.setLoadingPage(false);
+                    console.log('Login success');
+                    this.Web.showAlert({type: 'success', text: this.Trans.get('alert.auth_success') });
+                    this.UserAuth.goToDashboard();
+                }).catch((err)=>{
+                    this.Web.setLoadingPage(false);
+                    console.log('Login error : ',err);
+                    this.Web.showAlert({type: 'danger', text: this.Trans.get('alert.auth_failed') });
+                });
+            }      
+        },
+        onReset(evt) {
+            evt.preventDefault();
+            // Reset our form values
+            this.form.email = "";
+            this.form.password = "";
+            this.form.rememberMe = false;
+        }
+    },
+    created() {}
 };
 </script>
