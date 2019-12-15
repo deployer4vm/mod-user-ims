@@ -140,7 +140,7 @@ export default {
                     text: this.Trans.get('alert.form_must_complete_text') 
                 });
             }else{
-                this.Web.setLoadingPage(true);
+                this.Web.setLoadingPage(true,'Authenticate...');
                 this.UserAuth.login({
                     username: this.form.username,
                     password: this.form.password
