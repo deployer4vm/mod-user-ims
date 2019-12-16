@@ -1,8 +1,8 @@
 <template>
     <b-card :header="Trans.get('notif.notification_title') + ' / ' + title">
-        <h3>{{ notif.data.subject}}</h3>  
+        <!-- <h3>{{ notif.data.subject}}</h3>  -->
         <b-card-text>
-            {{ notif.data.body}}
+            <div v-html="notif.data.body"></div>
         </b-card-text>
         <hr>
         <b-button :to="{name: 'notification'}" variant="primary">{{Trans.get('lang.back')}}</b-button>
