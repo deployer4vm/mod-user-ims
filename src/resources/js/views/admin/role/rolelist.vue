@@ -68,19 +68,19 @@
           class="card-table"
         >
 
-          <template slot="tenant" slot-scope="data">
+          <template v-slot:cell(tenant)="data">
             {{data.item.tenant?data.item.tenant.name:''}}
           </template>
           
-          <template slot="tenant_group" slot-scope="data">
+          <template v-slot:cell(tenant_group)="data">
             {{data.item.tenant_group?data.item.tenant_group.name:''}}
           </template>
 
-          <template slot="role_code" slot-scope="data">
+          <template v-slot:cell(role_code)="data">
             <b-badge variant="outline-default">{{data.item.role_code}}</b-badge>
           </template>
 
-          <template slot="actions" slot-scope="data">
+          <template v-slot:cell(actions)="data">
             <!-- <b-btn variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit"><i class="ion ion-md-create"></i></b-btn> -->
             <router-link
                 class="btn btn-default icon-btn btn-xs md-btn-flat"
