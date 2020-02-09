@@ -28,8 +28,8 @@ class RoleController extends BaseController
      */
     public function readList(Request $request)
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
-            $this->setError(__('alert.access_denied',false,403));
+        if(!(UserAuth::hasAccess($this->accessRuleKey,'r') || UserAuth::hasAccess('moduser.user','r'))){
+            $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
 
