@@ -6,7 +6,7 @@ use Facades\hpsynapse\moduser\Repositories\UserRepo;
 use Facades\hpsynapse\moduser\Repositories\RoleRepo;
 use Illuminate\Support\Facades\Auth;
 use hpsynapse\moduser\Models\ApiToken;
-use App\Base\RepoCacheTrait;
+use App\Base\Traits\ResCacheTrait;
 
 /**
  * Library untuk akses SSO service
@@ -16,7 +16,7 @@ use App\Base\RepoCacheTrait;
  */
 class UserAuth
 {    
-    use RepoCacheTrait;
+    use ResCacheTrait;
     protected $isLogin=false;
     protected $isApiCall=false;
     protected $token='';
@@ -118,6 +118,7 @@ class UserAuth
         $role = UserRepo::getUserRole($userData['id']);
         
         foreach($role as $key => $val) {
+            $roleCode = $key;
             if($val['is_main_role']){
                 $roleCode = $key;
                 break;
@@ -294,17 +295,32 @@ class UserAuth
      * -------------------------------------------------------------------------
      */
     
+    
     /**
      * cek apakah user yang online memiliki akses role "rolde_code"
      * 
      * @param type $roleCode
      * @return boolean
      */
-    public function is($roleCode)
+    public function hasRole($roleCode)
     {
-        if(isset($this->userData['role']) && strpos($this->userData['role'],':'.$roleCode.';')){
+        if(isset($this->userData['role']) && strpos($this->userData['role'],';'.$roleCode.';')!==false){
             return true;
         }
+        return false;
+    }
+    
+    /**
+     * cek apakah user yang online adalah sebagai "rolde_code"
+     * 
+     * @param type $roleCode
+     * @return boolean
+     */
+    public function is($roleCode)
+    {
+        if(!empty($this->userRoleCode) && $this->userRoleCode == $roleCode){
+            return true;
+        }        
         return false;
     }
     

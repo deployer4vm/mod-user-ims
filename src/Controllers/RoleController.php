@@ -33,7 +33,7 @@ class RoleController extends BaseController
             return $this->done();
         }
 
-        $orderBy = false;
+        $orderBy = [];
         $filter = [];
 
         if($request->input('q', false))

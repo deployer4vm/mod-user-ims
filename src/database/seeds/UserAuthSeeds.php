@@ -20,15 +20,15 @@ class UserAuthSeeds extends Seeder
                 
         DB::table('roles')->insert([
             [
-                'role_code' => 'superadmin',
+                'role_code' => 'webdev',
                 'name' => 'Super Admin',
                 'level' => 1,
                 'rule' => '',
                 'created_at' => $now,
                 'updated_at' => $now
             ], [
-                'role_code' => 'admin',
-                'name' => 'Admin',
+                'role_code' => 'superadmin',
+                'name' => 'Super Admin',
                 'level' => 2,
                 'rule' => '',
                 'created_at' => $now,
@@ -40,11 +40,11 @@ class UserAuthSeeds extends Seeder
             [
                 'users' => [
                     'user_idcode' => '2019010110000001',
-                    'name' => 'Super Admin',
-                    'username' => 'superadmin',
-                    'email' => 'superadmin@email.com',
+                    'name' => 'Web Developer',
+                    'username' => 'webdev',
+                    'email' => 'webdev@email.com',
                     'password' => Hash::make('secret'),
-                    'role' => ';superadmin;',
+                    'role' => ';webdev;',
                     'level' => 1,
                     'created_at' => $now,
                     'updated_at' => $now
@@ -67,11 +67,11 @@ class UserAuthSeeds extends Seeder
             [
                 'users' => [
                     'user_idcode' => '2019010110000002',
-                    'name' => 'Admin',
-                    'username' => 'admin',
-                    'email' => 'admin@email.com',
+                    'name' => 'Super Admin',
+                    'username' => 'superadmin',
+                    'email' => 'superadmin@email.com',
                     'password' => Hash::make('secret'),
-                    'role' => ';admin;',
+                    'role' => ';superadmin;',
                     'level' => 2,
                     'created_at' => $now,
                     'updated_at' => $now

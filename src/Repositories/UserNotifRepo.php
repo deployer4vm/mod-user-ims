@@ -22,7 +22,7 @@ class UserNotifRepo extends BaseRepository
     
     public function addMessage()
     {
-        NotificationMessage;
+        
     }
     
     public function deleteMessage()
@@ -64,7 +64,7 @@ class UserNotifRepo extends BaseRepository
         if(isset($filter['type']))unset($filter['type']);
         if(isset($filter['readStatus']))unset($filter['readStatus']);
         $data = $this->_list(
-            $model, $filter, $offset, $limit, false
+            $model, $filter, $offset, $limit
         );
 
         return $data;

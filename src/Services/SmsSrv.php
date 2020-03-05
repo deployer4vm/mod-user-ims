@@ -2,13 +2,12 @@
 
 namespace hpsynapse\moduser\Services;
 
-use hpsynapse\moduser\Repositories\UserRepo;
-use hpsynapse\moduser\Repositories\UserMessageTraits;
+use GuzzleHttp\Client;
 
 /**
  * 
  */
-class SmsServices
+class SmsSrv
 {
 	/**
      * Zenziva::$userkey and $passkey
@@ -117,5 +116,3 @@ class SmsServices
     }
 	
 }
-
-?>

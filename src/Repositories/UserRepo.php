@@ -203,7 +203,7 @@ class UserRepo extends BaseRepository
       *     profile
       *     tenant
       */
-    public function listUser($filter = false, $offset = 0, $limit = 0,$orderBy=false)
+    public function listUser($filter = false,int $offset = 0,int $limit = 0,array $orderBy=[])
     {
         if (!$filter) $filter = [];
         $filter['searchField'] = ['name','email','username'];
@@ -396,11 +396,13 @@ class UserRepo extends BaseRepository
             $data['token'] = $apiTokenData['api_token'];
         }
 
-        if(isset($userData['profile'])){
-            $userData['profile']['user_id'] = $data['id'];
-            //insert profile
-            $this->registerProfile($userData['profile']);
-        }
+        /**
+         * add profile
+         */
+        $userProfile = [];
+        if(isset($userData['profile'])) $userProfile = $userData['profile'];            
+        $userProfile['user_id'] = $data['id'];
+        $this->registerProfile($userProfile);
 
         //update role data          
         $this->updateUserRole($data['id'],$roles);
@@ -652,7 +654,12 @@ class UserRepo extends BaseRepository
         }
         
         if($input!=[]){
-            $this->_update($model, ['user_id',$userId], $input);
+            if($this->_exists($model, ['user_id',$userId])){
+                $this->_update($model, ['user_id',$userId], $input);
+            }else{
+                $input['user_id'] = $userId;
+                $this->_create($model, $input);
+            }            
         }
     }
 

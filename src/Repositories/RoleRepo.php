@@ -17,7 +17,7 @@ class RoleRepo extends BaseRepository
         $this->model = $model;        
     }
     
-    public function listRole($filter=false, $offset=0,$limit=0,$orderBy=false)
+    public function listRole($filter=false,int $offset=0,int $limit=0,array $orderBy=[])
     {
         if (!$filter) $filter = [];
         $filter['searchField'] = ['name'];

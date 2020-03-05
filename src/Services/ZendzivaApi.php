@@ -4,7 +4,7 @@ namespace hpsynapse\moduser\Services;
 
 use GuzzleHttp\Client;
 
-class Sms {
+class ZendzivaApi {
 
     /**
      * Zenziva::$userkey and $passkey

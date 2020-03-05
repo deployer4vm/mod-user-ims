@@ -28,6 +28,7 @@ class UserNotifSrv
     {
         return $this->notificationType;
     }
+    
     public function getSummary($userId)
     {
         return [

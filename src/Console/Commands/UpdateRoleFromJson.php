@@ -16,14 +16,15 @@ class UpdateRoleFromJson extends Command
      *
      * @var string
      */
-    protected $signature = 'moduser:aclupdate';
+    protected $signature = 'moduser:aclupdate '.
+        '{--connection= : [OPTIONAL] default akan menggunakan koneksi default}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'update data json role di /config/acl';
+    protected $description = 'Update data json role di /app/MainApp/config/acl/* ke table roles';
 
     /**
      * Execute the console command.
@@ -31,7 +32,10 @@ class UpdateRoleFromJson extends Command
      * @return mixed
      */
     public function handle()
-    {
+    {        
+        $connection = $this->option('connection'); 
+        $connection = !$connection?config('database.default'):$connection;
+
         $filenames = glob(app_path('MainApp/config/acl/*'));
                    
         $paths = array_map(function ($filename) {
@@ -39,11 +43,12 @@ class UpdateRoleFromJson extends Command
         }, $filenames);
         
         foreach ($paths as $roleCode) {
-            DB::table('roles')->where('role_code',$roleCode)->update(['rule' => file_get_contents(app_path('MainApp/config/acl/'.$roleCode.'.json'))]);
+            DB::connection($this->connection)->table('roles')
+                ->where('role_code',$roleCode)
+                ->update(['rule' => file_get_contents(app_path('MainApp/config/acl/'.$roleCode.'.json'))]);
             $this->info('Update : '.$roleCode);
         }
 
         $this->info('SUCCESS!');
-
     }
 }
