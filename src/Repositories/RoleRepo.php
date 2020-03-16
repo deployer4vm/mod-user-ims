@@ -46,16 +46,17 @@ class RoleRepo extends BaseRepository
 
     public function createRole($data)
     {
+        if(isset($data['rule']) && is_array($data['rule']))$data['rule'] = json_encode($data['rule'],JSON_PRETTY_PRINT);
         return $this->_create(new Role, $data);
     }
     public function updateRole($where, $data)
     {
+        if(isset($data['rule']) && is_array($data['rule']))$data['rule'] = json_encode($data['rule'],JSON_PRETTY_PRINT);
         return $this->_update(new Role, $where, $data);
     }
     public function deleteRole($id)
     {
-        $this->_delete(new Role, ['id', $id]);
-        return true;
+        return $this->_delete(new Role, ['id', $id]);
     }
    
     

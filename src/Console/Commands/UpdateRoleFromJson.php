@@ -43,7 +43,7 @@ class UpdateRoleFromJson extends Command
         }, $filenames);
         
         foreach ($paths as $roleCode) {
-            DB::connection($this->connection)->table('roles')
+            DB::connection($connection)->table('roles')
                 ->where('role_code',$roleCode)
                 ->update(['rule' => file_get_contents(app_path('MainApp/config/acl/'.$roleCode.'.json'))]);
             $this->info('Update : '.$roleCode);

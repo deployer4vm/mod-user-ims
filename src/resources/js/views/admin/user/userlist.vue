@@ -2,7 +2,9 @@
     <div>
         <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
             <div>{{ Trans.get("user.module_caption") }}</div>
-            <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success rounded-pill btn-sm d-block" :to="{ name: 'user.add' }"> <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }} </router-link>
+            <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-secondary btn-sm d-block" :to="{ name: 'user.add' }">
+                <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }} 
+            </router-link>
         </h4>
 
         <!-- Filters -->
@@ -257,11 +259,18 @@
         created() {
             if (!this.UserAuth.hasAccess(this.accessRuleKey)) {
                 //goto dashboard current tenant
-                this.Web.goToCurrentTenant();
-                this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
+                this.Web.goToCurrentTenant();                
+                this.Web.showAlert({ 
+                    title: this.Trans.get("alert.warning_title"),
+                    text: this.Trans.get("alert.access_denied"), 
+                    type: "warning" 
+                });
                 return false;
             }
 
+            this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+            this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
+            
             //load data user
             this.loadData(1);
 

@@ -16,12 +16,18 @@ class UserAuthSeeds extends Seeder
      */
     public function run()
     {
+        DB::table('users')->truncate();
+        DB::table('user_profiles')->truncate();
+        DB::table('roles')->truncate();
+        DB::table('user_roles')->truncate();
+        DB::table('user_tenants')->truncate();
+        
         $now = Now();
                 
         DB::table('roles')->insert([
             [
                 'role_code' => 'webdev',
-                'name' => 'Super Admin',
+                'name' => 'Web Developer',
                 'level' => 1,
                 'rule' => '',
                 'created_at' => $now,

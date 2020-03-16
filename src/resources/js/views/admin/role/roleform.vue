@@ -30,7 +30,7 @@
                     <invalid-tooltip :inputItem="$v.roleForm.role_code" :fieldName="Trans.get('role.field_caption.role_code')" />
                 </b-form-group>
 
-                <b-form-group :label="Trans.get('role.field_caption.tenant_group')"  class="col position-relative">
+                <b-form-group v-if="AppConfig.system.web_admin.multitenant.active" :label="Trans.get('role.field_caption.tenant_group')"  class="col position-relative">
                     <b-select 
                         v-model="roleForm.tenant_group_id" 
                         :options="tenantGroupOption"                        
