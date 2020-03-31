@@ -3,9 +3,9 @@
 namespace hpsynapse\moduser\Controllers;
 
 use Illuminate\Http\Request;
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
-use Facades\hpsynapse\moduser\Repositories\RoleRepo;
-use Facades\hpsynapse\moduser\Services\UserAuth;
+use hpsynapse\moduser\Facades\UserRepo;
+use hpsynapse\moduser\Facades\RoleRepo;
+use hpsynapse\moduser\Facades\UserAuth;
 
 use App\Base\BaseController;
 
@@ -47,6 +47,12 @@ class UserController extends BaseController
         //jika menyertakan status
         if($request->input('role', false))
             $filter[] = ['role', 'LIKE', '%;'.$request->input('role').';%'];
+            
+        if($request->input('level', false)){
+            $filter[] = ['level', '!=', $request->input('level')];
+        } else if($request->input('level_except', false)){
+            $filter[] = ['level', '!=', $request->input('level_except')];
+        }
 
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
         if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')!=1) {

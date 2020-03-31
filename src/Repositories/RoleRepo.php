@@ -4,7 +4,7 @@ namespace hpsynapse\moduser\Repositories;
 
 use hpsynapse\moduser\Models\Role;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use hpsynapse\moduser\Facades\UserRepo;
 
 use App\Base\BaseRepository;
 

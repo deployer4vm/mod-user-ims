@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use GuzzleHttp\Client;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use hpsynapse\moduser\Facades\UserRepo;
 
 /**
  * prosess jobs dari queue yg digenerate jobs ProcessUserUpdate

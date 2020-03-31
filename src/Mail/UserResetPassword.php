@@ -8,7 +8,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 // use App\Mailling;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use hpsynapse\moduser\Facades\UserRepo;
 
 class UserResetPassword extends Mailable
 {

@@ -4,7 +4,7 @@ namespace hpsynapse\moduser\Middleware;
 
 use Closure;
 // use Illuminate\Support\Facades\Auth;
-use Facades\hpsynapse\moduser\Services\UserAuth;
+use hpsynapse\moduser\Facades\UserAuth;
 
 /**
  * 

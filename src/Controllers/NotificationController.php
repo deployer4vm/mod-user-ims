@@ -5,10 +5,10 @@ namespace hpsynapse\moduser\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
-use Facades\hpsynapse\moduser\Services\UserNotifSrv;
+use hpsynapse\moduser\Facades\UserNotifSrv;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
-use Facades\hpsynapse\moduser\Services\UserAuth;
+use hpsynapse\moduser\Facades\UserRepo;
+use hpsynapse\moduser\Facades\UserAuth;
 
 use App\Base\BaseController;
 

@@ -2,8 +2,8 @@
 
 namespace hpsynapse\moduser\Repositories;
 
-//use Facades\hpsynapse\moduser\Repositories\AppsRepo;
-//use Facades\hpsynapse\moduser\Repositories\UserRepo;
+//use hpsynapse\moduser\Facades\AppsRepo;
+//use hpsynapse\moduser\Facades\UserRepo;
 //use Carbon\Carbon;
 
 //use semua model yg diperlukan

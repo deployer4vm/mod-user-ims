@@ -7,7 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use hpsynapse\moduser\Facades\UserRepo;
 
 class UserActivation extends Mailable implements ShouldQueue
 {

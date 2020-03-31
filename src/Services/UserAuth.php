@@ -2,8 +2,8 @@
 
 namespace hpsynapse\moduser\Services;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
-use Facades\hpsynapse\moduser\Repositories\RoleRepo;
+use hpsynapse\moduser\Facades\UserRepo;
+use hpsynapse\moduser\Facades\RoleRepo;
 use Illuminate\Support\Facades\Auth;
 use hpsynapse\moduser\Models\ApiToken;
 use App\Base\Traits\ResCacheTrait;

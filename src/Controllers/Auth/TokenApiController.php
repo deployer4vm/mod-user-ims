@@ -2,11 +2,11 @@
 
 namespace hpsynapse\moduser\Controllers\Auth;
 
-use Facades\hpsynapse\moduser\Repositories\UserNotifRepo;
+use hpsynapse\moduser\Facades\UserNotifRepo;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
-use Facades\hpsynapse\moduser\Repositories\RoleRepo;
-use Facades\hpsynapse\moduser\Services\UserAuth;
+use hpsynapse\moduser\Facades\UserRepo;
+use hpsynapse\moduser\Facades\RoleRepo;
+use hpsynapse\moduser\Facades\UserAuth;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;

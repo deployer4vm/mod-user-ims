@@ -2,9 +2,9 @@
 
 namespace App\Modules\Auth\Controllers\Auth;
 use Facades\App\Services\AcSSOService;
-use Facades\hpsynapse\moduser\Services\SocialAuthSrv;
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
-use Facades\hpsynapse\moduser\Repositories\AppsRepo;
+use hpsynapse\moduser\Facades\SocialAuthSrv;
+use hpsynapse\moduser\Facades\UserRepo;
+use hpsynapse\moduser\Facades\AppsRepo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;

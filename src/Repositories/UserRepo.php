@@ -5,7 +5,7 @@ namespace hpsynapse\moduser\Repositories;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Facades\hpsynapse\moduser\Repositories\UserLogRepo;
+use hpsynapse\moduser\Facades\UserLogRepo;
 
 use Carbon\Carbon;
 

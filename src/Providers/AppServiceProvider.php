@@ -3,7 +3,7 @@ namespace hpsynapse\moduser\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\AliasLoader;
-use Facades\hpsynapse\moduser\Services\UserAuth;
+use hpsynapse\moduser\Facades\UserAuth;
 use hpsynapse\moduser\Console\Commands\UpdateRoleFromJson;
 
 // use Illuminate\Support\Facades\Schema;

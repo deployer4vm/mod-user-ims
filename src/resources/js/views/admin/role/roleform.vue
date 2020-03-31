@@ -101,6 +101,7 @@
                                             {{Trans.chose(rule.acl_caption)}}
                                             <div v-if="rule.acl_description!=''"><i>{{Trans.chose(rule.acl_description)}}</i></div>
                                         </td> 
+                                        <!-- jika hanya has_access nya aja yg ditampilkan, maka cukup tampilkan 1 check rule -->
                                         <template v-if="rule.crud.c!=1&&rule.crud.r!=1&&rule.crud.u!=1&&rule.crud.d!=1">                                   
                                             <td colspan="4">
                                                 <b-check :value="1" :unchecked-value="0" 
@@ -111,7 +112,7 @@
                                                 </b-check>
                                             </td>
                                         </template>
-                                        <template v-else> 
+                                        <template v-else><!-- jika menampilkan check CRUD -->
                                             <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0 || !UserAuth.hasAccess(ruleKey,'c')" class="px-2 m-0" /></td>
                                             <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0 || !UserAuth.hasAccess(ruleKey,'r')" class="px-2 m-0" /></td>
                                             <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0 || !UserAuth.hasAccess(ruleKey,'u')" class="px-2 m-0" /></td>

@@ -6,11 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
-use Facades\hpsynapse\moduser\Repositories\UserNotifRepo;
-use Facades\hpsynapse\moduser\Repositories\RoleRepo;
+use hpsynapse\moduser\Facades\UserRepo;
+use hpsynapse\moduser\Facades\UserNotifRepo;
+use hpsynapse\moduser\Facades\RoleRepo;
 
-use Facades\hpsynapse\moduser\Services\UserAuth;
+use hpsynapse\moduser\Facades\UserAuth;
 
 //use Carbon\Carbon;
 

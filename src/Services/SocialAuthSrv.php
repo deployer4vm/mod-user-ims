@@ -5,7 +5,7 @@ namespace hpsynapse\moduser\Services;
 use hpsynapse\moduser\Models\User;
 use hpsynapse\moduser\Models\UserProfile;
 
-use Facades\hpsynapse\moduser\Repositories\UserRepo;
+use hpsynapse\moduser\Facades\UserRepo;
 
 /**
  * Social Sign On Service Handling

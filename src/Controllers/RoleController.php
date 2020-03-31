@@ -4,8 +4,8 @@ namespace hpsynapse\moduser\Controllers;
 
 use Illuminate\Http\Request;
 
-use Facades\hpsynapse\moduser\Repositories\RoleRepo;
-use Facades\hpsynapse\moduser\Services\UserAuth;
+use hpsynapse\moduser\Facades\RoleRepo;
+use hpsynapse\moduser\Facades\UserAuth;
 
 use App\Base\BaseController;
 
