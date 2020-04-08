@@ -12,7 +12,7 @@ class CreateUserTenantsTable extends Migration
      * @return void
      */
     public function up()
-    {
+{
         Schema::create('user_tenants', function (Blueprint $table) {
             $table->bigIncrements('id');
 

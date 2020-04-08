@@ -127,7 +127,7 @@ export default {
                     this.Web.setLoadingPage(false);
                     console.log('Login success');
                     this.Web.showAlert({type: 'success', text: this.Trans.get('alert.auth_success') });
-                    this.UserAuth.goToDashboard();
+                    this.UserAuth.goToHome();
                 }).catch((err)=>{
                     this.Web.setLoadingPage(false);
                     console.log('Login error : ',err);

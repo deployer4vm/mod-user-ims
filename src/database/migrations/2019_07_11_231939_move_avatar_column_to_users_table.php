@@ -18,7 +18,7 @@ class MoveAvatarColumnToUsersTable extends Migration
         });
         Schema::table('user_profiles', function (Blueprint $table) {
             $table->dropColumn('avatar');
-        });
+        });        
     }
 
     /**
