@@ -30,7 +30,7 @@
                     <invalid-tooltip :inputItem="$v.roleForm.role_code" :fieldName="Trans.get('role.field_caption.role_code')" />
                 </b-form-group>
 
-                <b-form-group v-if="AppConfig.system.web_admin.multitenant.active" :label="Trans.get('role.field_caption.tenant_group')"  class="col position-relative">
+                <b-form-group v-if="AppConfig.system.multitenant.active" :label="Trans.get('role.field_caption.tenant_group')"  class="col position-relative">
                     <b-select 
                         v-model="roleForm.tenant_group_id" 
                         :options="tenantGroupOption"                        
@@ -208,7 +208,7 @@ export default {
             return (key.split(".").length - 1);
         },
         isRuleKeyAllowed(tenant_group_id) {
-            if(this.AppConfig.system.web_admin.multitenant.active){
+            if(this.AppConfig.system.multitenant.active){
                 if(!(this.roleForm.tenant_group_id == 0 || tenant_group_id == 0 || tenant_group_id.includes(this.roleForm.tenant_group_id)))
                     return false;
             }
@@ -439,7 +439,7 @@ export default {
         };
 
         //load tenant group jika fitur multitenant aktif
-        if(this.AppConfig.system.web_admin.multitenant.active==1 && this.Web.getTenant.is_main){
+        if(this.AppConfig.system.multitenant.active==1 && this.Web.getTenant.is_main){
             this.$store.dispatch('listTenantGroup').then((res)=>{
                 var tmp = [{value:0, text: this.Trans.get('role.roleform.tenant_group_select_all_group')}];
                 _.forEach(res,(v,k)=>{

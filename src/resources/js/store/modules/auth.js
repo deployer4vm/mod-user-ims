@@ -100,7 +100,7 @@ const actions = {
                 
                 //jika auto detek login
                 if(
-                    globals().AppConfig.system.web_admin.multitenant.autodetect_login == 1 &&
+                    globals().AppConfig.system.multitenant.autodetect_login == 1 &&
                     res.data.data.tenant &&
                     res.data.data.tenant.group_app != authData.group_app){ 
 

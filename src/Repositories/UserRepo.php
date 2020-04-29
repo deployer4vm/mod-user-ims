@@ -103,7 +103,7 @@ class UserRepo extends BaseRepository
         }
 
         //jika multitenant aktif dan user tidak all_tenant
-        if (config('AppConfig.system.web_admin.multitenant.active')==1 && $user['all_tenant']==0) {
+        if (config('AppConfig.system.multitenant.active')==1 && $user['all_tenant']==0) {
 
             //jika null berarti autodetect tenant
             if (is_null($tenantId)) {
@@ -133,12 +133,12 @@ class UserRepo extends BaseRepository
      * @param type $except
      * @return boolean
      */
-    public function isEmailRegistered($email, $except_user_id = false)
+    public function isEmailRegistered($email, $exceptUserId = false)
     {
         $user = User::where('email', $email);
 
-        if ($except_user_id) {
-            $user = $user->where('id', '!=', $except_user_id);
+        if ($exceptUserId) {
+            $user = $user->where('id', '!=', $exceptUserId);
         }
 
         if ($user->exists()) {
@@ -155,12 +155,12 @@ class UserRepo extends BaseRepository
      * @param type $except
      * @return boolean
      */
-    public function isPhoneRegistered($phone, $except_user_id = false)
+    public function isPhoneRegistered($phone, $exceptUserId = false)
     {
         $user = User::where('phone', $phone);
 
-        if ($except_user_id) {
-            $user = $user->where('id', '!=', $except_user_id);
+        if ($exceptUserId) {
+            $user = $user->where('id', '!=', $exceptUserId);
         }
 
         if ($user->exists()) {
@@ -177,12 +177,12 @@ class UserRepo extends BaseRepository
      * @param type $except
      * @return boolean
      */
-    public function isUsernameRegistered($username, $except_user_id = false)
+    public function isUsernameRegistered($username, $exceptUserId = false)
     {
         $user = User::where('username', $username);
 
-        if ($except_user_id) {
-            $user = $user->where('id', '!=', $except_user_id);
+        if ($exceptUserId) {
+            $user = $user->where('id', '!=', $exceptUserId);
         }
 
         if ($user->exists()) {
@@ -589,6 +589,21 @@ class UserRepo extends BaseRepository
         if (isset($userData['_method'])) unset($userData['_method']);
         if (isset($userData['password']) && $userData['password']) $userData['password'] = Hash::make($userData['password']);
         
+        if (isset($userData['username']) && $this->isUsernameRegistered($userData['username'], $userId)){
+            $this->error = 'Username already registered.';
+            return false;
+        }
+        
+        if (isset($userData['email']) && $userData['email'] && $this->isEmailRegistered($userData['email'], $userId)) {
+            $this->error = 'Email already registered.';
+            return false;
+        }
+
+        if (isset($userData['phone']) && $userData['phone'] && $this->isPhoneRegistered($userData['phone'], $userId)) {
+            $this->error = 'Phone already registered.';
+            return false;
+        }
+		
         //jika menyertakan profile, maka proses update table profile
         if(isset($userData['profile'])){
             $this->updateProfile($userId, $userData['profile']);

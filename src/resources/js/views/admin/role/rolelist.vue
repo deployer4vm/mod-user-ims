@@ -305,7 +305,7 @@ export default {
             this.fields.splice(5,1);
         }
         //jika tidak menggunakan system tenant maka hilangkan kolom tenant
-        if(this.AppConfig.system.web_admin.multitenant.active==0){
+        if(this.AppConfig.system.multitenant.active==0){
             this.fields.splice(3,2);
         }else{  
             if(this.AppConfig.packageLocal.moduser.role_hidden_field.includes('tenant_group')){

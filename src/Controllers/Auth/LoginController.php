@@ -60,7 +60,7 @@ class LoginController extends BaseController
         $authData = $request->only('username', 'password');
 
         $tenantId = config('tenant.id');
-        if (config('AppConfig.system.web_admin.multitenant.autodetect_login')==1) $tenantId = null;
+        if (config('AppConfig.system.multitenant.autodetect_login')==1) $tenantId = null;
         
 
         if($user = UserRepo::loginCheck($authData['username'],$authData['password'], $tenantId)){
@@ -138,7 +138,7 @@ class LoginController extends BaseController
         }        
 
         $tenantId = config('tenant.id');
-        if (config('AppConfig.system.web_admin.multitenant.autodetect_login')==1) 
+        if (config('AppConfig.system.multitenant.autodetect_login')==1) 
             $tenantId = null;
 
         if($user = UserRepo::loginCheck($authParam['username'],$authParam['password'], $tenantId)){

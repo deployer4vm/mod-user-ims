@@ -51,7 +51,7 @@ class RoleController extends BaseController
             $filter[] = ['level','>',UserAuth::user('level')];
         }
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
-        if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')>1) {
+        if (config('AppConfig.system.multitenant.active')==1 && config('tenant.id')>1) {
             $filter[] = [
                 ['tenant_id', config('tenant.id')],
                 ['OR tenant_group_id',config('tenant.tenant_group_id')],
@@ -143,7 +143,7 @@ class RoleController extends BaseController
 
         if(isset($input['id']))unset($input['id']);
 
-        if(config('AppConfig.system.web_admin.multitenant.active')){
+        if(config('AppConfig.system.multitenant.active')){
             //jika owner/main app maka bisa set sendiri tenant dan group tenant role nya
             if(config('tenant.is_main')){
                 if(!isset($input['tenant_id']))$input['tenant_id'] = 0;
@@ -188,7 +188,7 @@ class RoleController extends BaseController
         
         if(isset($input['id']))unset($input['id']);
 
-        if(config('AppConfig.system.web_admin.multitenant.active')){
+        if(config('AppConfig.system.multitenant.active')){
             //jika owner/main app maka bisa set sendiri tenant dan group tenant role nya
             if(config('tenant.is_main')){
                 if(!isset($input['tenant_id']))$input['tenant_id'] = 0;

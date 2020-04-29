@@ -55,7 +55,7 @@ class UserController extends BaseController
         }
 
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
-        if (config('AppConfig.system.web_admin.multitenant.active')==1 && config('tenant.id')!=1) {
+        if (config('AppConfig.system.multitenant.active')==1 && config('tenant.id')!=1) {
             $filter['tenant'] = [config('tenant.id')];
         }
         
