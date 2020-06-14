@@ -4,7 +4,7 @@ namespace hpsynapse\moduser\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\ThrottlesLogins;
+use hpsynapse\moduser\Controllers\Auth\ThrottlesLogins;
 
 use hpsynapse\moduser\Facades\UserRepo;
 use hpsynapse\moduser\Facades\UserNotifRepo;

@@ -41,6 +41,8 @@ const actions = {
                 params: filterParams,
             })
             .then(res => {
+                // if(params.saveState==undefined||params.saveState)
+                //     commit("setUserList", res.data.data);
                 commit("setUserList", res.data.data);
                 return res.data.data;
             });

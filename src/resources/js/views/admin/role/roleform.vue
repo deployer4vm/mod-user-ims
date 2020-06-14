@@ -1,136 +1,157 @@
 <template>
     <div>
-        
-        <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
-            <router-link class="btn btn-outline-success d-block" :to="{name: 'role.list'}">
-                <span class="ion ion-ios-arrow-back"></span>&nbsp; {{Trans.get('lang.back')}}
+                    
+        <h4 class="d-flex justify-content-between align-items-center w-100 mb-4 border-bottom">
+            <router-link class="p-3 rounded-0 btn btn-outline-default bg-light border-right d-block borderless text-muted text-nowrap" :to="{name: 'role.list'}">
+                <span class="ion ion-ios-arrow-back"></span>&nbsp; {{ Trans.get("lang.back") }}
             </router-link>
-            <div>
-                <span class="text-muted font-weight-light">{{Trans.get('role.module_caption')}} /</span>
-                {{ title }}
+            <div class="p-2 pr-4 text-right">
+                <span class="text-muted font-weight-light">
+                    {{Trans.get('role.module_caption')}} / 
+                </span> 
+                {{title}}
             </div>
         </h4>
 
-        <b-card>
-            <b-card-body class="pb-2">
+        <div class="m-4">
+            <b-card>
+                <b-card-body class="pb-2">
 
-                <b-form-group :label="Trans.get('role.field_caption.name')" class="col position-relative">
-                    <b-input 
-                        :state="$v.roleForm.name.$error?'invalid':''" 
-                        v-model="roleForm.name" @blur="formatRoleCodeFromRoleName"
-                    />
-                    <invalid-tooltip :inputItem="$v.roleForm.name" :fieldName="Trans.get('role.field_caption.name')" />
-                </b-form-group>
+                    <b-form-group :label="Trans.get('role.field_caption.name')" label-align-md="right" label-class="pr-md-2" :label-cols-md="2">
+                        <b-input 
+                            :state="$v.roleForm.name.$error?'invalid':''" 
+                            v-model="roleForm.name" @blur="formatRoleCodeFromRoleName"
+                        />
+                        <invalid-tooltip :inputItem="$v.roleForm.name" :fieldName="Trans.get('role.field_caption.name')" />
+                    </b-form-group>
 
-                <b-form-group :label="Trans.get('role.field_caption.role_code')" class="col position-relative">
-                    <b-input 
-                        :state="$v.roleForm.role_code.$error?'invalid':''"
-                        v-model="roleForm.role_code" @blur="formatRoleCode"
-                    />
-                    <invalid-tooltip :inputItem="$v.roleForm.role_code" :fieldName="Trans.get('role.field_caption.role_code')" />
-                </b-form-group>
+                    <b-form-group :label="Trans.get('role.field_caption.role_code')" label-align-md="right" label-class="pr-md-2" :label-cols-md="2">
+                        <b-input 
+                            :state="$v.roleForm.role_code.$error?'invalid':''"
+                            v-model="roleForm.role_code" @blur="formatRoleCode"
+                        />
+                        <invalid-tooltip :inputItem="$v.roleForm.role_code" :fieldName="Trans.get('role.field_caption.role_code')" />
+                    </b-form-group>
 
-                <b-form-group v-if="AppConfig.system.multitenant.active" :label="Trans.get('role.field_caption.tenant_group')"  class="col position-relative">
-                    <b-select 
-                        v-model="roleForm.tenant_group_id" 
-                        :options="tenantGroupOption"                        
-                    />                    
-                </b-form-group>
+                    <b-form-group v-if="AppConfig.system.multitenant.active" :label="Trans.get('role.field_caption.tenant_group')"  label-align-md="right" label-class="pr-md-2" :label-cols-md="2">
+                        <b-select 
+                            v-model="roleForm.tenant_group_id" 
+                            :options="tenantGroupOption"                        
+                        />                    
+                    </b-form-group>
 
-                
-                <b-form-group :label="Trans.get('role.field_caption.level')"  class="col position-relative">
-                    <b-select 
-                        :state="$v.roleForm.level.$error?'invalid':''" 
-                        v-model="roleForm.level" 
-                        :options="levelOption" 
-                    />
-                    <invalid-tooltip :inputItem="$v.roleForm.level" :fieldName="Trans.get('role.field_caption.level')" />
-                </b-form-group>
+                    
+                    <b-form-group :label="Trans.get('role.field_caption.level')"  label-align-md="right" label-class="pr-md-2" :label-cols-md="2">
+                        <b-select 
+                            :state="$v.roleForm.level.$error?'invalid':''" 
+                            v-model="roleForm.level" 
+                            :options="levelOption" 
+                        />
+                        <invalid-tooltip :inputItem="$v.roleForm.level" :fieldName="Trans.get('role.field_caption.level')" />
+                    </b-form-group>
 
-            </b-card-body>
-      
-            <hr class="border-light m-0">
+                </b-card-body>
+        
+                <hr class="border-light m-0">
 
-            <div class="table-responsive">
+                <div class="table-responsive">
 
-                <table class="table mb-0 table-hover">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>{{Trans.get('role.roleform.module')}}</th>
-                            <th>{{Trans.get('role.roleform.feature')}}</th>
-                            <th>{{Trans.get('role.roleform.create')}}</th>
-                            <th>{{Trans.get('role.roleform.read')}}</th>
-                            <th>{{Trans.get('role.roleform.update')}}</th>
-                            <th>{{Trans.get('role.roleform.delete')}}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template v-for="(moduleRule,key,i) in AppConfig.acl"> 
-                            
-                            <template v-if="isRuleKeyAllowed(moduleRule.tenant_group_id)">                   
-                                <tr class="table-primary">
-                                    <th scope="row"><b>{{i+1}}</b></th>
-                                    <td>
-                                        {{Trans.chose(moduleRule.acl_caption)}}
-                                        <div v-if="moduleRule.acl_description!=''"><i>{{Trans.chose(moduleRule.acl_description)}}</i></div>
-                                    </td>
-                                    <td colspan="5">                            
-                                        <div class="float-right">
-                                            <b-btn variant="primary" size="xs" :disabled="disabledModuleAccess[key]" @click="checkModuleAll(key)">{{Trans.get('role.roleform.check_all')}}</b-btn> 
-                                            <b-btn variant="success" size="xs" :disabled="disabledModuleAccess[key]" @click="uncheckModuleAll(key)">{{Trans.get('role.roleform.uncheck_all')}}</b-btn>
-                                        </div>             
-                                        <div class="float-left">
-                                            <b-check 
-                                                :value="1" 
-                                                :unchecked-value="0" 
-                                                v-model="roleForm.rule[key].has_access" 
-                                                @change="setModule(key,$event)"
-                                            >
-                                                {{Trans.get('role.roleform.has_access')}}
-                                            </b-check>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <template v-for="(rule,ruleKey,index) in moduleRule.children">
-                                    <tr :key="'rulekey' + ruleKey" v-if="isRuleKeyAllowed(rule.tenant_group_id)">
-                                        <th scope="row">{{index+1}}</th>
-                                        <td></td>
-                                        <td :class="'rulekey-' + dotCount(ruleKey)">
-                                            <!-- <span class="ion ion-md-return-right" v-if="dotCount(ruleKey)>1"></span> -->
-                                            {{Trans.chose(rule.acl_caption)}}
-                                            <div v-if="rule.acl_description!=''"><i>{{Trans.chose(rule.acl_description)}}</i></div>
-                                        </td> 
-                                        <!-- jika hanya has_access nya aja yg ditampilkan, maka cukup tampilkan 1 check rule -->
-                                        <template v-if="rule.crud.c!=1&&rule.crud.r!=1&&rule.crud.u!=1&&rule.crud.d!=1">                                   
-                                            <td colspan="4">
-                                                <b-check :value="1" :unchecked-value="0" 
-                                                    v-model="roleForm.rule[ruleKey].has_access"
-                                                    :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0 || !UserAuth.hasAccess(ruleKey,'has_access')"
+                    <table class="table mb-0 table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{{Trans.get('role.roleform.module')}}</th>
+                                <th>{{Trans.get('role.roleform.feature')}}</th>
+                                <th>{{Trans.get('role.roleform.create')}}</th>
+                                <th>{{Trans.get('role.roleform.read')}}</th>
+                                <th>{{Trans.get('role.roleform.update')}}</th>
+                                <th>{{Trans.get('role.roleform.delete')}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template v-for="(moduleRule,key,i) in AppConfig.acl"> 
+                                
+                                <template v-if="isGroupTenantAllowed(moduleRule.tenant_group_id)">                   
+                                    <tr class="table-primary" :key="'parent-rule-' + i">
+                                        <th scope="row"><b>{{i+1}}</b></th>
+                                        <td>
+                                            {{Trans.chose(moduleRule.acl_caption)}}
+                                            <div v-if="moduleRule.acl_description!=''"><i>{{Trans.chose(moduleRule.acl_description)}}</i></div>
+                                        </td>
+                                        <td colspan="5">                            
+                                            <div class="float-right">
+                                                <b-btn variant="primary" size="xs" :disabled="disabledModuleAccess[key]" @click="checkModuleAll(key)">{{Trans.get('role.roleform.check_all')}}</b-btn> 
+                                                <b-btn variant="success" size="xs" :disabled="disabledModuleAccess[key]" @click="uncheckModuleAll(key)">{{Trans.get('role.roleform.uncheck_all')}}</b-btn>
+                                            </div>             
+                                            <div class="float-left">
+                                                <b-check 
+                                                    :value="1" 
+                                                    :unchecked-value="0" 
+                                                    v-model="roleForm.rule[key].has_access" 
+                                                    @change="setModule(key,$event)"
                                                 >
                                                     {{Trans.get('role.roleform.has_access')}}
                                                 </b-check>
-                                            </td>
-                                        </template>
-                                        <template v-else><!-- jika menampilkan check CRUD -->
-                                            <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].c" v-if="rule.crud.c==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0 || !UserAuth.hasAccess(ruleKey,'c')" class="px-2 m-0" /></td>
-                                            <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0 || !UserAuth.hasAccess(ruleKey,'r')" class="px-2 m-0" /></td>
-                                            <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0 || !UserAuth.hasAccess(ruleKey,'u')" class="px-2 m-0" /></td>
-                                            <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key] || roleForm.rule[rule.parent].has_access==0 || !UserAuth.hasAccess(ruleKey,'d')" class="px-2 m-0" /></td>
-                                        </template>
+                                            </div>
+                                        </td>
                                     </tr>
+                                    <template v-for="(rule,ruleKey,index) in moduleRule.children">
+                                        <tr :key="'rulekey' + ruleKey" v-if="isGroupTenantAllowed(rule.tenant_group_id)">
+                                            <th scope="row">{{index+1}}</th>
+                                            <td></td>
+                                            <td :class="'rulekey-' + dotCount(ruleKey)">
+                                                <!-- <span class="ion ion-md-return-right" v-if="dotCount(ruleKey)>1"></span> -->
+                                                {{Trans.chose(rule.acl_caption)}} 
+                                                <div v-if="rule.acl_description!=''">
+                                                    <i>{{Trans.chose(rule.acl_description)}}</i>
+                                                </div>
+                                            </td> 
+                                            <!-- jika hanya has_access nya aja yg ditampilkan, maka cukup tampilkan 1 check rule -->
+                                            <template v-if="rule.crud.c!=1&&rule.crud.r!=1&&rule.crud.u!=1&&rule.crud.d!=1">                                   
+                                                <td colspan="4">
+                                                    <b-check :value="1" :unchecked-value="0" 
+                                                        v-model="roleForm.rule[ruleKey].has_access"
+                                                        :disabled="
+                                                            disabledModuleAccess[key] || 
+                                                            !isAnyCheck(roleForm.rule[rule.parent]) || 
+                                                            !UserAuth.hasAccess(ruleKey,'has_access')"
+                                                    >
+                                                        {{Trans.get('role.roleform.has_access')}}
+                                                    </b-check>
+                                                </td>
+                                            </template>
+                                            <template v-else><!-- jika menampilkan check CRUD -->
+                                                <td>
+                                                    <b-check 
+                                                        :value="1" 
+                                                        :unchecked-value="0" 
+                                                        v-model="roleForm.rule[ruleKey].c" 
+                                                        v-if="rule.crud.c==1" 
+                                                        :disabled="
+                                                            disabledModuleAccess[key] ||
+                                                            !isAnyCheck(roleForm.rule[rule.parent]) ||
+                                                            !UserAuth.hasAccess(ruleKey,'c')" 
+                                                        class="px-2 m-0" 
+                                                    />
+                                                </td>
+                                                <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].r" v-if="rule.crud.r==1" :disabled="disabledModuleAccess[key] || !isAnyCheck(roleForm.rule[rule.parent]) || !UserAuth.hasAccess(ruleKey,'r')" class="px-2 m-0" /></td>
+                                                <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].u" v-if="rule.crud.u==1" :disabled="disabledModuleAccess[key] || !isAnyCheck(roleForm.rule[rule.parent]) || !UserAuth.hasAccess(ruleKey,'u')" class="px-2 m-0" /></td>
+                                                <td><b-check :value="1" :unchecked-value="0" v-model="roleForm.rule[ruleKey].d" v-if="rule.crud.d==1" :disabled="disabledModuleAccess[key] || !isAnyCheck(roleForm.rule[rule.parent]) || !UserAuth.hasAccess(ruleKey,'d')" class="px-2 m-0" /></td>
+                                            </template>
+                                        </tr>
+                                    </template>
                                 </template>
                             </template>
-                        </template>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
 
-            </div>
-      
-            <div class="text-right mt-3">
-                <b-btn variant="primary" @click="save">{{Trans.get('lang.save_change')}}</b-btn>
-            </div>
-        </b-card>
+                </div>
+        
+                <div class="text-right mt-3">
+                    <b-btn variant="primary" @click="save">{{Trans.get('lang.save_change')}}</b-btn>
+                </div>
+            </b-card>
+        </div>
     </div>
 </template>
 <!-- Page -->
@@ -203,17 +224,21 @@ export default {
         }
     },
     methods: {
-        //untuk cek banyaknya titik pada rule key, karena parent dan child rule dipisah oleh titik
+        // untuk cek banyaknya titik pada rule key, karena parent dan child rule dipisah oleh titik
         dotCount(key) {
             return (key.split(".").length - 1);
         },
-        isRuleKeyAllowed(tenant_group_id) {
+        // cek apakah tenant_group_id terlampir (rule) ditampilkan di role ini
+        isGroupTenantAllowed(tenant_group_id) {
             if(this.AppConfig.system.multitenant.active){
+                // this.roleForm.tenant_group_id == 0 berarti role nya punya akses ke semua rule
+                // tenant_group_id == 0 berarti rule nya bisa diakses oleh semua role
                 if(!(this.roleForm.tenant_group_id == 0 || tenant_group_id == 0 || tenant_group_id.includes(this.roleForm.tenant_group_id)))
                     return false;
             }
             return true;
         },
+        //kosongkan/uncek semua checklist di roleform
         setEmptyRole() {
             var tmp = {};
             _.forEach(this.AppConfig.acl,(v,k) => {
@@ -236,12 +261,14 @@ export default {
             });
             this.roleForm.rule = tmp;
         },
+        //load data role yang akan diedit
         loadRole() {  
             this.$store.dispatch(
                     'role/getRole',this.$route.params.roleId                    
                 ).then((res)=>{
 
-                    //copy semua data role ke roleform nya kecuali field rule, karena fild rule akan diassing selanjutnya
+                    //copy semua data role ke roleform nya kecuali field rule, karena field rule akan di-assign 
+                    //selanjutnya sesuai format yang digunakan di roleform ini
                     _.forEach(res,(v,k) => {
                         if(k!='rule')this.roleForm[k] = v;
                     });
@@ -271,9 +298,7 @@ export default {
                     this.Web.showAlert({text: "Get role Error",style: "warning"});
                 });
         },
-        /**
-         * enable/disable pilihan rule per module
-         */
+        //enable/disable pilihan rule per module
         setModule(moduleKey,val){
             var tmp = JSON.parse(JSON.stringify(this.disabledModuleAccess));
             tmp[moduleKey] = val?false:true;
@@ -310,21 +335,34 @@ export default {
             });
             this.roleForm.rule = tmp;
         },
+        //format nama role agar sesuai aturan penamaan role nya
         formatRoleCodeFromRoleName(v){
             this.$v.roleForm.name.$touch();
             if(this.roleForm.role_code==''){
                 this.roleForm.role_code = this.roleForm.name.toLowerCase().replace(/[^a-zA-Z0-9_]/g, "_");
             }
         },
+        //format penamaan role_code agar sesuai aturan penamaan role_code nya
         formatRoleCode(v){
             this.$v.roleForm.role_code.$touch();
             this.roleForm.role_code = this.roleForm.role_code.replace(/[^a-zA-Z0-9_]/g, "_");
         },
+        //cek apakah salah satu crud atau has_access ada yg tercek
+        isAnyCheck(rule)
+        {
+            if(rule.has_access!=0 || rule.c != 0 || rule.r != 0 || rule.u != 0 || rule.d != 0)
+                return true;
+            return false;
+        },
         save() {
 
+            
+            /**
+             * memastikan child yg parent Module nya tidak diceklis agar di 0 kan jg semau
+             */
             _.forEach(this.disabledModuleAccess,(v,k) => {
                 _.forEach(this.rulePerModule[k],(v2,k2)=>{
-                    //jika disabled maka uncheck semua hak akses nya
+                    //jika module disabled maka uncheck semua hak akses nya
                     if(v){
                         this.roleForm.rule[k2] = {
                             "has_access":0,
@@ -333,6 +371,7 @@ export default {
                             "u": 0,
                             "d": 0
                         };
+                    //jika module enable pastikan .has_access terceklis saat ada salah satu crud yg terceklis
                     }else{
                         this.roleForm.rule[k2]['has_access'] = 
                             (this.roleForm.rule[k2]['has_access'] || 
@@ -344,21 +383,25 @@ export default {
                 });
             });
 
+            /**
+             * memastikan child yg parentnya tidak terceklis agar sama2 tidak terceklis
+             */
             _.forEach(this.AppConfig.acl,(moduleRule,moduelName) => {
                 _.forEach(moduleRule.children,(rule,ruleKey)=>{
                     //jika parent nya disable maka child nya juga di uncek
                     if(
                         !this.roleForm.rule[rule.parent].has_access || 
-                        !this.isRuleKeyAllowed(rule.tenant_group_id) || 
+                        !this.isGroupTenantAllowed(rule.tenant_group_id) || 
                         !this.UserAuth.hasAccess(ruleKey)
                     ){
+
                         this.roleForm.rule[ruleKey] = {
                             "has_access":0,
                             "c": 0,
                             "r": 0,
                             "u": 0,
                             "d": 0
-                        };
+                        };                        
                     }else{
                         
                         this.roleForm.rule[ruleKey] = {
@@ -371,6 +414,7 @@ export default {
                     }
                 });
             });
+
             this.$v.$touch();  
             if (this.$v.$invalid) {
                 this.Web.showAlert({
@@ -457,6 +501,10 @@ export default {
             this.showTenantGroup = false;
         }
         
+        this.Web.setBodyWithPadding(false);
+    },
+    destroyed() {
+        this.Web.setBodyWithPadding(true);
     }
 }
 </script>

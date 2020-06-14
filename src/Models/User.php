@@ -3,7 +3,7 @@
 namespace hpsynapse\moduser\Models;
 
 //use Laravel\Passport\HasApiTokens;//comment jika tidak menggunakan passport
-//use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -41,20 +41,35 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
     
     public function profile()
     {
         return $this->hasOne('hpsynapse\moduser\Models\UserProfile','user_id');
-    }    
+    }
+
     public function roles()
     {
         return $this->hasMany('hpsynapse\moduser\Models\UserRole','user_id');
-    }     
+    }
+
+    
+    public function mainRole()
+    {
+        return $this->hasOne('hpsynapse\moduser\Models\UserRole','user_id')->has('role')->where('is_main_role',1);
+    }
+
+    // public function mainRole()
+    // {
+    //     // dd($this->roles()->where('is_main_role',1)->first()->role());
+    //     // dd($this->roles()->where('is_main_role',1));
+    //     return $this->roleutama()->role();//\hpsynapse\moduser\Models\UserRole::where('is_main_role',1)->where('user_id',$this->user_id);
+    // }
+
     public function userTenant()
     {
         return $this->hasMany('hpsynapse\moduser\Models\UserTenant','user_id');
-    }   
+    }
+
     public function tenant()
     {
         return $this->hasManyThrough(

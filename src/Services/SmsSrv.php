@@ -2,7 +2,8 @@
 
 namespace hpsynapse\moduser\Services;
 
-use GuzzleHttp\Client;
+// use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
 
 /**
  * 
@@ -100,7 +101,6 @@ class SmsSrv
 		    "tipe"  => 'reguler',
 		    "pesan"  => $this->text
         ]);*/
-        $client = new Client(['base_uri' => 'http://subdomain.zenziva.com']);
         $configSms = [];
         if (config('hpsynapse.send_sms_zenziva')) {
             $configSms = array_merge($configSms, config('hpsynapse.send_sms_zenziva'));
@@ -108,11 +108,13 @@ class SmsSrv
 
         config(['hpsynapse.send_sms_zenziva' => $configSms]);
         
-
-        $request = $client->post('/apps/smsapi.php?'.$data.'');
-        $response = $request->getBody()->getContents();
+        // $client = new Client(['base_uri' => 'http://subdomain.zenziva.com']);
+        // $request = $client->post('/apps/smsapi.php?'.$data.'');
+        // $response = $request->getBody()->getContents();
+        
+        $response = Http::post('http://subdomain.zenziva.com/apps/smsapi.php?'.$data);        
        
-        return $response;
+        return $response->json();
     }
 	
 }

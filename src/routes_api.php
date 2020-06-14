@@ -1,5 +1,7 @@
 <?php
-// use hpsynapse\moduser\Facades\RoleRepo;
+
+use Illuminate\Support\Facades\Route;
+
 /**
  * Route API feature Auth
  */

@@ -48,11 +48,11 @@
         >
         
           <template slot="nilai_pagu" slot-scope="data">
-            {{Format.formatPrice(data.item.nilai_pagu)}}
+            {{Format.formatCurrency(data.item.nilai_pagu)}}
           </template>
         
           <template slot="nilai" slot-scope="data">
-            {{Format.formatPrice(data.item.nilai)}}
+            {{Format.formatCurrency(data.item.nilai)}}
           </template>
 
           <template slot="actions" slot-scope="data">
@@ -210,7 +210,7 @@ export default {
                 this.form.tahun = String(this.oneData.tahun);
                 this.form.no_prk = this.oneData.no_prk;
                 this.form.no_wbs = this.oneData.no_wbs;
-                this.form.nilai = this.Format.formatPrice(this.oneData.nilai);
+                this.form.nilai = this.Format.formatCurrency(this.oneData.nilai);
 
                 this.$bvModal.show("modals-form");
 

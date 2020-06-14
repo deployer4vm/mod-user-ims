@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 //Auth Route
 Route::group([
     'prefix' => config('AppConfig.endpoint.web.auth')
@@ -9,6 +11,10 @@ Route::group([
     Route::get('/emailverify/success', 'Auth\VerificationController@verifySuccess')->name('auth.emailVerification.success');
     Route::get('/emailverify/fail', 'Auth\VerificationController@verifyFail')->name('auth.emailVerification.fail');
     
+    Route::get('/authentification-failed', function(){
+        abort(401);
+    })->name('auth.login');
+
     Route::middleware('auth')->group(function(){
         //Auth/LoginController
         Route::get('/logout', 'Auth\LoginController@apiLogout')->name('auth.logout');

@@ -3,8 +3,9 @@
 namespace hpsynapse\moduser\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class ApiToken extends Model
+class ApiToken extends Authenticatable
 {
     /**
      * The table associated with the model.

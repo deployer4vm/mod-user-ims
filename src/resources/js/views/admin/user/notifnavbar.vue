@@ -44,7 +44,8 @@ export default {
                     unread_count: 0
                 }
             },
-            lastNotifCount: 0
+            lastNotifCount: 0,
+            timeOut: null
         };
     },
     created() {
@@ -53,34 +54,39 @@ export default {
     },
     methods: {
         loadNotif() {
+            clearTimeout(window.timeOut);
             var that = this;
             let filterParams = {params: {limit: 5}};
             this.LocalApi.get(this.AppConfig.endpoint.api.moduser + "/notification" , filterParams)
                 .then(res => {
-                    that.notif = res.data.data;
-                    var subject = '';
-                    var newNotifCount = that.notif.summary.unread_count - that.lastNotifCount;
-                    //jika unread notifnya bertambah maka tampilkan notif
-                    if(that.lastNotifCount!=0 && that.notif.summary.unread_count > that.lastNotifCount){ 
-                        var i=0;                   
-                        _.forEach(that.notif.notification,(v,i)=>{  
-                            if(v.read_at==null){
-                                i++;
-                                subject = subject + '<div class="p-1 pl-2">' + v.data.subject + '</div>';
-                                if(i>=newNotifCount)return true;
-                            }
-                        });
-                        if(subject != '')
-                            that.Web.showAlert({ 
-                                type: 'dark', 
-                                title: this.Trans.get('notif.new_notification_title') + ' <b class="text-danger">(' + newNotifCount + ') </b>', 
-                                text: '<br>' + subject , position: "default" 
+                    if(res){
+                        that.notif = res.data.data;
+                        var subject = '';
+                        var newNotifCount = that.notif.summary.unread_count - that.lastNotifCount;
+                        //jika unread notifnya bertambah maka tampilkan notif
+                        if(that.lastNotifCount!=0 && that.notif.summary.unread_count > that.lastNotifCount){ 
+                            var i=0;                   
+                            _.forEach(that.notif.notification,(v,i)=>{  
+                                if(v.read_at==null){
+                                    i++;
+                                    subject = subject + '<div class="p-1 pl-2">' + v.data.subject + '</div>';
+                                    if(i>=newNotifCount)return true;
+                                }
                             });
+                            if(subject != '')
+                                that.Web.showAlert({ 
+                                    type: 'dark', 
+                                    title: this.Trans.get('notif.new_notification_title') + ' <b class="text-danger">(' + newNotifCount + ') </b>', 
+                                    text: '<br>' + subject , position: "default" 
+                                });
+                        }
+                        that.lastNotifCount = that.notif.summary.unread_count;
                     }
-                    that.lastNotifCount = that.notif.summary.unread_count;
-                    setTimeout(function(){
+                    window.timeOut = setTimeout(function(){                        
                         that.loadNotif();
                     },10000);
+                }).catch((res)=>{    
+                    
                 });
         }
     }

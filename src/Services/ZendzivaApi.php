@@ -2,7 +2,8 @@
 
 namespace hpsynapse\moduser\Services;
 
-use GuzzleHttp\Client;
+// use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
 
 class ZendzivaApi {
 
@@ -96,7 +97,6 @@ class ZendzivaApi {
      */
     public function send(){
 
-        $client = new Client(['base_uri' => $this->apiurl]);
         $data = http_build_query([
 		    "userkey"  => $this->userkey,
 		    "passkey"  => $this->passkey,
@@ -105,8 +105,11 @@ class ZendzivaApi {
 		    "pesan"  => $this->text
         ]);
 
-        $request = $client->post('/apps/smsapi.php?'.$data.'');
-        $response = $request->getBody()->getContents();
-        return $response;
+        // $client = new Client(['base_uri' => $this->apiurl]);
+        // $request = $client->post('/apps/smsapi.php?'.$data.'');
+        // $response = $request->getBody()->getContents();
+
+        $response = Http::post($this->apiurl.'/apps/smsapi.php?'.$data);          
+        return $response->json();
     }
 }

@@ -8,8 +8,8 @@
     },
     "require": {
         "php":"~7.1",
-        "guzzlehttp/guzzle": "~6.0",
-        "kreait/firebase-php": "^4.0"
+        "kreait/firebase-php": "^4.0",
+        "pusher/pusher-php-server": "~4.0"
     },
     "require-dev": {
         "php":"~7.1"
@@ -17,7 +17,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "hpsynapse\\moduser\\Providers\\AppServiceProvider"
+                "hpsynapse\\moduser\\Providers\\AppServiceProvider",
+                "hpsynapse\\moduser\\Providers\\EventServiceProvider"
             ]
         }
     },

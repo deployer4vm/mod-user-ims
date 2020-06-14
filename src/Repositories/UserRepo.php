@@ -209,7 +209,7 @@ class UserRepo extends BaseRepository
         $filter['searchField'] = ['name','email','username'];
         $filter['hiddenColumn'] = ['created_at', 'updated_at', 'cached_at'];
 
-        $user = User::with(['profile','roles.role']);
+        $user = User::with(['profile','roles.role','mainRole']);
 
         if(isset($filter['profile'])){
             $user->whereHas('profile', function($q) use ($filter){

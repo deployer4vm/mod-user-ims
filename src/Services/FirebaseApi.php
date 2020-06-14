@@ -9,8 +9,6 @@ use Kreait\Firebase\Database;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 
-//use GuzzleHttp\Client;
-
 class FirebaseApi
 {
 

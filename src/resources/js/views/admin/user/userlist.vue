@@ -2,7 +2,7 @@
     <div>
         <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
             <div>{{ Trans.get("user.module_caption") }}</div>
-            <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-secondary btn-sm d-block" :to="{ name: 'user.add' }">
+            <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success btn-sm d-block" :to="{ name: 'user.add' }">
                 <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }} 
             </router-link>
         </h4>
