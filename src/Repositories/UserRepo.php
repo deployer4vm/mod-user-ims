@@ -103,7 +103,7 @@ class UserRepo extends BaseRepository
         }
 
         //jika multitenant aktif dan user tidak all_tenant
-        if (config('AppConfig.system.multitenant.active')==1 && $user['all_tenant']==0) {
+        if (config('AppConfig.system.multitenant.active',false) && $user['all_tenant']==0) {
 
             //jika null berarti autodetect tenant
             if (is_null($tenantId)) {
@@ -370,7 +370,7 @@ class UserRepo extends BaseRepository
         $userData['password'] = isset($userData['password']) ? Hash::make($userData['password']) : '';
 
         $userData['user_idcode'] = $this->generateUserIdcode();
-        // if(!isset($userData['tenant_id']))$userData['tenant_id'] = config('tenant.id') ? config('tenant.id') : 0;//jika 0 berarti tanpa tenant atau bisa akses semua tenant
+        // if(!isset($userData['tenant_id']))$userData['tenant_id'] = config('tenant.id',0);//jika 0 berarti tanpa tenant atau bisa akses semua tenant
 
         //role dikosongin dahulu karena insert role di proses selanjutnya
         $roles = $userData['role_code'];
