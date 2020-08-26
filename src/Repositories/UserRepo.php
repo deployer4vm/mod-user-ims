@@ -212,7 +212,7 @@ class UserRepo extends BaseRepository
         $user = User::with(['profile','roles.role','mainRole']);
 
         if(isset($filter['profile'])){
-            $user->whereHas('profile', function($q) use ($filter){
+            $user = $user->whereHas('profile', function($q) use ($filter){
                 $q = $this->_where($q,$filter['profile']);
             });
             unset($filter['profile']);
@@ -220,7 +220,7 @@ class UserRepo extends BaseRepository
 
         if(isset($filter['tenant'])){
             // $user = $user->where('all_tenant');
-            $user->whereHas('userTenant', function($q) use ($filter){
+            $user = $user->whereHas('userTenant', function($q) use ($filter){
                 $q = $this->_where($q,[['tenant_id',$filter['tenant']]]);
             });
             unset($filter['tenant']);
@@ -235,7 +235,6 @@ class UserRepo extends BaseRepository
             $orderBy
         );
         $this->dataUserPagination = $this->pagination;
-
         $data['data'] = array_map([$this,'_formatUser'],$data['data']);
 
         return $data;
@@ -253,22 +252,11 @@ class UserRepo extends BaseRepository
      * @param type              $userId
      * @return array|false      jika tidak ada
      */
-    public function getUser($userId)
+    public function getUser($where)
     {
-        $user = User::with(['profile']);
-
-        if(is_array($userId)){
-            if(count($userId)==2){
-                $user = $user->where($userId[0],$userId[1])->first();
-            }else{                
-                $user = $user->where($userId[0],$userId[1],$userId[2])->first();
-            }
-        }else{
-            $user = $user->find($userId);
-        }
-
+        $user = $this->_getOne(User::with(['profile']),$where);
         if ($user) {          
-            return $this->_formatUser($user->toArray());
+            return $this->_formatUser($user);
         }
         return false;
     }

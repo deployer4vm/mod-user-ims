@@ -51,7 +51,7 @@
             <!-- Table -->
             <hr class="border-light m-0" />
             <div class="table-responsive">
-                <b-table :items="listData.data" :fields="fields" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :striped="true" :bordered="true" :current-page="1" :per-page="perPage" class="card-table">
+                <b-table :items="listData.data" :fields="fields" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :striped="true" :bordered="true" class="card-table">
                     <template v-slot:cell(account)="data">
                         <a href="javascript:void(0)">{{ data.item.account }}</a>
                     </template>
