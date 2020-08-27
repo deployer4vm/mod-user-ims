@@ -2,6 +2,8 @@
 
 namespace hpsynapse\moduser\Models;
 
+use App\Base\BaseModel;
+
 class UserOTP extends BaseModel
 {
     /**

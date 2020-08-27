@@ -2,9 +2,9 @@
 
 namespace hpsynapse\moduser\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Base\BaseModel;
 
-class UserTenant extends Model
+class UserTenant extends BaseModel
 {
     /**
      * The table associated with the model.
@@ -18,7 +18,7 @@ class UserTenant extends Model
      *
      * @var array
      */
-    protected $guarded = ['id','created_at','updated_at'];
+    protected $guarded = ['id','created_at'];
     
     public function user()
     {

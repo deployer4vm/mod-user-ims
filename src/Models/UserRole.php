@@ -2,9 +2,9 @@
 
 namespace hpsynapse\moduser\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Base\BaseModel;
 
-class UserRole extends Model
+class UserRole extends BaseModel
 {
     /**
      * The table associated with the model.
@@ -18,7 +18,7 @@ class UserRole extends Model
      *
      * @var array
      */
-    protected $guarded = ['id','created_at','updated_at'];
+    protected $guarded = ['id','created_at'];
     
     public function role()
     {

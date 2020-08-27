@@ -2,9 +2,9 @@
 
 namespace hpsynapse\moduser\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Base\BaseModel;
 
-class PasswordReset extends Model
+class PasswordReset extends BaseModel
 {
     /**
      * The table associated with the model.
@@ -14,10 +14,11 @@ class PasswordReset extends Model
     protected $table = 'password_resets';
     protected  $primaryKey  = 'email';
     const UPDATED_AT = null;
+    
     /**
      * The attributes that aren't mass assignable.
      *
      * @var array
      */
-    protected $guarded = ['created_at'];
+    protected $guarded = ['id', 'created_at'];
 }
