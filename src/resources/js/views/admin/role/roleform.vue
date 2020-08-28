@@ -474,9 +474,12 @@ export default {
             this.loadRole();
         }
         
-        var startI = this.UserAuth.getUser('level') + 1;
-        var endI = this.AppConfig.packageLocal.moduser.user_role.user_level.max+1;
-        if(startI < this.AppConfig.packageLocal.moduser.user_role.user_level.min) startI = this.AppConfig.packageLocal.moduser.user_role.user_level.max;
+        var startI = parseInt(this.UserAuth.getUser('level')) + 1;
+        
+        var endI = parseInt(this.AppConfig.packageLocal.moduser.user_role.user_level.max)+1;
+        if(startI < parseInt(this.AppConfig.packageLocal.moduser.user_role.user_level.min)) 
+            startI = parseInt(this.AppConfig.packageLocal.moduser.user_role.user_level.max);
+            
         //load level
         for (var i = startI; i < endI; i++) {
             this.levelOption[i] = i;
