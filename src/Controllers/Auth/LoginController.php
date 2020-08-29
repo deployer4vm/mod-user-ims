@@ -162,7 +162,14 @@ class LoginController extends BaseController
                 if($val['is_main_role']){
                     $this->output['data']['role_code'] = $key;
                 }
-            }  
+            }
+
+            // jika main role tidak ada berarti ada yang salah di insert user ke databasenya
+            if(!isset($this->output['data']['role_code'])){
+                $this->setError(__('alert.auth_failed').'<br><i>Main Role</i> user tidak terdeteksi.');
+                return $this->done();
+            }
+
             $this->output['data']['role'] = UserRepo::getUserRole($user['id']);        
             $token = UserRepo::generateToken($user['id'],$this->output['data']['role_code'],1,$request->input('deviceId',''),$pushParam);
             $this->output['data']['token'] = $token['api_token'];

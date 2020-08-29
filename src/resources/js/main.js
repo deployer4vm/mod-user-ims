@@ -2,6 +2,11 @@
 //can be used to register vue global componet
 import globals from "@/globals";
 
-if(globals().AppConfig.packageLocal.moduser.notification.enable==1 && globals().AppConfig.packageLocal.moduser.notification.show==1){
+// jika fitur notifikasi aktif maka registerkan component navbar notifikasi
+if(
+    globals().AppConfig.packageLocal.moduser.notification.enable==1 && 
+    globals().AppConfig.packageLocal.moduser.notification.show==1
+){
     Vue.component('notif-navbar',require("./views/admin/user/notifnavbar").default);
 }
+// Vue.component('profile-tab-profile',require("node_modules/../app/MainApp/resources/js/components/moduser/userprofile/profile").default);
