@@ -95,6 +95,7 @@ const actions = {
                 
                 //set token di LocalApi
                 globals().LocalApi.defaults.headers.common['Authorization'] = 'Bearer ' + state.token; 
+                globals().LocalApi.defaults.headers.common['Syn-Api-Token'] = state.token; 
 
                 EventBus.$emit('onLogin',JSON.parse(JSON.stringify(res.data.data)));
                 
@@ -145,6 +146,7 @@ const actions = {
 
         //delete autorization nya
         delete globals().LocalApi.defaults.headers.common['Authorization'];
+        delete globals().LocalApi.defaults.headers.common['Syn-Api-Token'];
 
         let userData = {
             token: state.token,
