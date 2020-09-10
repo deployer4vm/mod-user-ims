@@ -35,14 +35,15 @@
 
         <b-card no-body>
             <!-- Table controls -->
-            <b-card-body>
+            <b-card-body class="pt-3 pb-2">
                 <div class="row">
                     <div class="col">
-                        {{ Trans.get("pagination.per_page") }}: &nbsp;
-                        <b-select size="sm" v-model="perPage" :options="[10, 20, 30, 40, 50]" class="d-inline-block w-auto" />
-                    </div>
-                    <div class="col">
-                        <b-input size="sm" :placeholder="Trans.get('lang.search') + '...'" class="d-inline-block w-auto float-sm-right" v-model="searchString" />
+                        <b-form-group :label="Trans.get('pagination.per_page')" class="d-inline-block w-auto mt-1">
+                            <b-select v-model="perPage" :options="[10, 20, 30, 40, 50]"/>
+                        </b-form-group>
+                        <b-form-group :label="Trans.get('lang.search')" class="d-inline-block w-auto mt-1">
+                            <b-input placeholder="Search..." v-model="searchString" />
+                        </b-form-group> 
                     </div>
                 </div>
             </b-card-body>

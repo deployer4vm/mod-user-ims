@@ -55,12 +55,12 @@
                     <hr class="border-light m-0" />
 
                     <b-card-body class="pb-2">
-                        <b-form-group :label="Trans.get('user.field_caption.password')" class="col position-relative">
+                        <b-form-group :label="Trans.get('user.field_caption.password')">
                             <b-input type="password" :state="$v.form.password.$error ? 'invalid' : ''" v-model.trim="form.password" @blur="$v.form.password.$touch()" :placeholder="Trans.get('user.field_caption.password')" />
                             <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('user.field_caption.password')" />
                         </b-form-group>
 
-                        <b-form-group :label="Trans.get('user.field_caption.confirm_password')" class="col position-relative">
+                        <b-form-group :label="Trans.get('user.field_caption.confirm_password')">
                             <b-input type="password" :state="$v.form.repassword.$error ? 'invalid' : ''" v-model.trim="form.repassword" @blur="$v.form.repassword.$touch()" :placeholder="Trans.get('user.field_caption.confirm_password')" />
                             <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="Trans.get('user.field_caption.confirm_password')" :customAlert="{ sameAsPassword: Trans.get('user.alert.password_not_match') }" />
                         </b-form-group>
@@ -259,6 +259,7 @@
                                     return true;
                                 }
                             });
+                            this.form.status = this.form.status==2?2:1;
                             this.form.password = "";
                             this.form.repassword = "";
                         })

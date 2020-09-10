@@ -13,6 +13,7 @@ return [
         'role' => 'Role',
         'status' => 'Status',
         'status_item' => [
+            'guest' => 'User Baru',
             'active' => 'Active',
             'banned' => 'Banned'
         ]

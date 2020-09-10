@@ -28,14 +28,18 @@
 
         <b-card no-body>
             <!-- Table controls -->
-            <b-card-body>
+            <b-card-body class="pb-2 pt-2">  
                 <div class="row">
                     <div class="col">
-                        {{ Trans.get("pagination.per_page") }}: &nbsp;
-                        <b-select size="sm" v-model="perPage" :options="[10, 20, 30, 40, 50]" class="d-inline-block w-auto" />
-                    </div>
-                    <div class="col">
-                        <b-input size="sm" :placeholder="Trans.get('lang.search') + '...'" class="d-inline-block w-auto float-sm-right" v-model="searchString" />
+                        <b-form-group :label="Trans.get('pagination.per_page')" class="d-inline-block w-auto mt-1">
+                            <b-select v-model="perPage" :options="[10, 20, 30, 40, 50]"/>
+                        </b-form-group>
+                        <b-form-group :label="Trans.get('lang.search')" class="d-inline-block w-auto mt-1">
+                            <b-input placeholder="Search..." v-model="searchString" />
+                        </b-form-group>     
+                        <b-btn variant="info" @click="doSearch" style="margin-top: -3px;" class="d-inline-block w-auto">
+                            <span class="ion ion-ios-search"></span>
+                        </b-btn>
                     </div>
                 </div>
             </b-card-body>
@@ -163,17 +167,19 @@
             filterStatus(v) {
                 this.loadData(this.curPage, this.searchString, this.sortBy, this.sortDesc);
             },
-            searchString(v) {
-                const val = v.toLowerCase();
-                var that = this;
-                clearTimeout(this.suggestTimeout);
-                this.suggestTimeout = setTimeout(function() {
-                    that.loadData(1, val);
-                }, 300);
-            },
+            // searchString(v) {
+            //     const val = v.toLowerCase();
+            //     var that = this;
+            //     clearTimeout(this.suggestTimeout);
+            //     this.suggestTimeout = setTimeout(function() {
+            //         that.loadData(1, val);
+            //     }, 300);
+            // },
         },
-
-        methods: {
+        methods: { 
+            doSearch() {
+                this.loadList(this.curPage,this.searchString,this.sortBy,this.sortDesc);
+            },   
             loadData(curPage, q = "", orderBy = false, sortDesc = false) {
                 var offset = this.perPage * (curPage - 1);
                 this.loadParams = {};
