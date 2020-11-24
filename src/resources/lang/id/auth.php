@@ -22,15 +22,37 @@ return [
         'button' => 'Kirim reset password email',
         'back_to_login' => 'kembali ke halaman login'
     ],
-    //text lang di halaman loting
+    //text lang di halaman login
     'login' => [
         'title' => 'Login to Your Account',
         'usernamecaption' => 'Username/Email',
         'passwordcaption' => 'Password',
-        'forgotpassword' => 'Forgot Password ?',
-        'remember_me' => 'Remeber Me',
+        'forgotpassword' => 'Lupa Password ?',
+        'remember_me' => 'Ingat Aku',
         'sigincaption' => 'Sign In',
-        'dont_have_an_account'=>'Don\'t have an account yet?',
-        'signupcaption' => 'Sign Up'
+        'dont_have_an_account'=>'Belum memiliki Akun?',
+        'signupcaption' => 'Sign Up',
+        'alert' => [
+            'user_not_found'=> 'User tidak ditemukan',
+            'user_banned' => 'User diblokir',
+            'password_fail' => 'Usernaem atau password keliru'
+        ]
+    ],
+    //text lang di halaman register
+    'register' => [
+        'title' => 'Registrasi',
+        'namecaption' => 'Nama',
+        'emailcaption' => 'Email',
+        'usernamecaption' => 'Username',
+        'passwordcaption' => 'Password',
+        'repasswordcaption' => 'Konfirmasi Password',
+        'sigincaption' => 'Sign In',
+        'already_have_an_account'=>'Sudah memiliki Akun?',
+        'signupcaption' => 'Sign Up',
+        'alert' => [
+            'password_not_match' => 'Konfirmasi password keliru',
+            'register_success' => 'Registrasi Berhasil',
+            'register_failed' => 'Registrasi Gagal'
+        ]
     ],
 ];

@@ -324,17 +324,14 @@ class UserAuth
         return false;
     }
     
-    public function hasAccess($key, $subKey='has_access')
+    public function hasAccess($key, $subKey='has_access', $defaultAccess=true)
     {
         if(isset($this->userRole[$this->userRoleCode])){
-            if(
-                isset($this->userRole[$this->userRoleCode]['rule'][$key][$subKey]) 
-                && $this->userRole[$this->userRoleCode]['rule'][$key][$subKey] == 0
-            ){
-                return false;
+            if(isset($this->userRole[$this->userRoleCode]['rule'][$key][$subKey])){
+                return $this->userRole[$this->userRoleCode]['rule'][$key][$subKey] == 1?true:false;
             }
         }
-        return true;
+        return $defaultAccess;
     }
 
     /**

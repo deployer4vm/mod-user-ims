@@ -183,7 +183,8 @@ class LoginController extends BaseController
             }
             return $this->done();
         }
-        $this->setError(__('alert.auth_failed'));
+        // $this->setError(__('alert.auth_failed'));
+        $this->setError(UserRepo::errorFull());
         return $this->done();
     }
     

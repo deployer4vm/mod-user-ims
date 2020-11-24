@@ -43,7 +43,30 @@ return [
         'remember_me' => 'Remeber Me',
         'sigincaption' => 'Sign In',
         'dont_have_an_account'=>'Don\'t have an account yet?',
-        'signupcaption' => 'Sign Up'
+        'signupcaption' => 'Sign Up',
+        'alert' => [
+            'user_not_found'=> 'User not found',
+            'user_banned' => 'User blocked',
+            'password_fail' => 'Usernaem or password wrong'
+        ]
+    ],
+    //text lang di halaman register
+    'register' => [
+        'title' => 'Register',
+        'namecaption' => 'Name',
+        'emailcaption' => 'Email',
+        'usernamecaption' => 'Username',
+        'passwordcaption' => 'Password',
+        'repasswordcaption' => 'Password Confirmation',
+        'remember_me' => 'Remeber Me',
+        'sigincaption' => 'Sign In',
+        'already_have_an_account'=>'Already have an account yet?',
+        'signupcaption' => 'Sign Up',
+        'alert' => [
+            'password_not_match' => 'Password confirmation not match',
+            'register_success' => 'Register Success',
+            'register_failed' => 'Register Failed'
+        ]
     ],
 
 ];

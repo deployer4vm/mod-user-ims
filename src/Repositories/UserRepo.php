@@ -2,6 +2,7 @@
 
 namespace hpsynapse\moduser\Repositories;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -89,16 +90,21 @@ class UserRepo extends BaseRepository
         if ($userData == null) {
             $userData = User::where('email', $username)->first();
             if ($userData == null) {
+                $this->error = _('auth.login.alert.user_not_found');
                 return false;
             }
         }
-
-        if (!Hash::check($password, $userData->password)) return false;
+        // dd([$password,$userData->password,Hash::make($password),Hash::check($password, $userData->password)]);
+        if (!Hash::check($password, $userData->password)){
+            $this->error = _('auth.login.alert.password_fail');
+            return false;
+        }
 
         $user = $userData->toArray();
 
         //user banned
         if($user['status']==2){
+            $this->error = _('auth.login.alert.user_banned');
             return false;
         }
 
@@ -117,6 +123,7 @@ class UserRepo extends BaseRepository
             //jika tidak punya akses all tenant maka cek tenant
             } else if ($user['all_tenant']==0) {
                 if (UserTenant::where('tenant_id', $tenantId)->where('user_id',$user['id'])->first() == null) {
+                    $this->error = _('auth.login.alert.user_not_found');
                     return false;
                 }
             }
@@ -575,6 +582,11 @@ class UserRepo extends BaseRepository
         
         if (isset($userData['_token'])) unset($userData['_token']);
         if (isset($userData['_method'])) unset($userData['_method']);
+        if (isset($userData['created_at'])) unset($userData['created_at']);
+        if (isset($userData['updated_at'])) unset($userData['updated_at']);
+        if (isset($userData['repassword'])) unset($userData['repassword']);
+        if (isset($userData['user_role'])) unset($userData['user_role']);
+
         if (isset($userData['password']) && $userData['password']) $userData['password'] = Hash::make($userData['password']);
         
         if (isset($userData['username']) && $this->isUsernameRegistered($userData['username'], $userId)){
@@ -603,6 +615,7 @@ class UserRepo extends BaseRepository
             if(empty($value))unset($userData[$key]);
         }
         
+        
         //upload avatar jika menyertakan avatar
         if (isset($userData['avatar']) && !empty($userData['avatar'])) {
             $userData['avatar'] = Storage::putFile('images/avatar', $userData['avatar']);
@@ -622,7 +635,7 @@ class UserRepo extends BaseRepository
             $this->updateUserRole($userId,$userData['role_code']);
             unset($userData['role_code']);
         }
-
+        Log::info($userData);
         $this->_update(new User, $userId, $userData);
 
         return true;

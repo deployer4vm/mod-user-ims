@@ -133,6 +133,19 @@ const actions = {
                 return dispatch("implementAcl");
             });
     },
+    register({ commit, dispatch, state }, authData) {
+        return globals().LocalApi
+            .post(authPath + "/register", {
+                name: authData.name,
+                email: authData.email,
+                password: authData.password
+            })
+            .then(res => {
+                EventBus.$emit('onRegister',JSON.parse(JSON.stringify(res.data.data)));
+                
+                return JSON.parse(JSON.stringify(res.data.data));
+            });
+    },
     changeRole({ commit, state, dispatch },roleCode) {
         return globals().LocalApi
             .get(authPath + "/change_role/" + roleCode).then(res => {
