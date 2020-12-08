@@ -38,11 +38,11 @@ const RegisterPage2 = resolve => {
     });
 };
 //custom
-// const RegisterPage3 = resolve => {
-//     require.ensure(["node_modules/../app/MainApp/resources/js/views/auth/register"], () => {
-//       resolve(require("node_modules/../app/MainApp/resources/js/views/auth/register"));
-//     });
-// };
+const RegisterPage3 = resolve => {
+    require.ensure(["node_modules/../app/MainApp/resources/js/views/auth/register"], () => {
+        resolve(require("node_modules/../app/MainApp/resources/js/views/auth/register"));
+    });
+};
 
 const ForgotPasswordPage = resolve => {
   require.ensure(["../views/admin/auth/forgotpasswordform"], () => {
@@ -103,9 +103,9 @@ const NotifList = resolve => {
     });
   };
 const NotifDetail = resolve => {
-require.ensure(["../views/admin/user/notifdetail"], () => {
-    resolve(require("../views/admin/user/notifdetail"));
-});
+    require.ensure(["../views/admin/user/notifdetail"], () => {
+        resolve(require("../views/admin/user/notifdetail"));
+    });
 };
 /*
 Broadcast

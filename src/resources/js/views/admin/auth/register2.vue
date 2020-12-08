@@ -37,42 +37,42 @@
 
                         <!-- Form -->
                         <form class="my-5" @submit="onSubmit" @reset="onReset">
-                            <b-form-group :label="Trans.get('auth.login.namecaption')" class="position-relative">
+                            <b-form-group :label="Trans.get('auth.register.namecaption')" class="position-relative">
                                 <b-input-group>
                                     <b-input-group-text slot="prepend"><i class="ion ion-md-contact"></i></b-input-group-text>
                                     <b-input :state="$v.form.name.$error ? 'invalid' : ''" v-model.trim="form.name" @change="$v.form.name.$touch()" />
                                 </b-input-group>
-                                <invalid-tooltip :inputItem="$v.form.name" :fieldName="Trans.get('auth.login.namecaption')" />
+                                <invalid-tooltip :inputItem="$v.form.name" :fieldName="Trans.get('auth.register.namecaption')" />
                             </b-form-group>
 
-                            <b-form-group :label="Trans.get('auth.login.emailcaption')" class="position-relative">
+                            <b-form-group :label="Trans.get('auth.register.emailcaption')" class="position-relative">
                                 <b-input-group>
                                     <b-input-group-text slot="prepend"><i class="ion ion-md-contact"></i></b-input-group-text>
                                     <b-input :state="$v.form.email.$error ? 'invalid' : ''" v-model.trim="form.email" @change="$v.form.email.$touch()" />
                                 </b-input-group>
-                                <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('auth.login.emailcaption')" />
+                                <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('auth.register.emailcaption')" />
                             </b-form-group>
 
                             <b-form-group class="position-relative">
                                 <div slot="label" class="d-flex justify-content-between align-items-end">
-                                    <div>{{ Trans.get("auth.login.passwordcaption") }}</div>
+                                    <div>{{ Trans.get("auth.register.passwordcaption") }}</div>
                                 </div>
                                 <b-input-group>
                                     <b-input-group-text slot="prepend"><i class="ion ion-md-lock"></i></b-input-group-text>
                                     <b-input type="password" :state="$v.form.password.$error ? 'invalid' : ''" v-model.trim="form.password" @change="$v.form.password.$touch()" />
                                 </b-input-group>
-                                <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('auth.login.passwordcaption')" />
+                                <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('auth.register.passwordcaption')" />
                             </b-form-group>
 
                             <b-form-group class="position-relative">
                                 <div slot="label" class="d-flex justify-content-between align-items-end">
-                                    <div>{{ Trans.get("auth.login.repasswordcaption") }}</div>
+                                    <div>{{ Trans.get("auth.register.repasswordcaption") }}</div>
                                 </div>
                                 <b-input-group>
                                     <b-input-group-text slot="prepend"><i class="ion ion-md-lock"></i></b-input-group-text>
                                     <b-input type="password" :state="$v.form.repassword.$error ? 'invalid' : ''" v-model.trim="form.repassword" @change="$v.form.repassword.$touch()" />
                                 </b-input-group>
-                                <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="Trans.get('auth.login.repasswordcaption')" />
+                                <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="Trans.get('auth.register.repasswordcaption')" />
                             </b-form-group>
 
                             <b-btn type="submit" class="btn-block" variant="primary">{{ Trans.get("auth.register.signupcaption") }}</b-btn>  
@@ -81,7 +81,7 @@
 
                         <div class="text-center text-muted" v-if="AppConfig.packageLocal.moduser.registration.enable">
                             {{ Trans.get("auth.register.already_have_an_account") }}
-                            <router-link tag="a" :to="{ name: 'login' }">{{ Trans.get("auth.register.signupcaption") }}</router-link>
+                            <router-link tag="a" :to="{ name: 'login' }">{{ Trans.get("auth.register.sigincaption") }}</router-link>
                         </div>
                     </div>
                 </div>
