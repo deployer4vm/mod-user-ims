@@ -90,13 +90,13 @@ class UserRepo extends BaseRepository
         if ($userData == null) {
             $userData = User::where('email', $username)->first();
             if ($userData == null) {
-                $this->error = _('auth.login.alert.user_not_found');
+                $this->error = __('auth.login.alert.user_not_found');
                 return false;
             }
         }
         // dd([$password,$userData->password,Hash::make($password),Hash::check($password, $userData->password)]);
         if (!Hash::check($password, $userData->password)){
-            $this->error = _('auth.login.alert.password_fail');
+            $this->error = __('auth.login.alert.password_fail');
             return false;
         }
 
@@ -104,7 +104,7 @@ class UserRepo extends BaseRepository
 
         //user banned
         if($user['status']==2){
-            $this->error = _('auth.login.alert.user_banned');
+            $this->error = __('auth.login.alert.user_banned');
             return false;
         }
 
@@ -123,7 +123,7 @@ class UserRepo extends BaseRepository
             //jika tidak punya akses all tenant maka cek tenant
             } else if ($user['all_tenant']==0) {
                 if (UserTenant::where('tenant_id', $tenantId)->where('user_id',$user['id'])->first() == null) {
-                    $this->error = _('auth.login.alert.user_not_found');
+                    $this->error = __('auth.login.alert.user_not_found');
                     return false;
                 }
             }
