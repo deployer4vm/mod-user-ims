@@ -262,7 +262,7 @@ class UserController extends BaseController
     }
     
     /**
-     * update password
+     * update password di my profile
      * 
      * @param Request $request
      *      password
@@ -270,7 +270,7 @@ class UserController extends BaseController
      */
     public function updatePassword(Request $request)
     {
-        $id = $request->route('id');
+        $id = UserAuth::user('id');//$request->route('id');
         $userData = $request->only(['password','password_confirmation']);
 
         $validator = \Validator::make($userData, [
@@ -282,6 +282,8 @@ class UserController extends BaseController
             $this->setError('Input Error :',$validator->messages(),400,true);
             return $this->done();
         }
+
+        unset($userData['password_confirmation']);
 
         $change = UserRepo::updateUser($id, $userData);
         if (!$change) {

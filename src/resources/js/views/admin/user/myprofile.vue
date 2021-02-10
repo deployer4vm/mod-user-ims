@@ -18,6 +18,7 @@
                     </b-list-group>
                 </div>
 
+                <!-- Tab General / Profile -->
                 <div class="col-md-9" v-if="curTab === 'general'">
                     <b-card-body class="media align-items-center" v-if="showUserField('avatar')">
                         <img :src="`${publicUrl}img/avatars/${form.avatar}`" alt class="d-block ui-w-80" />
@@ -52,7 +53,9 @@
                         </div>
                     </b-card-body>
                 </div>
+                <!-- / Tab General / Profile -->
 
+                <!-- Tab Change Password -->
                 <div class="col-md-9" v-if="curTab === 'password'">
                     <b-card-body>
                         <b-form-group label="New password">
@@ -67,6 +70,8 @@
                         </div>
                     </b-card-body>
                 </div>
+                <!-- / Tab Change Password -->
+
                 <template v-for="(component,i) in profileTabAdds">
                     <div class="col-md-9" v-if="curTab === component.id" :key="i">
                         <component :is="component.component"></component>
@@ -151,11 +156,11 @@
             },
             saveUser() {
                 this.LocalApi.put(this.AppConfig.endpoint.api.moduser + "/profile", {
-                    id: this.userForm.id,
-                    username: this.userForm.username,
-                    name: this.userForm.name,
-                    email: this.userForm.email,
-                })
+                        id: this.userForm.id,
+                        username: this.userForm.username,
+                        name: this.userForm.name,
+                        email: this.userForm.email,
+                    })
                     .then((res) => {
                         this.Web.showAlert({ text: "Profile berhasil disimpan" });
                     })
@@ -173,10 +178,10 @@
             },
             savePassword() {
                 this.LocalApi.put(this.AppConfig.endpoint.api.moduser + "/" + this.userForm.id + "/updatepassword", {
-                    id: this.userForm.id,
-                    password: this.passwordForm.password,
-                    password_confirmation: this.passwordForm.password_confirmation,
-                })
+                        id: this.userForm.id,
+                        password: this.passwordForm.password,
+                        password_confirmation: this.passwordForm.password_confirmation,
+                    })
                     .then((res) => {
                         this.Web.showAlert({ text: "Password berhasil diganti" });
                         this.passwordForm.password = "";

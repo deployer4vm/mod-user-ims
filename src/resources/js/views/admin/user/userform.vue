@@ -12,7 +12,7 @@
             </div>
         </h4>
 
-        <div class="m-3">
+        <div class="m-3" v-if="isDataLoaded">
             <b-tabs class="nav-tabs-top nav-responsive-sm">
                 <b-tab :title="Trans.get('user.userform.tab_account_caption')" active>
                     <b-card-body v-if="showUserField('avatar')">
@@ -98,6 +98,23 @@
                 <!-- <b-btn variant="default">Cancel</b-btn> -->
             </div>
         </div>
+        <div v-else>
+            <div class="text-mutted h-row align-items-center" style="width: 100%;">
+                <div class="col">
+                    <div class="sk-cube-grid sk-primary">
+                        <div class="sk-cube sk-cube1"></div>
+                        <div class="sk-cube sk-cube2"></div>
+                        <div class="sk-cube sk-cube3"></div>
+                        <div class="sk-cube sk-cube4"></div>
+                        <div class="sk-cube sk-cube5"></div>
+                        <div class="sk-cube sk-cube6"></div>
+                        <div class="sk-cube sk-cube7"></div>
+                        <div class="sk-cube sk-cube8"></div>
+                        <div class="sk-cube sk-cube9"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <!-- Page -->
@@ -174,7 +191,8 @@
                     postal_code: ""
                 }
             },
-            roleItems: {}
+            roleItems: {},
+            isDataLoaded: true,
         }),
         computed: {
             isAdd() {
@@ -246,6 +264,7 @@
         methods: {
             loadData() {
                 if (!this.isAdd) {
+                    this.isDataLoaded = false;
                     this.$store
                         .dispatch("user/getUser", this.$route.params.userId)
                         .then(res => {
@@ -262,12 +281,15 @@
                             this.form.status = this.form.status==2?2:1;
                             this.form.password = "";
                             this.form.repassword = "";
+                            this.isDataLoaded = true;
                         })
                         .catch(res => {
+                            this.isDataLoaded = true;
                             console.log("get User error : ", res);
                             this.Web.showAlert({ text: "Get Data Error", style: "warning" });
                         });
                 } else {
+                    this.isDataLoaded = true;
                     this.form = this.formEmpty;
                 }
             },
