@@ -311,7 +311,7 @@ class UserAuth
     }
     
     /**
-     * cek apakah user yang online adalah sebagai "rolde_code"
+     * cek apakah user yang online adalah sebagai "role_code"
      * 
      * @param type $roleCode
      * @return boolean
@@ -323,9 +323,26 @@ class UserAuth
         }        
         return false;
     }
-    
-    public function hasAccess($key, $subKey='has_access', $defaultAccess=true)
+
+    /**
+     * cek apakah user adalah webdev
+     *
+     * @return boolean
+     */
+    public function isWebDev()
     {
+        return $this->isLogin() && $this->is('webbdev');
+    }
+    
+    public function hasAccess(
+        $key, 
+        $subKey = 'has_access', 
+        $defaultAccess = true,
+        $checkWebDev = false
+    ) {
+        if ($checkWebDev === true && $this->isWebDev()) {
+            return true;
+        }
         if(isset($this->userRole[$this->userRoleCode])){
             if(isset($this->userRole[$this->userRoleCode]['rule'][$key][$subKey])){
                 return $this->userRole[$this->userRoleCode]['rule'][$key][$subKey] == 1?true:false;
