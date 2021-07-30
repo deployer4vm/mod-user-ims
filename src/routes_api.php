@@ -27,8 +27,13 @@ Route::group($groupAuth,function(){
         //TokenApiController
         Route::post('/token/validate', 'Auth\TokenApiController@validateToken')->name('auth.api.validatetoken');
         //ubah role user yang sedang loign
-        Route::get('/change_role/{role_code}', 'Auth\TokenApiController@changeRole')->name('auth.api.changerole'); 
+        Route::get('/change_role/{role_code}', 'UserController@changeRole')->name('auth.api.changerole'); 
     });
+
+    /**
+     * SSO
+     */
+
 });
 
 /**

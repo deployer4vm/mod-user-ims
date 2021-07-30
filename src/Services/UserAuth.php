@@ -60,9 +60,14 @@ class UserAuth
         return $data;
     }
     
-    public function getToken()
+    public function getToken($field=false)
     {
-        return $this->token;
+        if($field && session('APPSSession.token.'.$field)){
+            $data = session('APPSSession.token.'.$field);
+        }else{
+            $data = session('APPSSession.token');
+        }
+        return $data;
     }
 
     public function getSesionToken()

@@ -368,7 +368,7 @@ class UserRepo extends BaseRepository
         // if(!isset($userData['tenant_id']))$userData['tenant_id'] = config('tenant.id',0);//jika 0 berarti tanpa tenant atau bisa akses semua tenant
 
         //role dikosongin dahulu karena insert role di proses selanjutnya
-        $roles = $userData['role_code'];
+        $roles = $userData['role_code'];// hanya boleh level 3 ke atas
         $mainRole = $userData['main_role'];
         unset($userData['role_code'],$userData['main_role']);
 
@@ -412,7 +412,8 @@ class UserRepo extends BaseRepository
 
         if (isset($userData['email']) && $userData['email'])
             $this->sendUserActivationEmail($data['id']);
-
+        
+        // dispatch event on register
         return $data;
     }
 
@@ -635,7 +636,7 @@ class UserRepo extends BaseRepository
             $this->updateUserRole($userId,$userData['role_code']);
             unset($userData['role_code']);
         }
-        Log::info($userData);
+        
         $this->_update(new User, $userId, $userData);
 
         return true;

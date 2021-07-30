@@ -77,15 +77,17 @@ class RegisterController extends BaseController
      * Api resource untuk registrasi
      * 
      * @param Request $request
-     * @param type $apps_code
+     *      name
+     *      email
+     *      phone
      */
-    public function apiRegister(Request $request, $apps_code = '')
+    public function apiRegister(Request $request)
     {            
         $userData = $request->all();//$request->only(['name', 'email', 'gender', 'password', 'password_confirmation']);
         $validator = \Validator::make($userData, [
             'name' => 'required|min:3|max:255',
             'email' => 'required|email|max:255',
-            'phone' => 'required|max:20',
+            'phone' => 'max:20',
             'password' => 'required|min:5|max:255',
             'tos_confirm' => 'required'
         ]);

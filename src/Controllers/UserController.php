@@ -15,7 +15,7 @@ class UserController extends BaseController
 
     public function __construct()
     {
-        $this->forceApiOutput();
+        // $this->forceApiOutput();
     }
     
     /**
@@ -208,58 +208,6 @@ class UserController extends BaseController
         return $this->done();
     }
     
-
-    public function updateProfile(Request $request)
-    {
-        
-        if(UserAuth::isLogin()){
-            $id = UserAuth::user('id');
-        }else{
-            $this->setError('User belum login');
-            return $this->done();
-        }
-
-        $input = $request->all();
-
-        if(isset($input['id']))unset($input['id']);
-        if(isset($input['created_at']))unset($input['created_at']);
-        if(isset($input['updated_at']))unset($input['updated_at']);
-
-        $validator = [];
-
-        if(isset($input['username'])){
-            $validator['username'] = 'required|min:3|max:255';
-        }
-        if(isset($input['name'])){
-            $validator['name'] = 'required|min:3|max:255';
-        }
-        if(isset($input['email'])){
-            $validator['email'] = 'required|email|min:3|max:255';
-        }
-        if(isset($input['phone'])){
-            $validator['phone'] = 'required|min:3|max:255';
-        }
-
-        if(!empty($validator)){
-            $validator = \Validator::make($input, $validator); 
-            if ($validator->fails()) {
-                $this->setError('Input Error :',$validator->messages(),400,true);
-                return $this->done();
-            }
-        }
-        
-        if(isset($input['role_code']))unset($input['role_code']);
-        if(isset($input['status']))unset($input['status']);
-        
-        if(UserRepo::updateUser($id, $input)) {            
-            $this->setAlert('Data Updated successfully','success');
-        }else{
-            $this->setAlert(UserRepo::error(),'danger');
-            $this->setError(UserRepo::error());
-        }
-
-        return $this->done();
-    }
     
     /**
      * update password di my profile
@@ -344,5 +292,101 @@ class UserController extends BaseController
         }
         return $this->done();
            
+    }
+
+    
+    /**
+     * PROFILE
+     * =================================================================
+     */
+
+    public function profile(Request $request)
+    {
+        $this->response = 'user.profile';
+
+        $this->output['data'] = UserAuth::user();
+        $this->output['data']['user_role'] = UserRepo::getUserRole($this->output['data']['id']);
+
+        foreach($this->output['data']['user_role'] as $key => $val) {
+            if($val['is_main_role']){
+                $this->output['data']['role_code'] = $key;
+            }
+        } 
+
+        return $this->done();
+    }
+
+    public function updateProfile(Request $request)
+    {
+        
+        if(UserAuth::isLogin()){
+            $id = UserAuth::user('id');
+        }else{
+            $this->setError('User belum login');
+            return $this->done();
+        }
+
+        $input = $request->all();
+
+        if(isset($input['id']))unset($input['id']);
+        if(isset($input['created_at']))unset($input['created_at']);
+        if(isset($input['updated_at']))unset($input['updated_at']);
+
+        $validator = [];
+
+        if(isset($input['username'])){
+            $validator['username'] = 'required|min:3|max:255';
+        }
+        if(isset($input['name'])){
+            $validator['name'] = 'required|min:3|max:255';
+        }
+        if(isset($input['email'])){
+            $validator['email'] = 'required|email|min:3|max:255';
+        }
+        if(isset($input['phone'])){
+            $validator['phone'] = 'required|min:3|max:255';
+        }
+
+        if(!empty($validator)){
+            $validator = \Validator::make($input, $validator); 
+            if ($validator->fails()) {
+                $this->setError('Input Error :',$validator->messages(),400,true);
+                return $this->done();
+            }
+        }
+        
+        if(isset($input['role_code']))unset($input['role_code']);
+        if(isset($input['status']))unset($input['status']);
+        
+        if(UserRepo::updateUser($id, $input)) {            
+            $this->setAlert('Data Updated successfully','success');
+        }else{
+            $this->setAlert(UserRepo::error(),'danger');
+            $this->setError(UserRepo::error());
+        }
+
+        return $this->done();
+    }
+    
+    /**
+     * GET
+     *      /auth/change_role/ROLE_CODE
+     *      /api/auth/change_role/ROLE_CODE
+     */
+    public function changeRole(Request $request)
+    {
+        $roleCode = $request->route('role_code');
+        $backLink = $request->input('backlink',false);
+        $this->response = $backLink?redirect($backLink):back();
+
+        if(UserAuth::setActiveRole($roleCode)){
+            $roleName = UserAuth::role($roleCode)['name'];
+            $this->setAlert('Role <b>'.$roleName.'</b> berhasil diaktifkan','success');
+
+        }else{
+            $this->setAlert('Role tidak ditemukan','danger');
+        }
+
+        return $this->done();
     }
 }

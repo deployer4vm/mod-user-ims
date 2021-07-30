@@ -5,6 +5,7 @@ namespace hpsynapse\moduser\Controllers\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use hpsynapse\moduser\Controllers\Auth\ThrottlesLogins;
+use Illuminate\Support\Facades\Log;
 
 use hpsynapse\moduser\Facades\UserRepo;
 use hpsynapse\moduser\Facades\UserNotifRepo;
@@ -24,16 +25,16 @@ class LoginController extends BaseController
 
     public function __construct()
     {
-        $this->middleware('guest')->except('logout');
+        $this->middleware('guest')->except(['logout','revalidate']);
     }
     
-    public function username()
-    {
-        return 'email';
-    }
+    // public function username()
+    // {
+    //     return 'email';
+    // }
 
     /**
-     * halaman web login
+     * halaman login WEB, baik SSO dan non SSO
      */
     public function login(Request $request)
     {
@@ -42,9 +43,27 @@ class LoginController extends BaseController
         return view('auth.login', $data);
     }
 
+    /**
+     * halaman login WEB, baik SSO dan non SSO
+     */
     public function doLogin(Request $request)
     {
-        $returnParam['backlink'] = $response['backlink'] = $request->input('backlink')?$request->input('backlink'):config('cur_apps.home_url');
+        $returnParam = [];
+        $returnParam['backlink'] = $response['backlink'] = $request->input('backlink','');
+
+        // jika menyertakan appCode berarti SSO
+        if($request->route('appCode')){
+            $returnParam['appCode'] = $request->route('appCode');
+            // get app Data
+            // ...
+            $appData = ['url_home'=>'','url_get_session'=>''];
+
+            $backLink = $appData['url_get_session'];// ke halaman get session applikasi menggunakan SSO ini
+        }else{
+            $backLink = $request->input('backlink',route('dashboard'));
+        }
+
+        
         $response['reff'] = 'login';
         
         $request->validate([
@@ -52,17 +71,17 @@ class LoginController extends BaseController
             'password' => 'required|min:3|max:255'
         ]);
 
+        $authData = $request->only('username', 'password');
         if ($this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
+            Log::info('Login Failed ! user : "'.$authData['username'].'" - password : "'.$authData['password'].'"');
+            Log::info('Too many login attemp');
             return $this->sendLockoutResponse($request);
         }
         
-        $authData = $request->only('username', 'password');
-
         $tenantId = config('tenant.id');
         if (config('AppConfig.system.multitenant.autodetect_login')==1) $tenantId = null;
         
-
         if($user = UserRepo::loginCheck($authData['username'],$authData['password'], $tenantId)){
             if (Auth::attempt(
                     ['username'=>$user['username'],'password'=>$authData['password']], $request->filled('remember')
@@ -76,7 +95,7 @@ class LoginController extends BaseController
                 
                 //jika di banned
                 if($userData->status==2){
-                    return redirect()->route('auth.login', $returnParam)->with('alert', ['type' => 'danger', 'message' => 'Login Failed. Account Banned.']);
+                    return redirect()->route('auth.login', $returnParam)->with('alert', ['type' => 'danger', 'message' => __('auth.login.alert.user_banned')]);
                 //jika pertama kali aktifikasi
                 }else if($userData->status==0){
                     UserRepo::updateUser($userData->id,['status'=>1]);
@@ -87,8 +106,8 @@ class LoginController extends BaseController
                 
                 $response['isLogin'] = 1;
                 $response['token'] = UserAuth::getToken();
-                                                    
-                return $this->authDone($response);
+               
+                return redirect()->away($backLink.'?'.http_build_query($response));
             }
         }
 
@@ -109,6 +128,31 @@ class LoginController extends BaseController
         $response['isLogin'] = 0;
         
         return $this->authDone($response,route('auth.login'));
+    }
+
+    /**
+     * halaman yang diakses pertama oleh applikasi pengguna SSO untuk detect session
+     * user saat ini
+     */
+    public function revalidate(Request $request)
+    {
+        $returnParam = [];
+        $returnParam['backlink'] = $response['backlink'] = $request->input('backlink','');
+
+        if($request->route('appCode')){
+            $returnParam['appCode'] = $request->route('appCode');
+            // get app Data
+            // ...
+            $appData = ['url_home'=>'','url_get_session'=>''];
+
+            $backLink = $appData['url_get_session'];// ke halaman get session applikasi menggunakan SSO ini
+        }else{
+            // jika tidak menyertakan appCode maka redirect ke halaman login jika sudah login 
+            // dan ke home jika belum login
+            $this->response = redirect();
+        }
+
+        return $this->done();
     }
     
     /**

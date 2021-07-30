@@ -46,7 +46,7 @@ return [
         'signupcaption' => 'Sign Up',
         'alert' => [
             'user_not_found'=> 'User not found',
-            'user_banned' => 'User blocked',
+            'user_banned' => 'Login Failed. Account Banned.',
             'password_fail' => 'Usernaem or password wrong'
         ]
     ],
@@ -55,12 +55,13 @@ return [
         'title' => 'Register',
         'namecaption' => 'Name',
         'emailcaption' => 'Email',
+        'phonecaption' => 'Phone',
         'usernamecaption' => 'Username',
         'passwordcaption' => 'Password',
         'repasswordcaption' => 'Password Confirmation',
         'remember_me' => 'Remeber Me',
         'sigincaption' => 'Sign In',
-        'already_have_an_account'=>'Already have an account yet?',
+        'already_have_an_account'=>'Already have an account?',
         'signupcaption' => 'Sign Up',
         'alert' => [
             'password_not_match' => 'Password confirmation not match',

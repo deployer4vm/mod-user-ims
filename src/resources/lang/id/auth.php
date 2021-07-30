@@ -34,7 +34,7 @@ return [
         'signupcaption' => 'Sign Up',
         'alert' => [
             'user_not_found'=> 'User tidak ditemukan',
-            'user_banned' => 'User diblokir',
+            'user_banned' => 'Login gagal. User diblokir',
             'password_fail' => 'Usernaem atau password keliru'
         ]
     ],
@@ -43,6 +43,7 @@ return [
         'title' => 'Registrasi',
         'namecaption' => 'Nama',
         'emailcaption' => 'Email',
+        'phonecaption' => 'Telepon',
         'usernamecaption' => 'Username',
         'passwordcaption' => 'Password',
         'repasswordcaption' => 'Konfirmasi Password',
