@@ -10,7 +10,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 class UserResetPassword extends Notification implements ShouldQueue
 {
     use Queueable;
-    protected $userId;
+    protected $userId,$appName,$appDomain,$appUrl;
 
     /**
      * Create a new notification instance.
@@ -20,9 +20,12 @@ class UserResetPassword extends Notification implements ShouldQueue
      * Data :
      * Link Reset Password
      */
-    public function __construct($userId)
+    public function __construct($userId,$appName='',$appDomain='',$appUrl='')
     {
         $this->userId = $userId;
+        $this->appName = $appName;
+        $this->appDomain = $appDomain;
+        $this->appUrl = $appUrl;
         
         // $this->connection = config('bssystem.queue_connection_ac');
         $this->queue = 'verification';
@@ -47,7 +50,12 @@ class UserResetPassword extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $email = new \hpsynapse\moduser\Mail\UserResetPassword($this->userId);
+        $email = new \hpsynapse\moduser\Mail\UserResetPassword(
+            $this->userId,
+            $this->appName,
+            $this->appDomain,
+            $this->appUrl
+        );
         return $email->to($notifiable->email);
     }
 

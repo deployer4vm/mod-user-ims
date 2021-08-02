@@ -21,8 +21,8 @@ const LoginPage2 = resolve => {
 };
 //custom
 const LoginPage3 = resolve => {
-  require.ensure(["node_modules/../app/MainApp/resources/js/views/auth/loginform"], () => {
-    resolve(require("node_modules/../app/MainApp/resources/js/views/auth/loginform"));
+  require.ensure(["node_modules/../app/MainApp/resources/js/components/moduser/auth/loginform"], () => {
+    resolve(require("node_modules/../app/MainApp/resources/js/components/moduser/auth/loginform"));
   });
 };
 
@@ -39,8 +39,8 @@ const RegisterPage2 = resolve => {
 };
 //custom
 const RegisterPage3 = resolve => {
-    require.ensure(["node_modules/../app/MainApp/resources/js/views/auth/register"], () => {
-        resolve(require("node_modules/../app/MainApp/resources/js/views/auth/register"));
+    require.ensure(["node_modules/../app/MainApp/resources/js/components/moduser/auth/register"], () => {
+        resolve(require("node_modules/../app/MainApp/resources/js/components/moduser/auth/register"));
     });
 };
 
@@ -56,8 +56,8 @@ const ForgotPasswordPage2 = resolve => {
 };
 //custom
 const ForgotPasswordPage3 = resolve => {
-  require.ensure(["node_modules/../app/MainApp/resources/js/views/auth/forgotpasswordform"], () => {
-    resolve(require("node_modules/../app/MainApp/resources/js/views/auth/forgotpasswordform"));
+  require.ensure(["node_modules/../app/MainApp/resources/js/components/moduser/auth/forgotpasswordform"], () => {
+    resolve(require("node_modules/../app/MainApp/resources/js/components/moduser/auth/forgotpasswordform"));
   });
 };
 

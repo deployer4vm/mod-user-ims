@@ -81,11 +81,18 @@ class UserController extends BaseController
      * 
      * Route Param : 
      *      id : route id
+     * @return Array default synapse api return
+     *      data 
+     *          ...all user record
+     *          profile Array record user_proflie
+     *          user_role
+     *          main_role Array record role utama user
+     *      
      */
     public function readOne(Request $request)
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
-            $this->setError(__('alert.access_denied',false,403));
+            $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
 
@@ -233,7 +240,7 @@ class UserController extends BaseController
 
         unset($userData['password_confirmation']);
 
-        $change = UserRepo::updateUser($id, $userData);
+        $change = UserRepo::resetPassword($id, $userData['password']);
         if (!$change) {
             return $this->done();
         }
@@ -266,6 +273,28 @@ class UserController extends BaseController
         UserRepo::unbanUser($id);
         $this->setAlert('User unbanned successfully','success');
         return $this->done();
+    }
+
+    public function resentVerificationMail(Request $request)
+    {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+        
+        $id = $request->route('id');
+        if(($userData = UserRepo::getUser(['id',$id]))!=false){
+            if (isset($userData['email']) && $userData['email']){
+                UserRepo::sendUserActivationEmail($id);
+                $this->setAlert('Email sent','success');
+            }else{
+                $this->setError(__('lang.data_attribute_not_found',['attribute'=>'Email']));
+            }
+        }else{
+            $this->setError(__('lang.data_attribute_not_found',['attribute'=>'User Id '.$id]));
+        }
+        return $this->done();
+
     }
 
     public function delete(Request $request)

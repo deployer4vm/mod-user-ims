@@ -168,7 +168,15 @@ class LoginController extends BaseController
      *      username
      *      password
      *      
-     * @return json array
+     * @return Array default synapse api return
+     *      data
+     *          user        Array record
+     *          tenant
+     *          role_code   String main role code
+     *          role        Array list role yg dimiliki user
+     *          token       string
+     *          lastUpdate
+     *          validUntil
      */
     public function apiLogin(Request $request)
     {

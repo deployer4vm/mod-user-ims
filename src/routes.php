@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Route;
  * General web Auth Route
  */
 Route::group([
-    'prefix' => config('AppConfig.endpoint.web.auth')
+    'prefix' => config('AppConfig.endpoint.web.auth'),
+    'domain' => config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain')
 ], function(){
     //VerificationController (web only, ga ada di api)
     Route::get('/emailverify', 'Auth\VerificationController@verify')->name('auth.emailVerification');
@@ -133,14 +134,19 @@ if(config('AppConfig.system.use_admin_full_vue',1)!=1){
     });
 
 }else{
-
-    Route::prefix(config('AppConfig.endpoint.admin.auth'))->group(function(){
+    Route::prefix(config('AppConfig.endpoint.admin.auth'))->domain(config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain'))->group(function(){
         Route::get('/login/{appCode?}', function(){
             return view('layouts.full_vue.main');
         })->name('auth.login');
-
+        // dd(config('AppConfig.system.mode'));
+        // dd(config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain'));
         Route::get('/register', function(){
             return view('layouts.full_vue.main');
         })->name('auth.register');//->middleware('AppsPermissionCheck')
+        
+        //ResetPasswordController
+        Route::get('/resetpassword', 'Auth\ResetPasswordController@resetPassword')->name('auth.resetPassword'); //form reset password dari link yg didapat di email
+        Route::post('/resetpassword', 'Auth\ResetPasswordController@doResetPassword');//prosess reset password
+        Route::get('/resetpassword/fail', 'Auth\ResetPasswordController@verifyFail')->name('auth.resetPassword.fail');
     });
 }

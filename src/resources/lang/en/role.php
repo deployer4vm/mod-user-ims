@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'module_caption' => 'User Roles',
     'field_caption' => [
         'name' => 'Name',
         'tenant' => 'Tenant',

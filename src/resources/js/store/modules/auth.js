@@ -139,6 +139,9 @@ const actions = {
         if(authData.name)
             newAuthData.name = authData.name;
 
+        if(authData.username)
+            newAuthData.username = authData.username;
+
         if(authData.email)
             newAuthData.email = authData.email;
 
@@ -150,13 +153,25 @@ const actions = {
 
         if(authData.role_code)
             newAuthData.role_code = authData.role_code;
+
+        if(authData.tos_confirm)
+            newAuthData.tos_confirm = authData.tos_confirm;
             
         return globals().LocalApi
             .post(authPath + "/register", newAuthData)
             .then(res => {
-                EventBus.$emit('onRegister',JSON.parse(JSON.stringify(res.data.data)));
+                EventBus.$emit('onRegister',JSON.parse(JSON.stringify(res.data)));
                 
-                return JSON.parse(JSON.stringify(res.data.data));
+                return JSON.parse(JSON.stringify(res.data));
+            });
+    },
+    forgotPassword({ commit, dispatch, state }, email) {
+        return globals().LocalApi
+            .post(authPath + "/forgotpassword", email)
+            .then(res => {
+                EventBus.$emit('onForgotPassword',JSON.parse(JSON.stringify(res.data)));
+                
+                return JSON.parse(JSON.stringify(res.data));
             });
     },
     changeRole({ commit, state, dispatch },roleCode) {

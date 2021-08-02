@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'module_caption' => 'Users',
     'my_profile' => 'My Profile',
     'field_caption' => [ //digunakan di form dan list (kolom)
         'avatar' => 'Avatar',

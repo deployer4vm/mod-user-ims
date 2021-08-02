@@ -1,12 +1,5 @@
 <template>
     <div>
-        <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
-            <div>{{ Trans.get("role.module_caption") }}</div>
-            <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success btn-sm d-block" :to="{ name: 'role.add' }">
-                <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("role.rolelist.add_new_role") }}
-            </router-link>
-        </h4>
-
         <!-- Filters -->
         <!-- <div class="ui-bordered px-4 pt-4 mb-4">
       <div class="form-row align-items-center">        
@@ -25,12 +18,12 @@
       </div>
     </div> -->
         <!-- / Filters -->
-
-        <b-card no-body>
+        <header-breadcrumb :pageTitle="pageTitle" :showBack="false" />
+        <b-card class="m-3" no-body>
             <!-- Table controls -->
-            <b-card-body class="pb-2 pt-2">  
-                <div class="row">
-                    <div class="col">
+            <b-card-body class="pt-3 pb-2">
+                <div class="d-flex justify-content-between">
+                    <div>
                         <b-form-group :label="Trans.get('pagination.per_page')" class="d-inline-block w-auto mt-1">
                             <b-select v-model="perPage" :options="[10, 20, 30, 40, 50]"/>
                         </b-form-group>
@@ -40,6 +33,11 @@
                         <b-btn variant="info" @click="doSearch" style="margin-top: -3px;" class="d-inline-block w-auto">
                             <span class="ion ion-ios-search"></span>
                         </b-btn>
+                    </div>
+                    <div>
+                        <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success d-block" :to="{ name: 'role.add' }">
+                            <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("role.rolelist.add_new_role") }}
+                        </router-link>
                     </div>
                 </div>
             </b-card-body>
@@ -105,7 +103,7 @@
     export default {
         name: "pages-role-list",
         metaInfo() {
-            return { title: this.Trans.get("role.module_caption") };
+            return { title: this.pageTitle };
         },
         components: {
             flatPickr,
@@ -137,6 +135,9 @@
                 set(value) {
                     this.$store.commit("role/setRoleList", value);
                 },
+            },
+            pageTitle() {
+                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.role.caption);
             },
             listRole() {
                 return this.$store.state.role.roleList;
@@ -242,6 +243,21 @@
                     },
                 });
             },
+            initView() {
+                this.Web.setModule("moduser");
+
+                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.caption));
+
+                this.Web.resetBreadcrumb();
+                this.Web.addBreadcrumb(this.Trans.get('lang.home'));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.role.caption));
+                // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.caption));
+                
+                this.Web.setBodyWithPadding(false);
+                this.Web.setShow("moduser");
+            },
         },
         created() {
             if (!this.UserAuth.hasAccess(this.accessRuleKey)) {
@@ -250,6 +266,7 @@
                 this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
                 return false;
             }
+            this.initView();
 
             this.loadData(1);
             this.fields = [

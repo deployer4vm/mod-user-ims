@@ -35,15 +35,14 @@ const mutations = {
 };
 
 const actions = {
-    userList({ commit, dispatch, state }, filterParams) {
+    userList({ commit, dispatch, state }, params) {
         return globals()
             .LocalApi.get(userApi , {
-                params: filterParams,
+                params: params.params
             })
             .then(res => {
-                // if(params.saveState==undefined||params.saveState)
-                //     commit("setUserList", res.data.data);
-                commit("setUserList", res.data.data);
+                if(params.saveState==undefined||params.saveState)
+                    commit("setUserList", res.data.data);
                 return res.data.data;
             });
     },
@@ -97,7 +96,16 @@ const actions = {
                 commit("setUser", res.data.data);
                 return true;
             });
-    }
+    },    
+    resentVerificationMail({commit},id){
+        return globals()
+            .LocalApi.put(userApi + "/" + id + "/resent-verification-mail")
+            .then(res => {
+                // commit("setUser", res.data.data);
+                return res.data.data;
+            });
+        
+    },
 };
 
 const user = {

@@ -1,49 +1,35 @@
 <template>
     <div>
-        <h4 class="d-flex justify-content-between align-items-center w-100 mb-4">
-            <div>{{ Trans.get("user.module_caption") }}</div>
-            <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success btn-sm d-block" :to="{ name: 'user.add' }">
-                <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }} 
-            </router-link>
-        </h4>
-
-        <!-- Filters -->
-        <div class="ui-bordered px-4 pt-4 mb-4">
-            <div class="form-row align-items-center">
-                <div class="col-md mb-4">
-                    <label class="form-label">{{ Trans.get("user.field_caption.role") }}</label>
-                    <b-select v-model="filterRole" :options="roleItems" />
-                </div>
-                <div class="col-md mb-4">
-                    <label class="form-label">{{ Trans.get("user.field_caption.status") }}</label>
-                    <b-select
-                        v-model="filterStatus"
-                        :options="{
-                            'all': Trans.get('lang.view_all'),
-                            '1': Trans.get('user.field_caption.status_item.active'),
-                            '2': Trans.get('user.field_caption.status_item.banned')
-                        }"
-                    />
-                </div>
-                <!-- <div class="col-md col-xl-2 mb-4">
-          <label class="form-label d-none d-md-block">&nbsp;</label>
-          <b-btn variant="secondary" :block="true">Show</b-btn>
-        </div> -->
-            </div>
-        </div>
-        <!-- / Filters -->
-
-        <b-card no-body>
+        <header-breadcrumb :pageTitle="pageTitle" :showBack="false" />
+        <b-card class="m-3" no-body>
             <!-- Table controls -->
             <b-card-body class="pt-3 pb-2">
-                <div class="row">
-                    <div class="col">
+                <div class="d-flex justify-content-between">
+                    <div>
                         <b-form-group :label="Trans.get('pagination.per_page')" class="d-inline-block w-auto mt-1">
                             <b-select v-model="perPage" :options="[10, 20, 30, 40, 50]"/>
                         </b-form-group>
+                        <b-form-group :label="Trans.get('user.field_caption.role')" class="d-inline-block w-auto mt-1">
+                            <b-select v-model="filterRole" :options="roleItems"/>
+                        </b-form-group>
+                        <b-form-group :label="Trans.get('user.field_caption.status')" class="d-inline-block w-auto mt-1">
+                            <b-select v-model="filterStatus" :options="{
+                                'all': Trans.get('lang.view_all'),
+                                '1': Trans.get('user.field_caption.status_item.active'),
+                                '2': Trans.get('user.field_caption.status_item.banned')
+                            }"/>
+                        </b-form-group>
                         <b-form-group :label="Trans.get('lang.search')" class="d-inline-block w-auto mt-1">
                             <b-input placeholder="Search..." v-model="searchString" />
-                        </b-form-group> 
+                        </b-form-group>     
+                        <b-btn variant="info" @click="doSearch" style="margin-top: -3px;" class="d-inline-block w-auto">
+                            <span class="ion ion-ios-search"></span>
+                        </b-btn>
+                    </div>
+                    <div>
+                        <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success d-block" :to="{ name: 'user.add' }">
+                            <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }} 
+                        </router-link>
                     </div>
                 </div>
             </b-card-body>
@@ -52,13 +38,40 @@
             <!-- Table -->
             <hr class="border-light m-0" />
             <div class="table-responsive">
-                <b-table :items="listData.data" :fields="fields" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :striped="true" :bordered="true" class="card-table">
+                <b-table 
+                    :items="listData.data" 
+                    :fields="fields" 
+                    :sort-by.sync="sortBy" 
+                    :sort-desc.sync="sortDesc" 
+                    :striped="true" 
+                    :bordered="true" 
+                    class="card-table"
+                >
                     <template v-slot:cell(account)="data">
                         <a href="javascript:void(0)">{{ data.item.account }}</a>
                     </template>
 
-                    <template v-slot:cell(verified)="data">
-                        <span class="ion" :class="{ 'ion-md-checkmark text-primary': data.item.verified, 'ion-md-close text-light': !data.item.verified }"></span>
+                    <template v-slot:cell(email)="data">
+                        {{data.item.email}} 
+                        <template v-if="data.item.email_verified_at">
+                            <b-badge variant="success">
+                                <span class="ion ion-md-checkmark"></span> verified
+                            </b-badge>
+                            <div class="pt-2 text-muted">
+                                diverifikasi pada {{moment(data.item.email_verified_at).format('YYYY-MM-DD')}} jam {{moment(data.item.email_verified_at).format('hh:mm')}}
+                            </div>
+                        </template>
+                        <template v-else>
+                            <b-badge variant="default">
+                                <span class="ion ion-md-close text-light"></span> unverified
+                            </b-badge> 
+                            <div class="pt-2 text-muted">
+                                kirim ulang email verifikasi ? 
+                                <b-btn class="btn btn-primary btn-xs md-btn-flat" @click="sendVerification(data.item.id)" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
+                                    <span class="ion ion-md-mail mr-2"></span> kirim
+                                </b-btn>
+                            </div>
+                        </template>
                     </template>
 
                     <template v-slot:cell(role)="data">
@@ -115,7 +128,7 @@
     export default {
         name: "pages-user-list",
         metaInfo() {
-            return { title: this.Trans.get("user.module_caption") };
+            return { title: this.pageTitle };
         },
         components: {
             flatPickr
@@ -150,6 +163,7 @@
         }),
 
         computed: {
+            
             listData: {
                 get() {
                     return this.$store.state.user.userList;
@@ -157,6 +171,9 @@
                 set(value) {
                     this.$store.commit("user/setUserList", value);
                 }
+            },
+            pageTitle() {
+                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption);
             },
             listRole() {
                 return this.$store.state.role.roleList;
@@ -196,29 +213,33 @@
                 }, 300);
             }
         },
-        methods: {
+        methods: { 
+            doSearch() {
+                this.loadData(this.curPage,this.searchString,this.sortBy,this.sortDesc);
+            },     
             loadData(curPage, q = "", orderBy = false, sortDesc = false) {
                 var offset = this.perPage * (curPage - 1);
                 this.loadParams = {};
+                this.loadParams.params = {};
 
-                this.loadParams.limit = this.perPage;
-                this.loadParams.offset = offset;
+                this.loadParams.params.limit = this.perPage;
+                this.loadParams.params.offset = offset;
 
                 if (q != "") {
-                    this.loadParams.q = q;
+                    this.loadParams.params.q = q;
                 }
 
                 if (orderBy != false) {
-                    this.loadParams.orderBy = orderBy;
-                    this.loadParams.orderType = sortDesc ? "DESC" : "ASC";
+                    this.loadParams.params.orderBy = orderBy;
+                    this.loadParams.params.orderType = sortDesc ? "DESC" : "ASC";
                 }
 
                 if (this.filterRole != "all") {
-                    this.loadParams.role = this.filterRole;
+                    this.loadParams.params.role = this.filterRole;
                 }
 
                 if (this.filterStatus != "all") {
-                    this.loadParams.status = this.filterStatus;
+                    this.loadParams.params.status = this.filterStatus;
                 }
 
                 this.$store.dispatch("user/userList", this.loadParams);
@@ -255,7 +276,51 @@
                             });
                     }
                 });
-            }
+            },
+            sendVerification(userId){
+                
+                if (!this.UserAuth.hasAccess(this.accessRuleKey, "u")) {
+                    //goto dashboard current tenant
+                    this.Web.goToCurrentTenant();
+                    this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
+                    return false;
+                }
+
+                this.Web.showAlert({
+                    styleType: "modal",
+                    style: "info",
+                    title: "Confirmation",
+                    text: "Kirim ulang email verifikasi ?",
+                    modalButtonCancel: "No",
+                    modalButtonOk: "Yes",
+                    onOk: () => {
+                        this.$store
+                            .dispatch("user/resentVerificationMail", userId)
+                            .then(res => {
+                                this.Web.showAlert({ text: "Kirim berhasil" });
+                                this.loadData(1);
+                            })
+                            .catch(res => {
+                                this.Web.showAlert({ text: "Kirim gagal : " + res.message, style: "warning" });
+                            });
+                    }
+                });
+            },
+            initView() {
+                this.Web.setModule("moduser");
+
+                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.caption));
+
+                this.Web.resetBreadcrumb();
+                this.Web.addBreadcrumb(this.Trans.get('lang.home'));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
+                // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.caption));
+                
+                this.Web.setBodyWithPadding(false);
+                this.Web.setShow("moduser");
+            },
         },
         created() {
             if (!this.UserAuth.hasAccess(this.accessRuleKey)) {
@@ -268,9 +333,7 @@
                 });
                 return false;
             }
-
-            this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-            this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
+            this.initView();
             
             //load data user
             this.loadData(1);

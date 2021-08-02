@@ -1,6 +1,7 @@
 @extends('layouts.landing')
 
 @section('content')
+@include('component.alert')
 <div class="card">
     <div class="p-4 p-sm-5">
 
@@ -10,17 +11,21 @@
                 <img src="{{asset('assets/images/logo.png')}}" alt="" style="max-width:200px;max-height:100px; height:auto">
             </a>
         </div>
-        <!-- / Logo -->
+        <!-- / Logo -->        
         <h1 class="display-4 text-center">{!! config('AppConfig.system.template.frontend.title') !!}</h1>
         <!-- Form -->
-        <hr class="mt-0 mb-4">
-        <h5 class="text-center font-weight-bold mb-4">Email Verification Success</h5>
-        <p class="text-center">
-            Email Anda berhasil diverifikasi.
-        </p>            
-        <p class="text-center mt-5 mb-0">
-            <a href="{!! config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain') !!}">Back</a>
-        </p>
+            <h5 class="text-center font-weight-bold mb-4">Reset Password</h5>
+
+            <hr class="mt-0 mb-4">
+
+            <p>
+                {{$error_message}}
+            </p>
+            
+            <p class="text-center mt-5 mb-0">
+                Kembali ke <a href="{{route('home')}}">{{config('AppConfig.client.app_name')}}</a>
+            </p>
+
     </div>
 </div>
 <div class="text-center p-4">

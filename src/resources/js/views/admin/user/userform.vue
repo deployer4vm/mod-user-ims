@@ -1,16 +1,6 @@
 <template>
-    <div>        
-        <h4 class="d-flex justify-content-between align-items-center w-100 mb-0 border-bottom">
-            <router-link class="p-3 rounded-0 btn btn-outline-default bg-light border-right d-block borderless text-muted text-nowrap" :to="{name: 'user.list'}">
-                <span class="ion ion-ios-arrow-back"></span>&nbsp; {{ Trans.get("lang.back") }}
-            </router-link>
-            <div class="p-2 pr-4 text-right">
-                <span class="text-muted font-weight-light">
-                    {{ Trans.get("user.module_caption") }} / 
-                </span> 
-                {{title}}
-            </div>
-        </h4>
+    <div>   
+        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'user.list'}" />     
 
         <div class="m-3" v-if="isDataLoaded">
             <b-tabs class="nav-tabs-top nav-responsive-sm">
@@ -46,7 +36,7 @@
                             <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
                         </b-form-group>
 
-                        <b-form-group label="Phone" v-if="showUserField('phone')">
+                        <b-form-group label="Phone" class="col position-relative" v-if="showUserField('phone')">
                             <b-input v-model="form.phone" />
                             <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
                         </b-form-group>
@@ -55,12 +45,12 @@
                     <hr class="border-light m-0" />
 
                     <b-card-body class="pb-2">
-                        <b-form-group :label="Trans.get('user.field_caption.password')">
+                        <b-form-group :label="Trans.get('user.field_caption.password')" class="col position-relative">
                             <b-input type="password" :state="$v.form.password.$error ? 'invalid' : ''" v-model.trim="form.password" @blur="$v.form.password.$touch()" :placeholder="Trans.get('user.field_caption.password')" />
                             <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('user.field_caption.password')" />
                         </b-form-group>
 
-                        <b-form-group :label="Trans.get('user.field_caption.confirm_password')">
+                        <b-form-group :label="Trans.get('user.field_caption.confirm_password')" class="col position-relative">
                             <b-input type="password" :state="$v.form.repassword.$error ? 'invalid' : ''" v-model.trim="form.repassword" @blur="$v.form.repassword.$touch()" :placeholder="Trans.get('user.field_caption.confirm_password')" />
                             <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="Trans.get('user.field_caption.confirm_password')" :customAlert="{ sameAsPassword: Trans.get('user.alert.password_not_match') }" />
                         </b-form-group>
@@ -128,7 +118,7 @@
     export default {
         name: "pages-user-edit",
         metaInfo() {
-            return { title: this.Trans.get("user.module_caption") };
+            return { title: this.pageTitle };
         },
         components: {
             MaskedInput
@@ -198,6 +188,10 @@
             isAdd() {
                 return this.$route.params.userId ? false : true;
             },
+            
+            pageTitle() {
+                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption);
+            },
             title() {
                 return this.isAdd ? this.Trans.get("user.userform.form_add_caption") : "#" + this.form.name;
             },
@@ -225,6 +219,7 @@
                 });
                 return false;
             }
+            this.initView();
             
             this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
             this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
@@ -345,19 +340,37 @@
             onReset(evt) {
                 evt.preventDefault();
                 // Reset our form values
+                this.form.name = "";
+                this.form.username = "";
                 this.form.email = "";
+                this.form.phone = "";
                 this.form.password = "";
-                this.form.rememberMe = false;
             },
             showUserField(field) {
                 return !this.AppConfig.packageLocal.moduser.users_hidden_field.includes(field);
             },
             showProfileField(field) {
                 return !this.AppConfig.packageLocal.moduser.user_profiles.hide.includes(field);
-            }
+            },  
+            initView() {
+                this.Web.setModule("moduser");
+
+                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.caption));
+
+                this.Web.resetBreadcrumb();
+                this.Web.addBreadcrumb(this.Trans.get('lang.home'));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption),{name:'user.list'});
+                this.Web.addBreadcrumb(this.title);
+                
+                this.Web.setBodyWithPadding(false);
+                this.Web.setShow("moduser");
+            },            
+        
         },
-        destroyed () {     
-            this.Web.setBodyWithPadding(true);
-        }
+        // destroyed () {     
+        //     this.Web.setBodyWithPadding(true);
+        // }
     };
 </script>

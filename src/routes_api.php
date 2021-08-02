@@ -97,6 +97,7 @@ Route::group($groupUser,function(){
     Route::put('/{id}', 'UserController@update')->name('user.update'); 
     Route::put('/{id}/ban', 'UserController@ban')->name('user.ban'); 
     Route::put('/{id}/unban', 'UserController@unban')->name('user.unban'); 
+    Route::put('/{id}/resent-verification-mail', 'UserController@resentVerificationMail')->name('user.resentVerificationMail'); 
     Route::put('/{id}/updatepassword', 'UserController@updatePassword')->name('user.updatePassword'); 
     //delete resource
     Route::delete('/{id}', 'UserController@delete')->name('user.delete');  
