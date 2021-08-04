@@ -48,6 +48,15 @@
                                     <a href="javascript:void(0)" v-if="false">Resend confirmation</a>
                                 </b-alert>
                             </b-form-group>
+                            
+                            <b-form-group label="Phone" v-if="showUserField('phone')">
+                                <b-input v-model="userForm.phone" />
+                                <b-alert variant="warning" show class="mt-3 mb-0" v-if="false">
+                                    Your phone is not confirmed.
+                                    <br />
+                                    <a href="javascript:void(0)" v-if="false">Resend confirmation</a>
+                                </b-alert>
+                            </b-form-group>
 
                             <div class="text-right mt-3">
                                 <b-btn @click="saveUser" variant="primary">Save changes</b-btn>
@@ -138,13 +147,13 @@
             this.getUser(this.UserAuth.getUser("id"));
             this.initView();
             var that = this;
-            setTimeout(() => {
-                that.profileTabAdds.push({
-                    caption: 'Profile',
-                    component: 'profile-tab-profile',
-                    id: 'profile'
-                });
-            }, 500);
+            // setTimeout(() => {
+            //     that.profileTabAdds.push({
+            //         caption: 'Profile',
+            //         component: 'profile-tab-profile',
+            //         id: 'profile'
+            //     });
+            // }, 500);
         },
         methods: {
             showUserField(field) {
@@ -161,25 +170,26 @@
                 });
             },
             saveUser() {
-                this.LocalApi.put(this.AppConfig.endpoint.api.moduser + "/profile", {
-                        id: this.userForm.id,
-                        username: this.userForm.username,
-                        name: this.userForm.name,
-                        email: this.userForm.email,
-                    })
+                let data = {
+                    id: this.userForm.id,
+                    username: this.userForm.username,
+                    name: this.userForm.name,
+                    email: this.userForm.email,
+                };
+
+                if(this.showUserField('phone'))
+                    data.phone = this.userForm.phone;
+                
+                this.LocalApi.put(this.AppConfig.endpoint.api.moduser + "/profile", data)
                     .then((res) => {
                         this.Web.showAlert({ text: "Profile berhasil disimpan" });
                     })
-                    .catch((res) => {
-                        let errMessage = "Simpan data gagal : ";
-                        if (res.response.data && res.response.data.errors) {
-                            _.forEach(res.response.data.errors, (v, i) => {
-                                errMessage += "<br> - " + v[0];
-                            });
-                        } else {
-                            errMessage += res.message;
-                        }
-                        this.Web.showAlert({ text: errMessage, type: "warning" });
+                    .catch((res) => {                        
+                        this.Web.showAlert({ 
+                            title: this.Trans.get("alert.warning_title"),
+                            text: this.Trans.get("alert.update_failed",{attribute:'Data'}) + "<br>\n" + res.message, 
+                            type: "warning" 
+                        });
                     });
             },
             savePassword() {
@@ -193,17 +203,12 @@
                         this.passwordForm.password = "";
                         this.passwordForm.password_confirmation = "";
                     })
-                    .catch((res) => {
-                        let errMessage = "Simpan password gagal : ";
-                        console.log(res.response);
-                        if (res.response.data && res.response.data.errors) {
-                            _.forEach(res.response.data.errors, (v, i) => {
-                                errMessage += "<br> - " + v[0];
-                            });
-                        } else {
-                            errMessage += res.message;
-                        }
-                        this.Web.showAlert({ text: errMessage, type: "warning" });
+                    .catch((res) => {                     
+                        this.Web.showAlert({ 
+                            title: this.Trans.get("alert.warning_title"),
+                            text: this.Trans.get("alert.update_failed",{attribute:'Data'}) + "<br>\n" + res.message, 
+                            type: "warning" 
+                        });
                     });
             },
             initView() {

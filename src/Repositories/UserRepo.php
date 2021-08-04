@@ -332,6 +332,12 @@ class UserRepo extends BaseRepository
                 
             // $user = array_merge($user, $user['profile']); // splice in at position 3
         }
+
+        if (!empty($user['main_role']) && !isset($user['main_role']['role_code'])) {
+            $role = Role::where('id',$user['main_role']['role_id'])->first()->toArray();
+            $user['main_role'] = array_merge($user['main_role'],$role);
+        }
+
         // unset($user['profile']);        
         return $user;
     }
@@ -622,7 +628,7 @@ class UserRepo extends BaseRepository
      * 
      * @return boolean
      */
-    public function updateUser($userId, $userData)
+    public function updateUser($userId, $userData, $runEvent=true)
     {
         if(!($oldUser = $this->getUser($userId))){
             $this->error = __('lang.data_attribute_not_found',['attribute'=>'User']);
@@ -698,7 +704,8 @@ class UserRepo extends BaseRepository
             $this->resetPassword($userId, $userData['password']);
         }
         
-        event(new \hpsynapse\moduser\Events\OnUserUpdatedSuccess($oldUser,$this->getUser($userId))); 
+        if($runEvent)
+            event(new \hpsynapse\moduser\Events\OnUserUpdatedSuccess($oldUser,$this->getUser($userId))); 
         
         return true;
     }
@@ -1026,7 +1033,7 @@ class UserRepo extends BaseRepository
         $this->updateUser($userId, [
             'role'=> $this->generateUserRole($userId),
             'level'=>$role->level
-        ]);
+        ],false);
     }
 
     /**
