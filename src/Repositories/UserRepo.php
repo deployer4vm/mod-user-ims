@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 use Exception;
 use Validator;
@@ -666,56 +667,90 @@ class UserRepo extends BaseRepository
             return false;
         }
 		
-        //jika menyertakan profile, maka proses update table profile
-        if(isset($userData['profile'])){
-            $this->updateProfile($userId, $userData['profile']);
-            unset($userData['profile']);
-        }
         
-        //pastikan tidak ada parameter yang ksosong
-        foreach ($userData as $key => $value) {
-            if(empty($value))unset($userData[$key]);
-        }
+        $dontHaveTransactionLevel = !Tenant::dbTransactionLevel();
+        if($dontHaveTransactionLevel)
+            Tenant::dbBeginTransaction();
         
-        
-        //upload avatar jika menyertakan avatar
-        if (isset($userData['avatar']) && !empty($userData['avatar'])) {
-            $userData['avatar'] = Storage::putFile('images/avatar', $userData['avatar']);
-            
-            $userTmp = $this->_getOne(new User, $userId);
+        $hasUploadAvatar = false;
 
-            if (!empty($userTmp['avatar'])) {
-                Storage::delete($userTmp['avatar']);
+        try{
+
+            //jika menyertakan profile, maka proses update table profile
+            if(isset($userData['profile'])){
+                $this->updateProfile($userId, $userData['profile']);
+                unset($userData['profile']);
             }
-        }
+            
+            //pastikan tidak ada parameter yang ksosong
+            foreach ($userData as $key => $value) {
+                if(empty($value))unset($userData[$key]);
+            }
+            
+            
+            //upload avatar jika menyertakan avatar
+            if (isset($userData['avatar']) && !empty($userData['avatar'])) {
+                $userData['avatar'] = Storage::putFile('images/avatar', $userData['avatar']);
+                $hasUploadAvatar = true;
+                $userTmp = $this->_getOne(new User, $userId);
 
-        if(isset($userData['email']))$this->updateEmail($userId,$userData);
-        if(isset($userData['phone']))$this->updatePhone($userId,$userData);
-        
-        //jika update role data
-        if (isset($userData['role_code'])){            
-            $this->updateUserRole($userId,$userData['role_code']);
-            unset($userData['role_code']);
-        }
-        
-        $this->_update(new User, $userId, $userData);
+                if (!empty($userTmp['avatar'])) {
+                    Storage::delete($userTmp['avatar']);
+                }
+            }
 
-        if (isset($userData['password']) && $userData['password']){
-            $this->resetPassword($userId, $userData['password']);
+            if(isset($userData['email']))$this->updateEmail($userId,$userData);
+            if(isset($userData['phone']))$this->updatePhone($userId,$userData);
+            
+            //jika update role data
+            if (isset($userData['role_code'])){            
+                $this->updateUserRole($userId,$userData['role_code']);
+                unset($userData['role_code']);
+            }
+            
+            $this->_update(new User, $userId, $userData);
+
+            if (isset($userData['password']) && $userData['password']){
+                $this->resetPassword($userId, $userData['password']);
+            }
+            
+            if($runEvent)
+                event(new \hpsynapse\moduser\Events\OnUserUpdatedSuccess($oldUser,$this->getUser($userId))); 
+                        
+            if($dontHaveTransactionLevel)
+                Tenant::dbCommit();
+                
+            return true;
+
+        } catch (Exception  $e) {
+            if($dontHaveTransactionLevel)
+                Tenant::dbRollback();
+            if($hasUploadAvatar)
+
+            $this->error = $e->getMessage();
+            
+            Log::info('moduser UserRepo::updateUser() ERROR');
+            Log::error($e);
+
+            // jika sedang dalam transaksi dari parent maka teruskan error nya ke parent transaction nya
+            if(!$dontHaveTransactionLevel)
+                throw $e; 
+
+            return false;
         }
-        
-        if($runEvent)
-            event(new \hpsynapse\moduser\Events\OnUserUpdatedSuccess($oldUser,$this->getUser($userId))); 
-        
-        return true;
     }
 
-
+    /**
+     * banned user
+     */
     public function banUser($id,$banNote='')
     {
         return User::find($id)->update(['status' => 2,'banned_note'=>$banNote,'banned_at'=>now()]);
     }
 
+    /**
+     * unbaned user
+     */
     public function unbanUser($id)
     {
         return User::find($id)->update(['status' => 1]);

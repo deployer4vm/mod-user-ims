@@ -3,6 +3,8 @@
 namespace hpsynapse\moduser\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
 use hpsynapse\moduser\Facades\UserRepo;
 use hpsynapse\moduser\Facades\RoleRepo;
 use hpsynapse\moduser\Facades\UserAuth;
@@ -147,7 +149,7 @@ class UserController extends BaseController
             return $this->done();
         }
 
-        $validator = \Validator::make($userData, $validator);
+        $validator = Validator::make($userData, $validator);
 
         if ($validator->fails()) {       
             $this->setError('Data keliru',$validator->messages());
@@ -194,7 +196,7 @@ class UserController extends BaseController
         }
 
         if(!empty($validator)){
-            $validator = \Validator::make($input, $validator); 
+            $validator = Validator::make($input, $validator); 
             if ($validator->fails()) {
                 $this->setError('Input Error :',$validator->messages(),400,true);
                 return $this->done();
@@ -228,7 +230,7 @@ class UserController extends BaseController
         $id = UserAuth::user('id');//$request->route('id');
         $userData = $request->only(['password','password_confirmation']);
 
-        $validator = \Validator::make($userData, [
+        $validator = Validator::make($userData, [
             'password' => 'required|min:8|max:255',
             'password_confirmation' => 'required|min:8|max:255|same:password'
         ]);
@@ -377,7 +379,7 @@ class UserController extends BaseController
         }
 
         if(!empty($validator)){
-            $validator = \Validator::make($input, $validator); 
+            $validator = Validator::make($input, $validator); 
             if ($validator->fails()) {
                 $this->setError('Input Error :',$validator->messages(),400,true);
                 return $this->done();

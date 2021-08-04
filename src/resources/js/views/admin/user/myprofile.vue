@@ -42,10 +42,11 @@
 
                             <b-form-group label="Email">
                                 <b-input v-model="userForm.email" />
-                                <b-alert variant="warning" show class="mt-3 mb-0" v-if="false">
-                                    Your email is not confirmed. Please check your inbox.
-                                    <br />
-                                    <a href="javascript:void(0)" v-if="false">Resend confirmation</a>
+                                <b-alert variant="warning" show class="mt-3 mb-0" v-if="!userForm.email_verified_at && userForm.email == oldEmail">
+                                    Email Anda belum terverifikasi, silahkan cek email verifikasi yang kami kirim, atau 
+                                    <a href="javascript:void(0)" @click="sendVerification(userForm.id)" class="small">
+                                        kirim ulang email verifikasi
+                                    </a>
                                 </b-alert>
                             </b-form-group>
                             
@@ -127,6 +128,7 @@
                 status: 1,
                 profile: {},
             },
+            oldEmail:'',//data email sebelum diedit
             profileTabAdds:[]
         }),
         computed: {
@@ -166,6 +168,7 @@
             getUser(id) {
                 this.LocalApi.get(this.AppConfig.endpoint.api.moduser + "/" + id).then((res) => {
                     this.userForm = res.data.data;
+                    this.oldEmail = this.userForm.email;
                     return res.data.data;
                 });
             },
@@ -210,6 +213,26 @@
                             type: "warning" 
                         });
                     });
+            },
+            sendVerification(userId){
+                this.Web.showAlert({
+                    styleType: "modal",
+                    style: "info",
+                    title: "Confirmation",
+                    text: "Kirim ulang email verifikasi ?",
+                    modalButtonCancel: "No",
+                    modalButtonOk: "Yes",
+                    onOk: () => {
+                        this.$store
+                            .dispatch("user/resentVerificationMail", userId)
+                            .then(res => {
+                                this.Web.showAlert({ text: "Email berhasil dikirim" });
+                            })
+                            .catch(res => {
+                                this.Web.showAlert({ text: "Email gagal kirim : " + res.message, style: "warning" });
+                            });
+                    }
+                });
             },
             initView() {
                 this.Web.setModule("moduser");

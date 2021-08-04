@@ -27,12 +27,11 @@
 
                         <b-form-group :label="Trans.get('user.field_caption.username')" class="col position-relative" v-if="showUserField('username')">
                             <b-input v-model="form.username" :placeholder="Trans.get('user.field_caption.username')" />
-                            <!-- <a href="javascript:void(0)" class="small">Reset password</a> -->
                         </b-form-group>
 
                         <b-form-group :label="Trans.get('user.field_caption.email')" class="col position-relative" v-if="showUserField('email')">
                             <masked-input :class="{ 'form-control': true, 'is-invalid': $v.form.email.$error ? true : false }" type="text" :mask="emailMask" :aria-invalid="$v.form.email.$error" v-model.trim="form.email" placeholder="Email" />
-                            <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('user.field_caption.password')" />
+                            <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('user.field_caption.email')" />
                             <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
                         </b-form-group>
 
