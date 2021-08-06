@@ -62,19 +62,19 @@
 
                     <template v-slot:cell(actions)="data">
                         <!-- <b-btn variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit"><i class="ion ion-md-create"></i></b-btn> -->
-                        <router-link class="btn btn-default icon-btn btn-xs md-btn-flat" :title="Trans.get('lang.edit')" v-b-tooltip.hover :to="{ name: 'role.edit', params: { roleId: data.item.id } }" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
+                        <router-link class="btn btn-success icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.edit')" :to="{ name: 'role.edit', params: { roleId: data.item.id } }" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
                             <span class="ion ion-md-create"></span>
                         </router-link>
 
-                        <b-btn class="btn btn-danger icon-btn btn-xs md-btn-flat" :title="Trans.get('lang.delete')" @click="deleteRole(data.item.id)" v-b-tooltip.hover v-if="UserAuth.hasAccess(accessRuleKey, 'd')">
+                        <b-btn class="btn btn-danger icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.delete')" @click="deleteRole(data.item.id)" v-if="UserAuth.hasAccess(accessRuleKey, 'd')">
                             <span class="ion ion-md-close"></span>
                         </b-btn>
                         <!-- <b-dropdown variant="default btn-xs icon-btn md-btn-flat hide-arrow" :right="!isRTL">
-              <template slot="button-content">
-                <i class="ion ion-ios-settings"></i>
-              </template>
-              <b-dropdown-item @click="deleteRole(data.item.id)">Remove</b-dropdown-item>
-            </b-dropdown> -->
+                        <template slot="button-content">
+                            <i class="ion ion-ios-settings"></i>
+                        </template>
+                        <b-dropdown-item @click="deleteRole(data.item.id)">Remove</b-dropdown-item>
+                        </b-dropdown> -->
                     </template>
                 </b-table>
             </div>

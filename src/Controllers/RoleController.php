@@ -187,6 +187,12 @@ class RoleController extends BaseController
         $id = $request->route('id');
         $input = $request->all();
         
+        if(!UserAuth::hasAccess($this->accessRuleKey.'.can_edit_role_code') && isset($input['role_code']))
+            unset($input['role_code']);
+        
+        if(!UserAuth::hasAccess($this->accessRuleKey.'.can_edit_level') && isset($input['level']))
+            unset($input['level']);
+        
         if(isset($input['id']))unset($input['id']);
 
         if(config('AppConfig.system.multitenant.active')){

@@ -19,7 +19,8 @@
                     <b-input 
                         :state="$v.roleForm.role_code.$error?false:null"
                         @change="$v.roleForm.role_code.$touch()"
-                        v-model="roleForm.role_code" @blur="formatRoleCode"
+                        v-model="roleForm.role_code" @blur="formatRoleCode" 
+                        :disabled="!(isAdd || UserAuth.hasAccess(accessRuleKey + '.can_edit_role_code'))"
                     />
                     <invalid-tooltip :inputItem="$v.roleForm.role_code" :fieldName="Trans.get('role.field_caption.role_code')" />
                 </b-form-group>
@@ -32,12 +33,13 @@
                 </b-form-group>
 
                 
-                <b-form-group :label="Trans.get('role.field_caption.level')"  label-align-md="right" label-class="pr-md-2" :label-cols-md="2">
+                <b-form-group :label="Trans.get('role.field_caption.level')" label-align-md="right" label-class="pr-md-2" :label-cols-md="2">
                     <b-select 
                         :state="$v.roleForm.level.$error?false:null" 
                         @change="$v.roleForm.level.$touch()"
                         v-model="roleForm.level" 
                         :options="levelOption" 
+                        :disabled="!(isAdd || UserAuth.hasAccess(accessRuleKey + '.can_edit_level'))"
                     />
                     <invalid-tooltip :inputItem="$v.roleForm.level" :fieldName="Trans.get('role.field_caption.level')" />
                 </b-form-group>
