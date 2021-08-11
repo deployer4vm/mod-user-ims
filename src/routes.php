@@ -5,10 +5,14 @@ use Illuminate\Support\Facades\Route;
 /**
  * General web Auth Route
  */
-Route::group([
-    'prefix' => config('AppConfig.endpoint.web.auth'),
-    'domain' => config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain')
-], function(){
+$group = [
+    'prefix' => config('AppConfig.endpoint.web.auth')
+];
+if(request()->getHost()=='localhost'){
+    $group['domain'] = config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain');
+}
+
+Route::group($group, function(){
     //VerificationController (web only, ga ada di api)
     Route::get('/emailverify', 'Auth\VerificationController@verify')->name('auth.emailVerification');
     Route::get('/emailverify/success', 'Auth\VerificationController@verifySuccess')->name('auth.emailVerification.success');
@@ -134,7 +138,14 @@ if(config('AppConfig.system.use_admin_full_vue',1)!=1){
     });
 
 }else{
-    Route::prefix(config('AppConfig.endpoint.admin.auth'))->domain(config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain'))->group(function(){
+    
+    $group = [
+        'prefix' => config('AppConfig.endpoint.admin.auth')
+    ];
+    if(request()->getHost()=='localhost'){
+        $group['domain'] = config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain');
+    }
+    Route::group($group,function(){
         Route::get('/login/{appCode?}', function(){
             return view('layouts.full_vue.main');
         })->name('auth.login');

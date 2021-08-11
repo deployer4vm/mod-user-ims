@@ -18,7 +18,8 @@
             {{$error_message}}
         </p>        
         <p class="text-center mt-5 mb-0">
-            <a href="{!! config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain') !!}">Back</a>
+            <!-- <a href="{!! config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain') !!}">Back</a> -->
+            <a href="{{route('auth.login')}}">Back</a>
         </p>
     </div>
 </div>
