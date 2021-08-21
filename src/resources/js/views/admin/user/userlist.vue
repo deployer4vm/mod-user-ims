@@ -47,8 +47,18 @@
                     :bordered="true" 
                     class="card-table"
                 >
+                
                     <template v-slot:cell(account)="data">
                         <a href="javascript:void(0)">{{ data.item.account }}</a>
+                    </template>
+
+                    <template v-slot:cell(avatar)="data">
+                        <div class="ui-w-100 bg-light text-center rounded">
+                            <a :href="publicUrl + 'upload/' + data.item.avatar" target="_blank" v-if="data.item.avatar"><img :src="publicUrl + 'upload/' + data.item.avatar" style="max-width: 100px; max-height: 100px;" /></a>
+                            <div class="ui-w-100 text-center" style="padding-top: 10px;" v-else>
+                                <span class="ion ion-ios-person m-4" style="font-size: 22px"></span>
+                            </div>
+                        </div>
                     </template>
 
                     <template v-slot:cell(email)="data">
@@ -149,6 +159,7 @@
             fields: [],
             defaultFields: [
                 { key: "id", sortable: true, tdClass: "align-middle" },
+                { key: "avatar", sortable: true, tdClass: "align-middle" },
                 { key: "username", sortable: true, tdClass: "align-middle" },
                 { key: "email", sortable: true, tdClass: "align-middle" },
                 { key: "name", sortable: true, tdClass: "align-middle" },
@@ -213,7 +224,10 @@
                 }, 300);
             }
         },
-        methods: { 
+        methods: {             
+            showUserField(field) {
+                return !this.AppConfig.packageLocal.moduser.users_hidden_field.includes(field);
+            },
             doSearch() {
                 this.loadData(this.curPage,this.searchString,this.sortBy,this.sortDesc);
             },     
@@ -355,6 +369,10 @@
 
             //jika username termasuk dari field yang dihide maka hide kolomnya
             if (this.AppConfig.packageLocal.moduser.users_hidden_field.includes("username")) {
+                this.fields.splice(2, 1);
+            }
+
+            if(!this.showUserField('avatar')){
                 this.fields.splice(1, 1);
             }
             //filter kolom table user berdasarkan konfig

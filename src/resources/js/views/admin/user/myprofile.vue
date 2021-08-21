@@ -22,12 +22,22 @@
                     <!-- Tab General / Profile -->
                     <div class="col-md-9" v-if="curTab === 'general'">
                         <b-card-body class="media align-items-center" v-if="showUserField('avatar')">
-                            <img :src="`${publicUrl}img/avatars/${form.avatar}`" alt class="d-block ui-w-80" />
+                            <!-- <img :src="`${publicUrl}images/avatars/${userForm.id}/${userForm.avatar}`" alt class="d-block ui-w-80" />
                             <div class="media-body ml-4">
                                 <b-btn variant="outline-primary">Upload new photo</b-btn>&nbsp;
                                 <b-btn variant="default md-btn-flat">Reset</b-btn>
                                 <div class="text-light small mt-1">Allowed JPG, GIF or PNG. Max size of 800K</div>
-                            </div>
+                            </div> -->
+                            
+                            <image-crop-upload 
+                                v-if="userForm.id"
+                                :imagePath="userForm.avatar"
+                                @setValue="userForm.avatar = $event"
+                                maxSize="800000"
+                                :fieldCaption="Trans.get('user.field_caption.avatar')"
+                                fieldName="avatar"
+                            >
+                            </image-crop-upload>
                         </b-card-body>
 
                         <hr class="border-light m-0" />
@@ -182,8 +192,16 @@
 
                 if(this.showUserField('phone'))
                     data.phone = this.userForm.phone;
+
+                if(this.showUserField('avatar'))
+                    data.avatar = this.userForm.avatar;
                 
-                this.LocalApi.put(this.AppConfig.endpoint.api.moduser + "/profile", data)
+                var formData = globals().Helper.convertToFormData(data);
+                this.LocalApi.post(this.AppConfig.endpoint.api.moduser + "/profile", formData,{
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
                     .then((res) => {
                         this.Web.showAlert({ text: "Profile berhasil disimpan" });
                     })

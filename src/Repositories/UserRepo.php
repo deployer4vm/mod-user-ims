@@ -650,6 +650,7 @@ class UserRepo extends BaseRepository
         if (isset($userData['updated_at'])) unset($userData['updated_at']);
         if (isset($userData['repassword'])) unset($userData['repassword']);
         if (isset($userData['user_role'])) unset($userData['user_role']);
+        if (isset($userData['main_role'])) unset($userData['main_role']);
 
 
         if (isset($userData['username']) && $this->isUsernameRegistered($userData['username'], $userId)){
@@ -687,15 +688,12 @@ class UserRepo extends BaseRepository
                 if(empty($value))unset($userData[$key]);
             }
             
-            
             //upload avatar jika menyertakan avatar
-            if (isset($userData['avatar']) && !empty($userData['avatar'])) {
-                $userData['avatar'] = Storage::putFile('images/avatar', $userData['avatar']);
+            if (isset($userData['avatar']) && !empty($userData['avatar']) && !is_string($userData['avatar'])) {
+                $userData['avatar'] = $userData['avatar']->store('images/avatar/'.$oldUser['id']);
                 $hasUploadAvatar = true;
-                $userTmp = $this->_getOne(new User, $userId);
-
-                if (!empty($userTmp['avatar'])) {
-                    Storage::delete($userTmp['avatar']);
+                if (!empty($oldUser['avatar'])) {
+                    Storage::delete($oldUser['avatar']);
                 }
             }
 
@@ -719,7 +717,7 @@ class UserRepo extends BaseRepository
                         
             if($dontHaveTransactionLevel)
                 Tenant::dbCommit();
-                
+            
             return true;
 
         } catch (Exception  $e) {

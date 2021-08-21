@@ -5,16 +5,31 @@
         <div class="m-3" v-if="isDataLoaded">
             <b-tabs class="nav-tabs-top nav-responsive-sm">
                 <b-tab :title="Trans.get('user.userform.tab_account_caption')" active>
+
                     <b-card-body v-if="showUserField('avatar')">
-                        <div class="media align-items-center">
-                            <img :src="`${publicUrl}img/avatars/${userData.avatar}`" alt="" class="d-block ui-w-80" />
+                        <!-- <div class="media align-items-center">
+                            <div class="ui-w-100 bg-light text-center rounded">
+                                <img :src="`${publicUrl}images/avatars/${form.id}/${form.avatar}?size=100x100`" alt class="d-block" style="max-width: 100px; max-height: 100px;" v-if="form.avatar" />
+                                <div class="ui-w-100 text-center" style="padding-top: 10px;" v-else>
+                                    <span class="ion ion-ios-person m-4" style="font-size: 22px"></span>
+                                </div>
+                            </div>
                             <div class="media-body ml-3">
                                 <label class="form-label d-block mb-2">{{ Trans.get("user.field_caption.avatar") }}</label>
-                                <b-btn variant="outline-primary" size="sm">{{ Trans.get("lang.change") }}</b-btn
-                                >&nbsp;
-                                <b-btn variant="default md-btn-flat" size="sm">{{ Trans.get("lang.reset") }}</b-btn>
+                                <b-btn variant="outline-primary" @click="uploadAvatar" size="sm" :disabled="isAdd">Upload new photo</b-btn> &nbsp; <i class="text-muted" v-if="isAdd">Untuk menambahkan avatar, silahkan tambahkan terlebih dahulu data user.</i>
+                                <b-btn variant="default md-btn-flat" @click="resetdAvatar" size="sm" v-if="form.avatar">{{ Trans.get("lang.reset") }}</b-btn>
+                                <div class="text-light small mt-1">Allowed JPG, GIF or PNG. Max size of 800K</div>
                             </div>
-                        </div>
+                        </div> -->
+                        <image-crop-upload 
+                            v-if="form.id || isAdd"
+                            :imagePath="form.avatar"
+                            @setValue="form.avatar = $event"
+                            maxSize="800000"
+                            :fieldCaption="Trans.get('user.field_caption.avatar')"
+                            fieldName="avatar"
+                        >
+                        </image-crop-upload>
                     </b-card-body>
 
                     <hr class="border-light m-0" v-if="showUserField('avatar')" />
@@ -72,6 +87,7 @@
                             <b-select v-model="form.status" :options="{ 1: Trans.get('user.field_caption.status_item.active'), 2: Trans.get('user.field_caption.status_item.banned') }" />
                         </b-form-group>
                     </b-card-body>
+
                 </b-tab>
 
                 <b-tab :title="Trans.get('user.userform.tab_profile_caption')" v-if="showProfile">
@@ -115,7 +131,7 @@
     import { required, requiredIf, email, sameAs, minLength } from "node_modules/vuelidate/lib/validators";
 
     export default {
-        name: "pages-user-edit",
+        name: "moduser-user-form",
         metaInfo() {
             return { title: this.pageTitle };
         },
@@ -182,6 +198,12 @@
             },
             roleItems: {},
             isDataLoaded: true,
+            // upload
+            showUpload: false,
+            otherParams: {
+                token: '123456798',
+                name: 'img'
+            }
         }),
         computed: {
             isAdd() {
@@ -192,7 +214,7 @@
                 return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption);
             },
             title() {
-                return this.isAdd ? this.Trans.get("user.userform.form_add_caption") : "#" + this.form.name;
+                return this.isAdd ? this.Trans.get("user.userform.form_add_caption") : ("#" + this.form.name);
             },
             oneData: {
                 get() {
@@ -218,10 +240,9 @@
                 });
                 return false;
             }
-            this.initView();
             
-            this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-            this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
+            // this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+            // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
             
             if (this.showUserField("username")) {
                 this.formEmpty.username = "";
@@ -276,6 +297,8 @@
                             this.form.password = "";
                             this.form.repassword = "";
                             this.isDataLoaded = true;
+                            
+                            this.initView();
                         })
                         .catch(res => {
                             this.isDataLoaded = true;
@@ -285,6 +308,8 @@
                 } else {
                     this.isDataLoaded = true;
                     this.form = this.formEmpty;
+                    
+                    this.initView();
                 }
             },
             onSubmit(evt) {
@@ -301,7 +326,7 @@
                         if (!this.UserAuth.hasAccess(this.accessRuleKey, "c")) {
                             //goto dashboard current tenant
                             this.Web.goToCurrentTenant();
-                            this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
+                            this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
                             return false;
                         }
 
@@ -319,7 +344,7 @@
                         if (!this.UserAuth.hasAccess(this.accessRuleKey, "u")) {
                             //goto dashboard current tenant
                             this.Web.goToCurrentTenant();
-                            this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
+                            this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
                             return false;
                         }
 
@@ -351,6 +376,13 @@
             showProfileField(field) {
                 return !this.AppConfig.packageLocal.moduser.user_profiles.hide.includes(field);
             },  
+            uploadAvatar() {
+                this.showUpload = this.showUpload?false:true;
+            },
+            resetdAvatar() {
+                
+            },
+            //--------------------------
             initView() {
                 this.Web.setModule("moduser");
 
@@ -367,7 +399,7 @@
                 this.Web.setShow("moduser");
             },            
         
-        },
+        }
         // destroyed () {     
         //     this.Web.setBodyWithPadding(true);
         // }

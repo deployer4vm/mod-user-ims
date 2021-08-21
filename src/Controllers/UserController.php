@@ -203,14 +203,16 @@ class UserController extends BaseController
             }
         }
 
-        if($input['banned_note'] == null){
+        if(empty($input['banned_note'])){
             unset($input['banned_note']);
         }
 
+        if($request->file('avatar',false))
+            $input['avatar'] = $request->file('avatar');
+        
         if(UserRepo::updateUser($id, $input)) {            
             $this->setAlert('Data Updated successfully','success');
         }else{
-            $this->setAlert(UserRepo::error(),'danger');
             $this->setError(UserRepo::error());
         }
 
@@ -218,6 +220,54 @@ class UserController extends BaseController
     }
     
     
+    /**
+     * upload avatar
+     * 
+     * @param Request $request
+     *      avatar
+     */
+    public function uploadAvatar(Request $request)
+    {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+
+        if($request->file('avatar',false)==false){
+            $this->setError(__('validation.required',['attribute'=>'Avatar']));
+            return $this->done();
+        }
+
+        $id = $request->route('id');
+        if(UserRepo::updateUser($id, [
+            'avatar'=> $request->file('avatar')
+        ])) {            
+            $this->setAlert(__('alert.update_success',['attribute'=>'Avatar']),'success');
+        }else{
+            $this->setError(UserRepo::error(),UserRepo::errorValidator());
+        }
+        return $this->done();
+    }
+    
+    public function deleteAvatar(Request $request)
+    {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+        
+        $id = $request->route('id');
+           
+        if(UserRepo::deleteAvatar($id)){
+            $this->setAlert(__('alert.delete_success',['attribute'=>'Avatar']),'success');
+        }else{
+            $this->setError(UserRepo::error(),UserRepo::errorValidator());
+        }
+
+        return $this->done();
+           
+    }
+
     /**
      * update password di my profile
      * 
@@ -389,6 +439,9 @@ class UserController extends BaseController
         if(isset($input['role_code']))unset($input['role_code']);
         if(isset($input['status']))unset($input['status']);
         
+        if($request->file('avatar',false))
+            $input['avatar'] = $request->file('avatar');
+            
         if(UserRepo::updateUser($id, $input)) {            
             $this->setAlert('Data Updated successfully','success');
         }else{

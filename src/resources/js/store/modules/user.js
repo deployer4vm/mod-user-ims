@@ -73,16 +73,26 @@ const actions = {
         
     },
     register({commit},data) {
+        var formData = globals().Helper.convertToFormData(data);
         return globals()
-            .LocalApi.post(userApi,data)
+            .LocalApi.post(userApi,formData,{
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
             .then(res => {
                 commit("setUser", res.data.data);
                 return true;
             });
     },
     update({commit},data){
+        var formData = globals().Helper.convertToFormData(data.data);
         return globals()
-            .LocalApi.put(userApi + "/" + data.id,data.data)
+            .LocalApi.post(userApi + "/" + data.id,formData,{
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
             .then(res => {
                 commit("setUser", res.data.data);
                 return true;
