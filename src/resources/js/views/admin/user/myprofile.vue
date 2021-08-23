@@ -1,6 +1,6 @@
 <template>
     <div>
-        <header-breadcrumb :pageTitle="title" :backPath="{name: 'dashboard'}" />     
+        <header-breadcrumb :pageTitle="title" :backPath="{name: 'home'}" />     
 
         <div class="m-3">
             <b-card no-body class="overflow-hidden">
