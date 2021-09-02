@@ -34,13 +34,15 @@
                         <!-- / Logo -->
 
                         <h4 class="text-center font-weight-normal mt-5 mb-0">{{ title }}</h4>
-
+                        
+                        <alert />
+                        
                         <!-- Form -->
                         <form class="my-5" @submit="onSubmit" @reset="onReset">
                             <b-form-group :label="Trans.get('auth.register.namecaption')" class="position-relative">
                                 <b-input-group>
                                     <b-input-group-text slot="prepend"><i class="ion ion-md-contact"></i></b-input-group-text>
-                                    <b-input :state="$v.form.name.$error ? 'invalid' : ''" v-model.trim="form.name" @change="$v.form.name.$touch()" />
+                                    <b-input :state="$v.form.name.$error ? false : ''" v-model.trim="form.name" @change="$v.form.name.$touch()" />
                                 </b-input-group>
                                 <invalid-tooltip :inputItem="$v.form.name" :fieldName="Trans.get('auth.register.namecaption')" />
                             </b-form-group>
@@ -48,7 +50,7 @@
                             <b-form-group :label="Trans.get('auth.register.emailcaption')" class="position-relative">
                                 <b-input-group>
                                     <b-input-group-text slot="prepend"><i class="ion ion-md-contact"></i></b-input-group-text>
-                                    <b-input :state="$v.form.email.$error ? 'invalid' : ''" v-model.trim="form.email" @change="$v.form.email.$touch()" />
+                                    <b-input :state="$v.form.email.$error ? false : ''" v-model.trim="form.email" @change="$v.form.email.$touch()" />
                                 </b-input-group>
                                 <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('auth.register.emailcaption')" />
                             </b-form-group>
@@ -59,7 +61,7 @@
                                 </div>
                                 <b-input-group>
                                     <b-input-group-text slot="prepend"><i class="ion ion-md-lock"></i></b-input-group-text>
-                                    <b-input type="password" :state="$v.form.password.$error ? 'invalid' : ''" v-model.trim="form.password" @change="$v.form.password.$touch()" />
+                                    <b-input type="password" :state="$v.form.password.$error ? false : ''" v-model.trim="form.password" @change="$v.form.password.$touch()" />
                                 </b-input-group>
                                 <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('auth.register.passwordcaption')" />
                             </b-form-group>
@@ -70,7 +72,7 @@
                                 </div>
                                 <b-input-group>
                                     <b-input-group-text slot="prepend"><i class="ion ion-md-lock"></i></b-input-group-text>
-                                    <b-input type="password" :state="$v.form.repassword.$error ? 'invalid' : ''" v-model.trim="form.repassword" @change="$v.form.repassword.$touch()" />
+                                    <b-input type="password" :state="$v.form.repassword.$error ? false : ''" v-model.trim="form.repassword" @change="$v.form.repassword.$touch()" />
                                 </b-input-group>
                                 <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="Trans.get('auth.register.repasswordcaption')" />
                             </b-form-group>
@@ -95,21 +97,32 @@
 <style src="@/vendor/styles/pages/authentication.scss" lang="scss"></style>
 
 <script>
-    import { required, minLength, email } from "node_modules/vuelidate/lib/validators";
+    import { required, minLength, sameAs, email } from "node_modules/vuelidate/lib/validators";
 
     export default {
-        name: "pages-auth-login",
+        name: "pages-auth-registrasi",
         metaInfo: {
-            title: "Login"
+            title: "Registrasi",
         },
         data: () => ({
             form: {
-                name: '',
+                role_code:"user",
+                name: "",
                 email: "",
-                username: "",
+                phone: "",
                 password: "",
                 repassword: "",
-            }
+                tos_confirm: 0,
+            },
+            formEmpty: {
+                role_code:"user",
+                name: "",
+                email: "",
+                phone: "",
+                password: "",
+                repassword: "",
+                tos_confirm: 0,
+            },
         }),
         validations: {
             form: {
@@ -117,71 +130,96 @@
                     required
                 },
                 email: {
-                    required
+                    required,
+                    email
                 },
+                phone: {
+                    required: requiredIf(function (nestedModel) {
+                        return this.showUserField('phone');
+                    })
+                },  
                 password: {
                     required,
                     minLength: minLength(6)
                 },
                 repassword: {
-                    required,
-                    minLength: minLength(6)
+                    sameAsPassword: sameAs("password")
                 }
-            }
+            },
         },
         computed: {
             title() {
-                return this.Trans.get('auth.register.title');//this.Web.getTenantName() ? this.Web.getTenantName() : this.Web.getAdminTitle();
-            }
+                return this.Web.getTenantName()
+                    ? this.Web.getTenantName()
+                    : this.Web.getAdminTitle();
+            },
         },
         methods: {
             onSubmit(evt) {
                 evt.preventDefault();
 
+                this.$v.$touch();
                 if (this.$v.form.$error) {
                     this.Web.showAlert({
                         type: "danger",
                         title: this.Trans.get("alert.form_must_complete_title"),
-                        text: this.Trans.get("alert.form_must_complete_text")
+                        text: this.Trans.get("auth.register.alert.register_failed",{error:this.Trans.get("alert.form_must_complete_text")})
                     });
-                } else {
-                    if(this.form.password != this.form.repassword){
+                    return false;
+                }
+
+                if(this.form.password != this.form.repassword){
+                    this.Web.showAlert({
+                        type: "danger",
+                        title: this.Trans.get("alert.form_must_complete_title"),
+                        text: this.Trans.get("auth.register.alert.register_failed",{error:this.Trans.get("auth.register.alert.password_not_match")})
+                    });
+                    return false;
+                }
+
+                this.UserAuth.register(this.form)
+                    .then(res => {
+                        this.Web.showAlert({
+                            type: "success",
+                            text: res.message?res.message:this.Trans.get("register.alert.register_success")
+                        });
+                        this.UserAuth.goToHome();
+                    })
+                    .catch(err => {
+                        console.log("Login error : ", err);
                         this.Web.showAlert({
                             type: "danger",
-                            title: this.Trans.get("alert.form_must_complete_title"),
-                            text: this.Trans.get("auth.register.alert.password_not_match")
+                            text: this.Trans.get("auth.register.alert.register_failed",{error:err.message})
                         });
-                        return false;
-                    }
-                    this.Web.setLoadingPage(true, "Register...");
-                    this.UserAuth
-                        .register({
-                            name: this.form.name,
-                            email: this.form.email,
-                            password: this.form.password
-                        })
-                        .then(res => {
-                            this.Web.setLoadingPage(false);
-                            console.log("Registrasi success");
-                            this.Web.showAlert({ type: "success", text: this.Trans.get("auth.register.alert.register_success") });
-                            this.UserAuth.goToHome();
-                        })
-                        .catch(err => {
-                            this.Web.setLoadingPage(false);
-                            console.log("Registrasi error : ", err);
-                            this.Web.showAlert({ type: "danger", text: this.Trans.get("auth.register.alert.register_failed") });
-                        });
-                }
+                    });
             },
             onReset(evt) {
                 evt.preventDefault();
                 // Reset our form values
-                this.form.name = "";
-                this.form.email = "";
-                this.form.password = "";
-                this.form.repassword = "";
-            }
+                this.form = JSON.parse(JSON.stringify(this.formEmpty));
+            },            
+            showUserField(field) {
+                return !this.AppConfig.packageLocal.moduser.users_hidden_field.includes(field);
+            },
         },
-        created() {}
+        created() {
+            if(this.$route.query.role_code){
+                this.formEmpty.role_code = this.$route.query.role_code;
+                this.form.role_code = this.$route.query.role_code;
+            }
+            if(this.$route.query.email){
+                this.formEmpty.email = this.$route.query.email;
+                this.form.email = this.$route.query.email;
+            }
+            if(this.$route.query.name){
+                this.formEmpty.name = this.$route.query.name;
+                this.form.name = this.$route.query.name;
+            }
+            if(this.$route.query.phone){
+                this.formEmpty.phone = this.$route.query.phone;
+                this.form.phone = this.$route.query.phone;
+            }
+                        
+        },
     };
 </script>
