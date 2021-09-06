@@ -93,14 +93,16 @@ class UserController extends BaseController
      */
     public function readOne(Request $request)
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
-            $this->setError(__('alert.access_denied'),false,403);
-            return $this->done();
-        }
 
         $id = $request->route('id');
 
         $this->output['data'] = UserRepo::getUser($id);
+
+        if(!(UserAuth::hasAccess($this->accessRuleKey,'r') || $this->output['data']['id'] == UserAuth::user('id'))){
+            $this->setError(__('alert.access_denied'),false,403);
+            return $this->done();
+        }
+
         $this->output['data']['user_role'] = UserRepo::getUserRole($this->output['data']['id']);
 
         foreach($this->output['data']['user_role'] as $key => $val) {

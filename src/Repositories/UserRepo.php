@@ -703,7 +703,7 @@ class UserRepo extends BaseRepository
             //jika update role data
             if (isset($userData['role_code'])){            
                 $this->updateUserRole($userId,$userData['role_code']);
-                unset($userData['role_code']);
+                unset($userData['role_code'],$userData['role']);
             }
             
             $this->_update(new User, $userId, $userData);
@@ -1062,11 +1062,16 @@ class UserRepo extends BaseRepository
             }     
         }
                            
+        $roleUser = $this->generateUserRole($userId);
         //update role di table user
-        $this->updateUser($userId, [
-            'role'=> $this->generateUserRole($userId),
+        // $this->updateUser($userId, [
+        //     'role'=> $roleUser,
+        //     'level'=>$role->level
+        // ],false);
+        User::where('id',$userId)->update([
+            'role'=> $roleUser,
             'level'=>$role->level
-        ],false);
+        ]);
     }
 
     /**
