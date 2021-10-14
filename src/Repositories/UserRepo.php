@@ -845,13 +845,17 @@ class UserRepo extends BaseRepository
     public function varifyEmail($email, $verifyCode)
     {
         if ($this->generateEmailVerfifyCode($email) == $verifyCode) {
-            $user = User::where('email', $email)->whereNull('email_verified_at')->first();
-            if (!$user) {
+            $user = User::where('email', $email);
+            if (!$user->exists()) {
                 $this->error = __('auth.emailverify_fail_mailnotfound');
                 return false;
             }
-            $user->{'email_verified_at'} = now()->toDateTimeString();
-            $user->save();
+
+            $user = $user->whereNull('email_verified_at')->first();
+            if ($user->exists()) {
+                $user->{'email_verified_at'} = now()->toDateTimeString();
+                $user->save();
+            }
 
             event(new \hpsynapse\moduser\Events\OnEmailVerifiedSuccess($this->getUser($user->id))); 
             return true;

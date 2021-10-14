@@ -235,7 +235,7 @@
             sendVerification(userId){
                 this.Web.showAlert({
                     styleType: "modal",
-                    style: "info",
+                    type: "info",
                     title: "Confirmation",
                     text: "Kirim ulang email verifikasi ?",
                     modalButtonCancel: "No",
@@ -247,7 +247,7 @@
                                 this.Web.showAlert({ text: "Email berhasil dikirim" });
                             })
                             .catch(res => {
-                                this.Web.showAlert({ text: "Email gagal kirim : " + res.message, style: "warning" });
+                                this.Web.showAlert({ text: "Email gagal kirim : " + res.message, type: "warning" });
                             });
                     }
                 });

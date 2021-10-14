@@ -57,12 +57,13 @@ trait UserMessageTraits
      * @param type $isSecondary
      * @return type
      */
-    public function sendVerificationEmail($userId)
+    public function sendVerificationEmail($userId,$isSecondary=false)
     {
         return $this->notify(
             $userId,
             new \hpsynapse\moduser\Notifications\EmailVerification(
                 $userId,
+                $isSecondary,
                 config('AppConfig.client.app_name'),
                 Request::getHost(),
                 route('home')

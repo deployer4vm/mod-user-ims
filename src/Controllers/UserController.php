@@ -27,7 +27,7 @@ class UserController extends BaseController
     public function readList(Request $request) 
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
-            $this->setError(__('alert.access_denied',false,403));
+            $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
 
@@ -127,7 +127,7 @@ class UserController extends BaseController
     public function create(Request $request)
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'c')){
-            $this->setError(__('alert.access_denied',false,403));
+            $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
 
@@ -173,10 +173,10 @@ class UserController extends BaseController
      */
     public function update(Request $request)
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
+        // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+        //     $this->setError(__('alert.access_denied'),false,403);
+        //     return $this->done();
+        // }
         
         $id = $request->route('id');
 
@@ -230,10 +230,10 @@ class UserController extends BaseController
      */
     public function uploadAvatar(Request $request)
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
+        // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+        //     $this->setError(__('alert.access_denied'),false,403);
+        //     return $this->done();
+        // }
 
         if($request->file('avatar',false)==false){
             $this->setError(__('validation.required',['attribute'=>'Avatar']));
@@ -253,10 +253,10 @@ class UserController extends BaseController
     
     public function deleteAvatar(Request $request)
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
+        // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+        //     $this->setError(__('alert.access_denied'),false,403);
+        //     return $this->done();
+        // }
         
         $id = $request->route('id');
            
@@ -306,7 +306,7 @@ class UserController extends BaseController
     public function ban(Request $request)
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
+            $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
 
@@ -319,7 +319,7 @@ class UserController extends BaseController
     public function unban(Request $request)
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
+            $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
         
@@ -331,10 +331,10 @@ class UserController extends BaseController
 
     public function resentVerificationMail(Request $request)
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
+        // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+        //     $this->setError(__('alert.access_denied'),false,403);
+        //     return $this->done();
+        // }
         
         $id = $request->route('id');
         if(($userData = UserRepo::getUser(['id',$id]))!=false){
