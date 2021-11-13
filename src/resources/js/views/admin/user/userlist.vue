@@ -22,9 +22,11 @@
                         <b-form-group :label="Trans.get('lang.search')" class="d-inline-block w-auto mt-1">
                             <b-input placeholder="Search..." v-model="searchString" />
                         </b-form-group>     
-                        <b-btn variant="info" @click="doSearch" style="margin-top: -3px;" class="d-inline-block w-auto">
-                            <span class="ion ion-ios-search"></span>
-                        </b-btn>
+                        <b-form-group :label="''" class="d-inline-block w-auto mt-1">
+                            <b-btn variant="info" @click="doSearch" style="margin-top: -3px;">
+                                <span class="ion ion-ios-search"></span>
+                            </b-btn>
+                        </b-form-group>   
                     </div>
                     <div>
                         <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success d-block" :to="{ name: 'user.add' }">

@@ -852,12 +852,13 @@ class UserRepo extends BaseRepository
             }
 
             $user = $user->whereNull('email_verified_at')->first();
-            if ($user->exists()) {
+            if ($user) {
+                $userId = $user->id;
                 $user->{'email_verified_at'} = now()->toDateTimeString();
                 $user->save();
+                event(new \hpsynapse\moduser\Events\OnEmailVerifiedSuccess($this->getUser($userId))); 
             }
 
-            event(new \hpsynapse\moduser\Events\OnEmailVerifiedSuccess($this->getUser($user->id))); 
             return true;
         }
         $this->error = __('auth.emailverify_fail_varificationcodeinvalid');
@@ -915,8 +916,8 @@ class UserRepo extends BaseRepository
     
     /**
      * update format nomor telepon menja
-     * @param type $phone
-     * @return string
+     * @param String $phone
+     * @return String
      */
     public function phoneFormat($phone)
     {
@@ -964,7 +965,7 @@ class UserRepo extends BaseRepository
         
     /**
      * 
-     * @param type $userId
+     * @param String $userId
      * @return boolean|array list role user, format mirip data role di APPSSession
      */
     public function getUserRole($userId,$withoutTime=true)
