@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Request;
 use hpsynapse\moduser\Models\User;
 use hpsynapse\moduser\Models\UserOTP;
 use hpsynapse\moduser\Models\PasswordReset;
+use hpsynapse\moduser\Models\UserProfile;
 
 trait UserMessageTraits     
 {
