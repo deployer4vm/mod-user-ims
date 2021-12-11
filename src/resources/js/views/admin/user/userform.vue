@@ -1,6 +1,6 @@
 <template>
-    <div>   
-        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'user.list'}" />     
+    <div>
+        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'user.list'}" />
 
         <div class="m-3" v-if="isDataLoaded">
             <b-tabs class="nav-tabs-top nav-responsive-sm">
@@ -21,7 +21,7 @@
                                 <div class="text-light small mt-1">Allowed JPG, GIF or PNG. Max size of 800K</div>
                             </div>
                         </div> -->
-                        <image-crop-upload 
+                        <image-crop-upload
                             v-if="form.id || isAdd"
                             :imagePath="form.avatar"
                             @setValue="form.avatar = $event"
@@ -98,7 +98,7 @@
             </b-tabs>
 
             <div class="text-right mt-3">
-                <b-btn variant="secondary" @click="onSubmit">{{ Trans.get("lang.save_change") }}</b-btn
+                <b-btn variant="primary" @click="onSubmit">{{ Trans.get("lang.save_change") }}</b-btn
                 >&nbsp;
                 <!-- <b-btn variant="default">Cancel</b-btn> -->
             </div>
@@ -209,7 +209,7 @@
             isAdd() {
                 return this.$route.params.userId ? false : true;
             },
-            
+
             pageTitle() {
                 return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption);
             },
@@ -233,17 +233,17 @@
             if (!(this.UserAuth.hasAccess(this.accessRuleKey, "c") || this.UserAuth.hasAccess(this.accessRuleKey, "u"))) {
                 //goto dashboard current tenant
                 this.Web.goToCurrentTenant();
-                this.Web.showAlert({ 
+                this.Web.showAlert({
                     title: this.Trans.get("alert.warning_title"),
-                    text: this.Trans.get("alert.access_denied"), 
-                    type: "warning" 
+                    text: this.Trans.get("alert.access_denied"),
+                    type: "warning"
                 });
                 return false;
             }
-            
+
             // this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
             // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
-            
+
             if (this.showUserField("username")) {
                 this.formEmpty.username = "";
             }
@@ -297,7 +297,7 @@
                             this.form.password = "";
                             this.form.repassword = "";
                             this.isDataLoaded = true;
-                            
+
                             this.initView();
                         })
                         .catch(res => {
@@ -308,7 +308,7 @@
                 } else {
                     this.isDataLoaded = true;
                     this.form = this.formEmpty;
-                    
+
                     this.initView();
                 }
             },
@@ -375,12 +375,12 @@
             },
             showProfileField(field) {
                 return !this.AppConfig.packageLocal.moduser.user_profiles.hide.includes(field);
-            },  
+            },
             uploadAvatar() {
                 this.showUpload = this.showUpload?false:true;
             },
             resetdAvatar() {
-                
+
             },
             //--------------------------
             initView() {
@@ -394,13 +394,13 @@
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption),{name:'user.list'});
                 this.Web.addBreadcrumb(this.title);
-                
+
                 this.Web.setBodyWithPadding(false);
                 this.Web.setShow("moduser");
-            },            
-        
+            },
+
         }
-        // destroyed () {     
+        // destroyed () {
         //     this.Web.setBodyWithPadding(true);
         // }
     };

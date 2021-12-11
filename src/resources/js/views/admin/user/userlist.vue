@@ -2,10 +2,39 @@
     <div>
         <header-breadcrumb :pageTitle="pageTitle" :showBack="false" />
         <b-card class="m-3" no-body>
+            <b-card-body>
+                <div class="d-flex form-row flex-xl-row align-items-end">
+                    <b-form-group :label="Trans.get('pagination.per_page')" class="d-inline-block col-md mt-1">
+                        <b-select v-model="perPage" :options="[10, 20, 30, 40, 50]"/>
+                    </b-form-group>
+                    <b-form-group :label="Trans.get('user.field_caption.role')" class="d-inline-block col-md mt-1">
+                        <b-select v-model="filterRole" :options="roleItems"/>
+                    </b-form-group>
+                    <b-form-group :label="Trans.get('user.field_caption.status')" class="d-inline-block col-md mt-1">
+                        <b-select v-model="filterStatus" :options="{
+                            'all': Trans.get('lang.view_all'),
+                            '1': Trans.get('user.field_caption.status_item.active'),
+                            '2': Trans.get('user.field_caption.status_item.banned')
+                        }"/>
+                    </b-form-group>
+                    <b-form-group :label="Trans.get('lang.search')" class="d-inline-block col-md mt-1">
+                        <b-input-group>
+                            <b-input placeholder="Search..." v-model="searchString" />
+                            <b-btn variant="secondary" @click="doSearch">
+                                <span class="ion ion-ios-search"></span>
+                            </b-btn>
+                        </b-input-group>
+                    </b-form-group>
+                    <!-- <b-form-group :label="''" class="d-inline-block w-auto mt-1">
+                    </b-form-group> -->
+                </div>
+            </b-card-body>
+        </b-card>
+        <b-card class="m-3" no-body>
             <!-- Table controls -->
-            <b-card-body class="pt-3 pb-2">
-                <div class="d-flex justify-content-between">
-                    <div>
+            <b-card-body>
+                <div class="d-flex justify-content-end">
+                    <!-- <div>
                         <b-form-group :label="Trans.get('pagination.per_page')" class="d-inline-block w-auto mt-1">
                             <b-select v-model="perPage" :options="[10, 20, 30, 40, 50]"/>
                         </b-form-group>
@@ -21,18 +50,16 @@
                         </b-form-group>
                         <b-form-group :label="Trans.get('lang.search')" class="d-inline-block w-auto mt-1">
                             <b-input placeholder="Search..." v-model="searchString" />
-                        </b-form-group>     
+                        </b-form-group>
                         <b-form-group :label="''" class="d-inline-block w-auto mt-1">
                             <b-btn variant="info" @click="doSearch" style="margin-top: -3px;">
                                 <span class="ion ion-ios-search"></span>
                             </b-btn>
-                        </b-form-group>   
-                    </div>
-                    <div>
-                        <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success d-block" :to="{ name: 'user.add' }">
-                            <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }} 
+                        </b-form-group>
+                    </div> -->
+                    <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'user.add' }">
+                            <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }}
                         </router-link>
-                    </div>
                 </div>
             </b-card-body>
             <!-- / Table controls -->
@@ -40,16 +67,16 @@
             <!-- Table -->
             <hr class="border-light m-0" />
             <div class="table-responsive">
-                <b-table 
-                    :items="listData.data" 
-                    :fields="fields" 
-                    :sort-by.sync="sortBy" 
-                    :sort-desc.sync="sortDesc" 
-                    :striped="true" 
-                    :bordered="true" 
+                <b-table
+                    :items="listData.data"
+                    :fields="fields"
+                    :sort-by.sync="sortBy"
+                    :sort-desc.sync="sortDesc"
+                    :striped="true"
+                    :bordered="true"
                     class="card-table"
                 >
-                
+
                     <template v-slot:cell(account)="data">
                         <a href="javascript:void(0)">{{ data.item.account }}</a>
                     </template>
@@ -64,30 +91,36 @@
                     </template>
 
                     <template v-slot:cell(email)="data">
-                        {{data.item.email}} 
-                        <template v-if="data.item.email_verified_at">
-                            <b-badge variant="success">
-                                <span class="ion ion-md-checkmark"></span> verified
-                            </b-badge>
-                            <div class="pt-2 text-muted">
-                                diverifikasi pada {{moment(data.item.email_verified_at).format('YYYY-MM-DD')}} jam {{moment(data.item.email_verified_at).format('hh:mm')}}
-                            </div>
-                        </template>
-                        <template v-else>
-                            <b-badge variant="default">
-                                <span class="ion ion-md-close text-light"></span> unverified
-                            </b-badge> 
-                            <div class="pt-2 text-muted">
-                                kirim ulang email verifikasi ? 
-                                <b-btn class="btn btn-primary btn-xs md-btn-flat" @click="sendVerification(data.item.id)" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
-                                    <span class="ion ion-md-mail mr-2"></span> kirim
-                                </b-btn>
-                            </div>
-                        </template>
+                        <div>
+                            <span>{{data.item.email}}</span>
+                            <template v-if="data.item.email_verified_at">
+
+                                    <b-badge variant="success mt-2">
+                                        verified
+                                    </b-badge>
+                                    <span class="pt-2 text-light">
+                                        diverifikasi pada {{moment(data.item.email_verified_at).format('YYYY-MM-DD')}} jam {{moment(data.item.email_verified_at).format('hh:mm')}}
+                                    </span>
+
+                            </template>
+                            <template v-else>
+
+                                    <b-badge variant="outline-danger mt-2">
+                                        unverified
+                                    </b-badge>
+                                    <span class="pt-2 text-light">
+                                        kirim ulang email verifikasi ?
+                                        <b-btn class="btn btn-secondary btn-sm md-btn-flat" @click="sendVerification(data.item.id)" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
+                                            <span class="ion ion-md-mail mr-1"></span> Kirim
+                                            <!-- kirim -->
+                                        </b-btn>
+                                    </span>
+                            </template>
+                        </div>
                     </template>
 
                     <template v-slot:cell(role)="data">
-                        <b-badge variant="info m-1" v-for="dRole in data.item.roles" :key="data.item.id + dRole.role.id">{{ dRole.role.name }}</b-badge>
+                        <b-badge variant="outline-info" v-for="dRole in data.item.roles" :key="data.item.id + dRole.role.id">{{ dRole.role.name }}</b-badge>
                     </template>
 
                     <template v-slot:cell(status)="data">
@@ -160,23 +193,71 @@
             // END ---- listing option
             fields: [],
             defaultFields: [
-                { key: "id", sortable: true, tdClass: "align-middle" },
-                { key: "avatar", sortable: true, tdClass: "align-middle" },
-                { key: "username", sortable: true, tdClass: "align-middle" },
-                { key: "email", sortable: true, tdClass: "align-middle" },
-                { key: "name", sortable: true, tdClass: "align-middle" },
-                { key: "role", sortable: true, tdClass: "align-middle" },
-                { key: "status", sortable: true, tdClass: "align-middle" },
+                {
+                    key: "id",
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": "ID"
+                    }
+                },
+                {
+                    key: "avatar",
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": "Avatar"
+                    }
+                },
+                {
+                    key: "username",
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": "Username"
+                    }
+                },
+                {
+                    key: "email",
+                    sortable: true,
+                    tdClass: "align-middle", },
+                {
+                    key: "name",
+                    sortable: true, tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": "Name"
+                    }
+                },
+                {
+                    key: "role",
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": "Role"
+                    }
+                },
+                {
+                    key: "status",
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": "Status"
+                    }
+                },
                 {
                     key: "actions",
                     label: " ",
-                    tdClass: "text-nowrap align-middle text-center"
+                    tdClass: "text-nowrap align-middle text-center col-action",
+                    tdAttr: {
+                        "data-lable": ""
+                    }
+
                 }
             ]
         }),
 
         computed: {
-            
+
             listData: {
                 get() {
                     return this.$store.state.user.userList;
@@ -226,13 +307,13 @@
                 }, 300);
             }
         },
-        methods: {             
+        methods: {
             showUserField(field) {
                 return !this.AppConfig.packageLocal.moduser.users_hidden_field.includes(field);
             },
             doSearch() {
                 this.loadData(this.curPage,this.searchString,this.sortBy,this.sortDesc);
-            },     
+            },
             loadData(curPage, q = "", orderBy = false, sortDesc = false) {
                 var offset = this.perPage * (curPage - 1);
                 this.loadParams = {};
@@ -294,7 +375,7 @@
                 });
             },
             sendVerification(userId){
-                
+
                 if (!this.UserAuth.hasAccess(this.accessRuleKey, "u")) {
                     //goto dashboard current tenant
                     this.Web.goToCurrentTenant();
@@ -333,7 +414,7 @@
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
                 // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.caption));
-                
+
                 this.Web.setBodyWithPadding(false);
                 this.Web.setShow("moduser");
             },
@@ -341,16 +422,16 @@
         created() {
             if (!this.UserAuth.hasAccess(this.accessRuleKey)) {
                 //goto dashboard current tenant
-                this.Web.goToCurrentTenant();                
-                this.Web.showAlert({ 
+                this.Web.goToCurrentTenant();
+                this.Web.showAlert({
                     title: this.Trans.get("alert.warning_title"),
-                    text: this.Trans.get("alert.access_denied"), 
-                    type: "warning" 
+                    text: this.Trans.get("alert.access_denied"),
+                    type: "warning"
                 });
                 return false;
             }
             this.initView();
-            
+
             //load data user
             this.loadData(1);
 

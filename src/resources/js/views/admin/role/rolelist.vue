@@ -2,7 +2,7 @@
     <div>
         <!-- Filters -->
         <!-- <div class="ui-bordered px-4 pt-4 mb-4">
-      <div class="form-row align-items-center">        
+      <div class="form-row align-items-center">
         <div class="col-md mb-4">
           <label class="form-label">Role</label>
           <b-select v-model="filterRole" :options="['Any', 'SPV', 'Manager Bagian', 'Manager Utama', 'Enjin']" />
@@ -19,25 +19,48 @@
     </div> -->
         <!-- / Filters -->
         <header-breadcrumb :pageTitle="pageTitle" :showBack="false" />
+
+        <b-card class="m-3" no-body>
+            <b-card-body>
+                <div class="d-flex form-row flex-xl-row align-items-end">
+                    <b-form-group :label="Trans.get('pagination.per_page')" class="d-inline-block col-md mt-1">
+                        <b-select v-model="perPage" :options="[10, 20, 30, 40, 50]"/>
+                    </b-form-group>
+                    <b-form-group :label="Trans.get('lang.search')" class="d-inline-block col-md mt-1">
+                        <b-input-group>
+                            <b-input placeholder="Search..." v-model="searchString" />
+                            <b-btn variant="secondary" @click="doSearch">
+                                <span class="ion ion-ios-search"></span>
+                            </b-btn>
+                        </b-input-group>
+                    </b-form-group>
+                    <!-- <b-form-group :label="''" class="d-inline-block w-auto mt-1">
+
+                    </b-form-group> -->
+                </div>
+            </b-card-body>
+        </b-card>
+
+
         <b-card class="m-3" no-body>
             <!-- Table controls -->
-            <b-card-body class="pt-3 pb-2">
-                <div class="d-flex justify-content-between">
-                    <div>
+            <b-card-body>
+                <div class="d-flex justify-content-end">
+                    <!-- <div>
                         <b-form-group :label="Trans.get('pagination.per_page')" class="d-inline-block w-auto mt-1">
                             <b-select v-model="perPage" :options="[10, 20, 30, 40, 50]"/>
                         </b-form-group>
                         <b-form-group :label="Trans.get('lang.search')" class="d-inline-block w-auto mt-1">
                             <b-input placeholder="Search..." v-model="searchString" />
-                        </b-form-group>     
+                        </b-form-group>
                         <b-form-group :label="''" class="d-inline-block w-auto mt-1">
                             <b-btn variant="info" @click="doSearch" style="margin-top: -3px;">
                                 <span class="ion ion-ios-search"></span>
                             </b-btn>
-                        </b-form-group>     
-                    </div>
+                        </b-form-group>
+                    </div> -->
                     <div>
-                        <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-success d-block" :to="{ name: 'role.add' }">
+                        <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'role.add' }">
                             <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("role.rolelist.add_new_role") }}
                         </router-link>
                     </div>
@@ -46,7 +69,7 @@
             <!-- / Table controls -->
 
             <!-- Table -->
-            <hr class="border-light m-0" />
+            <!-- <hr class="border-light m-0" /> -->
 
             <div class="table-responsive">
                 <b-table :items="listData.data" :fields="fields" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :striped="true" :bordered="true" class="card-table">
@@ -179,10 +202,10 @@
             //     }, 300);
             // },
         },
-        methods: { 
+        methods: {
             doSearch() {
                 this.loadData(this.curPage,this.searchString,this.sortBy,this.sortDesc);
-            },   
+            },
             loadData(curPage, q = "", orderBy = false, sortDesc = false) {
                 var offset = this.perPage * (curPage - 1);
                 this.loadParams = {};
@@ -256,7 +279,7 @@
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.role.caption));
                 // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.caption));
-                
+
                 this.Web.setBodyWithPadding(false);
                 this.Web.setShow("moduser");
             },
@@ -272,16 +295,71 @@
 
             this.loadData(1);
             this.fields = [
-                { key: "id", sortable: true, tdClass: "align-middle" },
-                { key: "name", label: this.Trans.get("role.field_caption.name"), sortable: true, tdClass: "align-middle" },
-                { key: "level", label: this.Trans.get("role.field_caption.level"), sortable: true, tdClass: "align-middle" },
-                { key: "tenant", label: this.Trans.get("role.field_caption.tenant"), sortable: true, tdClass: "align-middle" },
-                { key: "tenant_group", label: this.Trans.get("role.field_caption.tenant_group"), sortable: true, tdClass: "align-middle" },
-                { key: "role_code", sortable: true, tdClass: "align-middle" },
+                {
+                    key: "id",
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": "No"
+                    }
+                },
+
+                {
+                    key: "name"
+                    , label: this.Trans.get("role.field_caption.name"),
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": this.Trans.get("role.field_caption.name")
+                    }
+                },
+
+                {
+                    key: "level",
+                    label: this.Trans.get("role.field_caption.level"),
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": this.Trans.get("role.field_caption.level")
+                    }
+                },
+
+                {
+                    key: "tenant",
+                    label: this.Trans.get("role.field_caption.tenant"),
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": this.Trans.get("role.field_caption.tenant")
+                    }
+                },
+
+                {
+                    key: "tenant_group",
+                    label: this.Trans.get("role.field_caption.tenant_group"),
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": this.Trans.get("role.field_caption.tenant_group")
+                    }
+                },
+
+                {
+                    key: "role_code",
+                    sortable: true,
+                    tdClass: "align-middle",
+                    tdAttr: {
+                        "data-lable": this.Trans.get("")
+                    }
+                },
+
                 {
                     key: "actions",
                     label: " ",
-                    tdClass: "text-nowrap align-middle text-center",
+                    tdClass: "text-nowrap align-middle text-center col-action",
+                    tdAttr: {
+                        "data-lable": ""
+                    }
                 },
             ];
 
