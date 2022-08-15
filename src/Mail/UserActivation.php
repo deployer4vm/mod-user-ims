@@ -13,7 +13,7 @@ class UserActivation extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
     
-    protected $userId,$isSecondary;
+    protected $userId,$isSecondary,$appName,$appDomain,$appUrl;
     
     
     /**
@@ -22,10 +22,13 @@ class UserActivation extends Mailable implements ShouldQueue
      * @param type $userId
      * @param type $isSecondary
      */
-    public function __construct($userId,$isSecondary=false)
+    public function __construct($userId,$isSecondary=false,$appName='',$appDomain='',$appUrl='')
     {
         $this->userId = $userId;
         $this->isSecondary = $isSecondary;
+        $this->appName = $appName;
+        $this->appDomain = $appDomain;
+        $this->appUrl = $appUrl;
     }
 
     /**
@@ -36,6 +39,10 @@ class UserActivation extends Mailable implements ShouldQueue
     public function build()
     {
         $userData = UserRepo::verificationEmailDataFormat($this->userId,$this->isSecondary);
-        return $this->subject(__('email.useractivation_subject'))->view('user.emails.userActivation')->with($userData);
+        $userData['app_name'] = $this->appName;
+        $userData['app_domain'] = $this->appDomain;
+        $userData['app_url'] = $this->appUrl;
+
+        return $this->subject(__('auth.register.activation_account_mail.subject',['website'=>$userData['app_domain']]))->view('user.emails.userActivation')->with($userData);
     }
 }

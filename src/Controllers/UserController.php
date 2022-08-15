@@ -3,6 +3,8 @@
 namespace hpsynapse\moduser\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
 use hpsynapse\moduser\Facades\UserRepo;
 use hpsynapse\moduser\Facades\RoleRepo;
 use hpsynapse\moduser\Facades\UserAuth;
@@ -15,7 +17,7 @@ class UserController extends BaseController
 
     public function __construct()
     {
-        $this->forceApiOutput();
+        // $this->forceApiOutput();
     }
     
     /**
@@ -25,7 +27,7 @@ class UserController extends BaseController
     public function readList(Request $request) 
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
-            $this->setError(__('alert.access_denied',false,403));
+            $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
 
@@ -81,17 +83,26 @@ class UserController extends BaseController
      * 
      * Route Param : 
      *      id : route id
+     * @return Array default synapse api return
+     *      data 
+     *          ...all user record
+     *          profile Array record user_proflie
+     *          user_role
+     *          main_role Array record role utama user
+     *      
      */
     public function readOne(Request $request)
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
 
         $id = $request->route('id');
 
         $this->output['data'] = UserRepo::getUser($id);
+
+        if(!(UserAuth::hasAccess($this->accessRuleKey,'r') || $this->output['data']['id'] == UserAuth::user('id'))){
+            $this->setError(__('alert.access_denied'),false,403);
+            return $this->done();
+        }
+
         $this->output['data']['user_role'] = UserRepo::getUserRole($this->output['data']['id']);
 
         foreach($this->output['data']['user_role'] as $key => $val) {
@@ -116,7 +127,7 @@ class UserController extends BaseController
     public function create(Request $request)
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'c')){
-            $this->setError(__('alert.access_denied',false,403));
+            $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
 
@@ -140,7 +151,7 @@ class UserController extends BaseController
             return $this->done();
         }
 
-        $validator = \Validator::make($userData, $validator);
+        $validator = Validator::make($userData, $validator);
 
         if ($validator->fails()) {       
             $this->setError('Data keliru',$validator->messages());
@@ -162,10 +173,10 @@ class UserController extends BaseController
      */
     public function update(Request $request)
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
+        // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+        //     $this->setError(__('alert.access_denied'),false,403);
+        //     return $this->done();
+        // }
         
         $id = $request->route('id');
 
@@ -187,27 +198,206 @@ class UserController extends BaseController
         }
 
         if(!empty($validator)){
-            $validator = \Validator::make($input, $validator); 
+            $validator = Validator::make($input, $validator); 
             if ($validator->fails()) {
                 $this->setError('Input Error :',$validator->messages(),400,true);
                 return $this->done();
             }
         }
 
-        if($input['banned_note'] == null){
+        if(empty($input['banned_note'])){
             unset($input['banned_note']);
         }
 
+        if($request->file('avatar',false))
+            $input['avatar'] = $request->file('avatar');
+        
         if(UserRepo::updateUser($id, $input)) {            
             $this->setAlert('Data Updated successfully','success');
         }else{
-            $this->setAlert(UserRepo::error(),'danger');
             $this->setError(UserRepo::error());
         }
 
         return $this->done();
     }
     
+    
+    /**
+     * upload avatar
+     * 
+     * @param Request $request
+     *      avatar
+     */
+    public function uploadAvatar(Request $request)
+    {
+        // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+        //     $this->setError(__('alert.access_denied'),false,403);
+        //     return $this->done();
+        // }
+
+        if($request->file('avatar',false)==false){
+            $this->setError(__('validation.required',['attribute'=>'Avatar']));
+            return $this->done();
+        }
+
+        $id = $request->route('id');
+        if(UserRepo::updateUser($id, [
+            'avatar'=> $request->file('avatar')
+        ])) {            
+            $this->setAlert(__('alert.update_success',['attribute'=>'Avatar']),'success');
+        }else{
+            $this->setError(UserRepo::error(),UserRepo::errorValidator());
+        }
+        return $this->done();
+    }
+    
+    public function deleteAvatar(Request $request)
+    {
+        // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+        //     $this->setError(__('alert.access_denied'),false,403);
+        //     return $this->done();
+        // }
+        
+        $id = $request->route('id');
+           
+        if(UserRepo::deleteAvatar($id)){
+            $this->setAlert(__('alert.delete_success',['attribute'=>'Avatar']),'success');
+        }else{
+            $this->setError(UserRepo::error(),UserRepo::errorValidator());
+        }
+
+        return $this->done();
+           
+    }
+
+    /**
+     * update password di my profile
+     * 
+     * @param Request $request
+     *      password
+     *      password_confirmatin
+     */
+    public function updatePassword(Request $request)
+    {
+        $id = UserAuth::user('id');//$request->route('id');
+        $userData = $request->only(['password','password_confirmation']);
+
+        $validator = Validator::make($userData, [
+            'password' => 'required|min:8|max:255',
+            'password_confirmation' => 'required|min:8|max:255|same:password'
+        ]);
+
+        if ($validator->fails()) {
+            $this->setError('Input Error :',$validator->messages(),400,true);
+            return $this->done();
+        }
+
+        unset($userData['password_confirmation']);
+
+        $change = UserRepo::resetPassword($id, $userData['password']);
+        if (!$change) {
+            return $this->done();
+        }
+
+        $this->setAlert('Password Updated successfully','success');
+        return $this->done();
+    }
+
+    public function ban(Request $request)
+    {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied'),false,403);
+            return $this->done();
+        }
+
+        $id = $request->route('id');
+        UserRepo::banUser($id,$request->input('banned_note',''));
+        $this->setAlert('User banned successfully','success');
+        return $this->done();
+    }
+
+    public function unban(Request $request)
+    {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+            $this->setError(__('alert.access_denied'),false,403);
+            return $this->done();
+        }
+        
+        $id = $request->route('id');
+        UserRepo::unbanUser($id);
+        $this->setAlert('User unbanned successfully','success');
+        return $this->done();
+    }
+
+    public function resentVerificationMail(Request $request)
+    {
+        // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
+        //     $this->setError(__('alert.access_denied'),false,403);
+        //     return $this->done();
+        // }
+        
+        $id = $request->route('id');
+        if(($userData = UserRepo::getUser(['id',$id]))!=false){
+            if (isset($userData['email']) && $userData['email']){
+                UserRepo::sendUserActivationEmail($id);
+                $this->setAlert('Email sent','success');
+            }else{
+                $this->setError(__('lang.data_attribute_not_found',['attribute'=>'Email']));
+            }
+        }else{
+            $this->setError(__('lang.data_attribute_not_found',['attribute'=>'User Id '.$id]));
+        }
+        return $this->done();
+
+    }
+
+    public function delete(Request $request)
+    {
+        if(!UserAuth::hasAccess($this->accessRuleKey,'d')){
+            $this->setError(__('alert.access_denied',false,403));
+            return $this->done();
+        }
+        
+        $id = $request->route('id');
+           
+        if(UserAuth::isLogin() && $id != UserAuth::user('id')){
+            $filter[] = ['id', $id];
+            $filter[] = ['level','>',UserAuth::user('level')];
+            $data = UserRepo::listUser($filter);
+            if($data['count']<=0){
+                $this->setError('Permission denied');
+                return $this->done();;
+            }
+        }   
+
+        if(!UserRepo::deleteUser($id)){
+            $this->setError('Error : '.UserRepo::error());
+        }
+        return $this->done();
+           
+    }
+
+    
+    /**
+     * PROFILE
+     * =================================================================
+     */
+
+    public function profile(Request $request)
+    {
+        $this->response = 'user.profile';
+
+        $this->output['data'] = UserAuth::user();
+        $this->output['data']['user_role'] = UserRepo::getUserRole($this->output['data']['id']);
+
+        foreach($this->output['data']['user_role'] as $key => $val) {
+            if($val['is_main_role']){
+                $this->output['data']['role_code'] = $key;
+            }
+        } 
+
+        return $this->done();
+    }
 
     public function updateProfile(Request $request)
     {
@@ -241,7 +431,7 @@ class UserController extends BaseController
         }
 
         if(!empty($validator)){
-            $validator = \Validator::make($input, $validator); 
+            $validator = Validator::make($input, $validator); 
             if ($validator->fails()) {
                 $this->setError('Input Error :',$validator->messages(),400,true);
                 return $this->done();
@@ -251,6 +441,9 @@ class UserController extends BaseController
         if(isset($input['role_code']))unset($input['role_code']);
         if(isset($input['status']))unset($input['status']);
         
+        if($request->file('avatar',false))
+            $input['avatar'] = $request->file('avatar');
+            
         if(UserRepo::updateUser($id, $input)) {            
             $this->setAlert('Data Updated successfully','success');
         }else{
@@ -262,87 +455,24 @@ class UserController extends BaseController
     }
     
     /**
-     * update password di my profile
-     * 
-     * @param Request $request
-     *      password
-     *      password_confirmatin
+     * GET
+     *      /auth/change_role/ROLE_CODE
+     *      /api/auth/change_role/ROLE_CODE
      */
-    public function updatePassword(Request $request)
+    public function changeRole(Request $request)
     {
-        $id = UserAuth::user('id');//$request->route('id');
-        $userData = $request->only(['password','password_confirmation']);
+        $roleCode = $request->route('role_code');
+        $backLink = $request->input('backlink',false);
+        $this->response = $backLink?redirect($backLink):back();
 
-        $validator = \Validator::make($userData, [
-            'password' => 'required|min:8|max:255',
-            'password_confirmation' => 'required|min:8|max:255|same:password'
-        ]);
+        if(UserAuth::setActiveRole($roleCode)){
+            $roleName = UserAuth::role($roleCode)['name'];
+            $this->setAlert('Role <b>'.$roleName.'</b> berhasil diaktifkan','success');
 
-        if ($validator->fails()) {
-            $this->setError('Input Error :',$validator->messages(),400,true);
-            return $this->done();
+        }else{
+            $this->setAlert('Role tidak ditemukan','danger');
         }
 
-        unset($userData['password_confirmation']);
-
-        $change = UserRepo::updateUser($id, $userData);
-        if (!$change) {
-            return $this->done();
-        }
-
-        $this->setAlert('Password Updated successfully','success');
         return $this->done();
-    }
-
-    public function ban(Request $request)
-    {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
-
-        $id = $request->route('id');
-        UserRepo::banUser($id,$request->input('banned_note',''));
-        $this->setAlert('User banned successfully','success');
-        return $this->done();
-    }
-
-    public function unban(Request $request)
-    {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
-        
-        $id = $request->route('id');
-        UserRepo::unbanUser($id);
-        $this->setAlert('User unbanned successfully','success');
-        return $this->done();
-    }
-
-    public function delete(Request $request)
-    {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'d')){
-            $this->setError(__('alert.access_denied',false,403));
-            return $this->done();
-        }
-        
-        $id = $request->route('id');
-           
-        if(UserAuth::isLogin() && $id != UserAuth::user('id')){
-            $filter[] = ['id', $id];
-            $filter[] = ['level','>',UserAuth::user('level')];
-            $data = UserRepo::listUser($filter);
-            if($data['count']<=0){
-                $this->setError('Permission denied');
-                return $this->done();;
-            }
-        }   
-
-        if(!UserRepo::deleteUser($id)){
-            $this->setError('Error : '.UserRepo::error());
-        }
-        return $this->done();
-           
     }
 }

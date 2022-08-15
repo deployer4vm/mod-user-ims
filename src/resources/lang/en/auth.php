@@ -16,8 +16,6 @@ return [
     'failed' => 'These credentials do not match our records.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
     //----------
-    'registersuccess' => 'Registrasi berhasil. Silahkan cek email Anda untuk melakukan verifikasi email.',
-    'registerfailed' => 'Registrasi gagal. Error : :error ',
     'emailverify_fail_mailnotfound' => 'Verifikasi email gagal. Error : Email tidak ditemukan',
     'emailverify_fail_verificationcodeinvalid' => 'Verifikasi email gagal. Error : Kode verifikasi invalid',
     'phoneverify_fail_phonenotfound' => 'Verifikasi nomor telepon gagal. Error : Nomor telepon tidak ditemukan',
@@ -32,7 +30,16 @@ return [
         'description' => 'Enter your email address and we will send you a link to reset your password.',
         'emailcaption' => 'Enter your email address',
         'button' => 'Send email address',
-        'back_to_login' => 'Back to Login'
+        'back_to_login' => 'Back to Login',
+        'email' => [
+            'subject' => ':website - Forgot password request'
+        ],
+        'alert' => [
+            'forgot_password_failed' => 'Forgot password gagal. Error : :error ',
+            'forgot_password_success' => 'Email instruksi forgot password telah dikirim ke email Anda.',
+            'email_cannot_be_empty' => 'Email tidak boleh kosong',            
+            'email_not_registered' => 'Email tidak terdaftar',
+        ]
     ],
     //text lang di halaman loting
     'login' => [
@@ -46,7 +53,7 @@ return [
         'signupcaption' => 'Sign Up',
         'alert' => [
             'user_not_found'=> 'User not found',
-            'user_banned' => 'User blocked',
+            'user_banned' => 'Login Failed. Account Banned.',
             'password_fail' => 'Usernaem or password wrong'
         ]
     ],
@@ -55,17 +62,26 @@ return [
         'title' => 'Register',
         'namecaption' => 'Name',
         'emailcaption' => 'Email',
+        'phonecaption' => 'Phone',
         'usernamecaption' => 'Username',
         'passwordcaption' => 'Password',
         'repasswordcaption' => 'Password Confirmation',
         'remember_me' => 'Remeber Me',
         'sigincaption' => 'Sign In',
-        'already_have_an_account'=>'Already have an account yet?',
+        'already_have_an_account'=>'Already have an account?',
         'signupcaption' => 'Sign Up',
-        'alert' => [
+        'activation_account_mail' => [
+            'subject' => ':website - Aktifasi akun'
+        ],
+        'verification_mail' => [
+            'subject' => ':website - Verifikasi email'
+        ],
+        'alert' => [                        
+            'register_success' => 'Registrasi berhasil. Silahkan cek email Anda untuk melakukan verifikasi email.',
+            'register_failed' => 'Registrasi gagal. Error : :error ',
             'password_not_match' => 'Password confirmation not match',
-            'register_success' => 'Register Success',
-            'register_failed' => 'Register Failed'
+            'tos_confirm_required' => 'Syarat dan ketentuan harus disetujui',
+            'validation_error' => 'Validasi error',
         ]
     ],
 

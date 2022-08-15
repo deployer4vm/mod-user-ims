@@ -2,10 +2,13 @@
 namespace hpsynapse\moduser\Repositories;
 
 use Illuminate\Notifications\Notification;
-//use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Request;
+
 use hpsynapse\moduser\Models\User;
 use hpsynapse\moduser\Models\UserOTP;
 use hpsynapse\moduser\Models\PasswordReset;
+use hpsynapse\moduser\Models\UserProfile;
 
 trait UserMessageTraits     
 {
@@ -55,11 +58,17 @@ trait UserMessageTraits
      * @param type $isSecondary
      * @return type
      */
-    public function sendVerificationEmail($userId)
+    public function sendVerificationEmail($userId,$isSecondary=false)
     {
         return $this->notify(
             $userId,
-            new \hpsynapse\moduser\Notifications\EmailVerification($userId)
+            new \hpsynapse\moduser\Notifications\EmailVerification(
+                $userId,
+                $isSecondary,
+                config('AppConfig.client.app_name'),
+                Request::getHost(),
+                route('home')
+            )
         );
     }    
     
@@ -68,7 +77,13 @@ trait UserMessageTraits
     {
         return $this->notify(
             $userId,
-            new \hpsynapse\moduser\Notifications\UserActivation($userId)
+            new \hpsynapse\moduser\Notifications\UserActivation(
+                $userId,
+                false,
+                config('AppConfig.client.app_name'),
+                Request::getHost(),
+                route('home')
+            )
         );
     }
 
@@ -109,7 +124,12 @@ trait UserMessageTraits
     {
         return $this->notify(
             $userId,
-            new \hpsynapse\moduser\Notifications\UserResetPassword($userId) 
+            new \hpsynapse\moduser\Notifications\UserResetPassword(
+                $userId,
+                config('AppConfig.client.app_name'),
+                Request::getHost(),
+                route('home')
+            ) 
         );
     }
     
@@ -124,7 +144,7 @@ trait UserMessageTraits
         $userData['resetPasswordUrl'] = route('auth.resetPassword',[
             'email' => $userData['email'],
             'verifyCode' => $userData['verifyCode']
-            ]);
+        ]);
         PasswordReset::create([
             'email' => $userData['email'],
             'token' => $userData['verifyCode']            

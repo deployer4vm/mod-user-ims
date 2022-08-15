@@ -7,6 +7,10 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
+use hpsynapse\moduser\Channels\FirebaseChannels;
+use hpsynapse\moduser\Channels\AwsSNSChannels;
+use hpsynapse\moduser\Channels\PusherChannels;
+use hpsynapse\moduser\Channels\SmsChannels;
 use hpsynapse\moduser\Channels\DbChannels;
 
 class SAMPLENOTIF extends Notification implements ShouldQueue
@@ -19,11 +23,12 @@ class SAMPLENOTIF extends Notification implements ShouldQueue
      * Create a new notification instance.
      *
      * @return void
-     */
-    public function __construct($someData)
+     */    
+    public function __construct($title, $body, $data)
     {
-        $this->someData = $someData;
-        // $this->connection = config('bssystem.queue_connection_ac');
+        $this->title = $title;
+        $this->body = $body;
+        $this->data = $data;        
     }
 
     /**
@@ -34,7 +39,23 @@ class SAMPLENOTIF extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail',DbChannels::class];
+        $config = [DbChannels::class];
+
+        if(config('AppConfig.packageLocal.moduser.notification.mail.enable',1))
+            $config[] = 'mail';
+        
+        if(config('AppConfig.packageLocal.moduser.notification.sms.enable',1))
+            $config[] = SmsChannels::class;
+
+        if(config('AppConfig.packageLocal.moduser.notification.firebase.enable',1)){
+            $config[] = FirebaseChannels::class;
+        }else if(config('AppConfig.packageLocal.moduser.notification.pusher.enable',1)){
+            $config[] = PusherChannels::class;
+        }else if(config('AppConfig.packageLocal.moduser.notification.aws_sns.enable',1)){
+            $config[] = AwsSNSChannels::class;
+        }
+
+        return $config;
     }
 
     /**
@@ -58,21 +79,44 @@ class SAMPLENOTIF extends Notification implements ShouldQueue
         // //untuk render email template jika diperlukan
         // //$email = (new MailInvoice($this->title,$this->invoice))->render();
     }
-    
-    public function toDatabase($notifiable)
+
+    public function toFirebase($notifiable)
     {
         return [
-            'subject' => $this->title,
-            'description' => 'Proses Packing Sudah selesai. Pesanan sedang dalam Pengiriman',
-            'link_web' => [//parameter wajib
-                'link' => '',
-                'route' => 'member.order.detail',
-                'parameter' => ['invoiceId' => $this->someData]
+            // 'topic' => 'broadcaset channel',
+            'token' => $notifiable->api_token->push_token,
+            'notification' => [
+                'title' => $this->title,
+                'body' => $this->body
             ],
-            'link_app' => ''//parameter wajib
+            'data' => [
+                'description' => isset($this->data['description'])?$this->data['description']:'',
+                'from' => [
+                    'name' => isset($this->data['from']['name'])?$this->data['from']['name']:'',
+                    'icon' => isset($this->data['from']['icon'])?$this->data['from']['icon']:''
+                ],
+                'link_web' => [
+                    'link' => '',
+                    'route' => 'notification.detail',
+                    'parameter' => [
+                        'notifId' => $this->id
+                    ]
+                ],
+                'link_apps' => isset($this->data['link_apps'])?$this->data['link_apps']:'',
+            ]  
         ];
     }
-
+    
+    /**
+     * Get the database array format representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function toDatabase($notifiable)
+    {
+        return $this->toArray($notifiable);
+    }
 
     /**
      * Get the array representation of the notification.
@@ -84,12 +128,20 @@ class SAMPLENOTIF extends Notification implements ShouldQueue
     {
         return [
             'subject' => $this->title,
-            'description' => 'Proses Packing Sudah selesai. Pesanan sedang dalam Pengiriman',
+            'description' => isset($this->data['description'])?$this->data['description']:'',
+            'body' => $this->body,
+            'from' => [
+                'name' => isset($this->data['from']['name'])?$this->data['from']['name']:'',
+                'icon' => isset($this->data['from']['icon'])?$this->data['from']['icon']:''
+            ],
             'link_web' => [
                 'link' => '',
-                'route' => 'member.order.detail',
-                'parameter' => ['invoiceId' => $this->invoice['invoice']]
-            ]
+                'route' => 'notification.detail',
+                'parameter' => [
+                    'notifId' => $this->id
+                ]
+            ],
+            'link_apps' => isset($this->data['link_apps'])?$this->data['link_apps']:''
         ];
     }
 }

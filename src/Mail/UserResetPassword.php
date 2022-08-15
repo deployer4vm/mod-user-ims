@@ -13,7 +13,7 @@ use hpsynapse\moduser\Facades\UserRepo;
 class UserResetPassword extends Mailable
 {
     use Queueable, SerializesModels;
-    protected $userId;
+    protected $userId,$appName,$appDomain,$appUrl;
     
     /**
      * Create a new message instance.
@@ -24,9 +24,12 @@ class UserResetPassword extends Mailable
      *      resetPasswordUrl
      * @return void
      */
-    public function __construct($userId)
+    public function __construct($userId,$appName='',$appDomain='',$appUrl='')
     {
         $this->userId = $userId;
+        $this->appName = $appName;
+        $this->appDomain = $appDomain;
+        $this->appUrl = $appUrl;
     }
 
     /**
@@ -37,6 +40,10 @@ class UserResetPassword extends Mailable
     public function build()
     {
         $userData = UserRepo::resetPasswordEmailDataFormat($this->userId);
-        return $this->subject(__('email.resetpassword_subject'))->view('user.emails.userResetPassword')->with($userData);
+        $userData['app_name'] = $this->appName;
+        $userData['app_domain'] = $this->appDomain;
+        $userData['app_url'] = $this->appUrl;
+        
+        return $this->subject(__('auth.forgotpassword.email.subject',['website'=>$userData['app_domain']]))->view('user.emails.userResetPassword')->with($userData);
     }
 }

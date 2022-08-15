@@ -27,8 +27,13 @@ Route::group($groupAuth,function(){
         //TokenApiController
         Route::post('/token/validate', 'Auth\TokenApiController@validateToken')->name('auth.api.validatetoken');
         //ubah role user yang sedang loign
-        Route::get('/change_role/{role_code}', 'Auth\TokenApiController@changeRole')->name('auth.api.changerole'); 
+        Route::get('/change_role/{role_code}', 'UserController@changeRole')->name('auth.api.changerole'); 
     });
+
+    /**
+     * SSO
+     */
+
 });
 
 /**
@@ -86,13 +91,16 @@ Route::group($groupUser,function(){
     Route::get('/{id}', 'UserController@readOne')->name('user.readOne');
 
     //create resource
-    Route::post('/', 'UserController@create')->name('user.create');  
+    Route::match(['put','post'],'/', 'UserController@create')->name('user.create');  
     //update resource
-    Route::put('/profile', 'UserController@updateProfile')->name('user.update'); 
-    Route::put('/{id}', 'UserController@update')->name('user.update'); 
+    Route::match(['put','post'],'/profile', 'UserController@updateProfile')->name('user.update'); 
+    Route::match(['put','post'],'/{id}', 'UserController@update')->name('user.update'); 
     Route::put('/{id}/ban', 'UserController@ban')->name('user.ban'); 
     Route::put('/{id}/unban', 'UserController@unban')->name('user.unban'); 
+    Route::put('/{id}/resent-verification-mail', 'UserController@resentVerificationMail')->name('user.resentVerificationMail'); 
     Route::put('/{id}/updatepassword', 'UserController@updatePassword')->name('user.updatePassword'); 
+    Route::post('/{id}/upload-avatar', 'UserController@uploadAvatar')->name('user.uploadAvatar'); 
+    Route::delete('/{id}/delete-avatar', 'UserController@deleteAvatar')->name('user.deleteAvatar'); 
     //delete resource
     Route::delete('/{id}', 'UserController@delete')->name('user.delete');  
     

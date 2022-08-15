@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Modules\Auth\Controllers\Auth;
+namespace hpsynapse\moduser\Controllers\Auth;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\Auth;
+
 use hpsynapse\moduser\Facades\UserRepo;
-use BSSystem\Core\Base\BaseController;
+
+use App\Base\BaseController;
 
 class ResetPasswordController extends BaseController
 {
@@ -24,7 +26,7 @@ class ResetPasswordController extends BaseController
         $data['setNewPassword'] = $request->query('setNewPassword',false);
 
         if(!UserRepo::varifyResetPasswordToken($data['email'],$data['verifyCode'])){
-            return redirect()->route('auth.forgotPassword', ['apps_code'=>$apps_code,'error_message'=>UserRepo::error()]);
+            return redirect()->route('auth.forgotPassword', ['error_message'=>UserRepo::error()]);
         }
 
         return view('auth.resetpassword', $data);
@@ -43,13 +45,13 @@ class ResetPasswordController extends BaseController
         
         //jika verified
         if(!UserRepo::varifyResetPasswordToken($data['email'],$data['verifyCode'],true)){
-            return redirect()->route('auth.resetPassword.fail', ['apps_code'=>$apps_code,'error_message'=>UserRepo::error()]);
+            return redirect()->route('auth.resetPassword.fail', ['error_message'=>UserRepo::error()]);
         }
-        $user = UserRepo::getOne('email',$data['email']);
+        $user = UserRepo::getUser(['email',$data['email']]);
         
         //jika banned
         if($user['status']==2){
-            return redirect()->route('auth.login', ['apps_code'=>$apps_code])->with('alert', ['type' => 'danger', 'message' => 'Login Failed. Account Banned.']);
+            return redirect()->route('auth.login')->with('alert', ['type' => 'danger', 'message' => 'Login Failed. Account Banned.']);
         }else {
             //jika aktifkasi pertama kali
             if($user['status']==0){
@@ -58,7 +60,7 @@ class ResetPasswordController extends BaseController
             UserRepo::resetPassword($user['id'],$request->input('password'));
         }
         
-        return redirect()->route('auth.login', ['apps_code'=>$apps_code]);
+        return redirect()->route('auth.login');
     }
     
     public function verifyFail(Request $request, $apps_code = '')

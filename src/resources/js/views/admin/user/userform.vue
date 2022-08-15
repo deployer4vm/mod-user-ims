@@ -1,30 +1,35 @@
 <template>
-    <div>        
-        <h4 class="d-flex justify-content-between align-items-center w-100 mb-0 border-bottom">
-            <router-link class="p-3 rounded-0 btn btn-outline-default bg-light border-right d-block borderless text-muted text-nowrap" :to="{name: 'user.list'}">
-                <span class="ion ion-ios-arrow-back"></span>&nbsp; {{ Trans.get("lang.back") }}
-            </router-link>
-            <div class="p-2 pr-4 text-right">
-                <span class="text-muted font-weight-light">
-                    {{ Trans.get("user.module_caption") }} / 
-                </span> 
-                {{title}}
-            </div>
-        </h4>
+    <div>
+        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'user.list'}" />
 
         <div class="m-3" v-if="isDataLoaded">
             <b-tabs class="nav-tabs-top nav-responsive-sm">
                 <b-tab :title="Trans.get('user.userform.tab_account_caption')" active>
+
                     <b-card-body v-if="showUserField('avatar')">
-                        <div class="media align-items-center">
-                            <img :src="`${publicUrl}img/avatars/${userData.avatar}`" alt="" class="d-block ui-w-80" />
+                        <!-- <div class="media align-items-center">
+                            <div class="ui-w-100 bg-light text-center rounded">
+                                <img :src="`${publicUrl}images/avatars/${form.id}/${form.avatar}?size=100x100`" alt class="d-block" style="max-width: 100px; max-height: 100px;" v-if="form.avatar" />
+                                <div class="ui-w-100 text-center" style="padding-top: 10px;" v-else>
+                                    <span class="ion ion-ios-person m-4" style="font-size: 22px"></span>
+                                </div>
+                            </div>
                             <div class="media-body ml-3">
                                 <label class="form-label d-block mb-2">{{ Trans.get("user.field_caption.avatar") }}</label>
-                                <b-btn variant="outline-primary" size="sm">{{ Trans.get("lang.change") }}</b-btn
-                                >&nbsp;
-                                <b-btn variant="default md-btn-flat" size="sm">{{ Trans.get("lang.reset") }}</b-btn>
+                                <b-btn variant="outline-primary" @click="uploadAvatar" size="sm" :disabled="isAdd">Upload new photo</b-btn> &nbsp; <i class="text-muted" v-if="isAdd">Untuk menambahkan avatar, silahkan tambahkan terlebih dahulu data user.</i>
+                                <b-btn variant="default md-btn-flat" @click="resetdAvatar" size="sm" v-if="form.avatar">{{ Trans.get("lang.reset") }}</b-btn>
+                                <div class="text-light small mt-1">Allowed JPG, GIF or PNG. Max size of 800K</div>
                             </div>
-                        </div>
+                        </div> -->
+                        <image-crop-upload
+                            v-if="form.id || isAdd"
+                            :imagePath="form.avatar"
+                            @setValue="form.avatar = $event"
+                            maxSize="800000"
+                            :fieldCaption="Trans.get('user.field_caption.avatar')"
+                            fieldName="avatar"
+                        >
+                        </image-crop-upload>
                     </b-card-body>
 
                     <hr class="border-light m-0" v-if="showUserField('avatar')" />
@@ -37,16 +42,15 @@
 
                         <b-form-group :label="Trans.get('user.field_caption.username')" class="col position-relative" v-if="showUserField('username')">
                             <b-input v-model="form.username" :placeholder="Trans.get('user.field_caption.username')" />
-                            <!-- <a href="javascript:void(0)" class="small">Reset password</a> -->
                         </b-form-group>
 
                         <b-form-group :label="Trans.get('user.field_caption.email')" class="col position-relative" v-if="showUserField('email')">
                             <masked-input :class="{ 'form-control': true, 'is-invalid': $v.form.email.$error ? true : false }" type="text" :mask="emailMask" :aria-invalid="$v.form.email.$error" v-model.trim="form.email" placeholder="Email" />
-                            <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('user.field_caption.password')" />
+                            <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('user.field_caption.email')" />
                             <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
                         </b-form-group>
 
-                        <b-form-group label="Phone" v-if="showUserField('phone')">
+                        <b-form-group label="Phone" class="col position-relative" v-if="showUserField('phone')">
                             <b-input v-model="form.phone" />
                             <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
                         </b-form-group>
@@ -55,12 +59,12 @@
                     <hr class="border-light m-0" />
 
                     <b-card-body class="pb-2">
-                        <b-form-group :label="Trans.get('user.field_caption.password')">
+                        <b-form-group :label="Trans.get('user.field_caption.password')" class="col position-relative">
                             <b-input type="password" :state="$v.form.password.$error ? 'invalid' : ''" v-model.trim="form.password" @blur="$v.form.password.$touch()" :placeholder="Trans.get('user.field_caption.password')" />
                             <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('user.field_caption.password')" />
                         </b-form-group>
 
-                        <b-form-group :label="Trans.get('user.field_caption.confirm_password')">
+                        <b-form-group :label="Trans.get('user.field_caption.confirm_password')" class="col position-relative">
                             <b-input type="password" :state="$v.form.repassword.$error ? 'invalid' : ''" v-model.trim="form.repassword" @blur="$v.form.repassword.$touch()" :placeholder="Trans.get('user.field_caption.confirm_password')" />
                             <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="Trans.get('user.field_caption.confirm_password')" :customAlert="{ sameAsPassword: Trans.get('user.alert.password_not_match') }" />
                         </b-form-group>
@@ -83,6 +87,7 @@
                             <b-select v-model="form.status" :options="{ 1: Trans.get('user.field_caption.status_item.active'), 2: Trans.get('user.field_caption.status_item.banned') }" />
                         </b-form-group>
                     </b-card-body>
+
                 </b-tab>
 
                 <b-tab :title="Trans.get('user.userform.tab_profile_caption')" v-if="showProfile">
@@ -93,7 +98,7 @@
             </b-tabs>
 
             <div class="text-right mt-3">
-                <b-btn variant="secondary" @click="onSubmit">{{ Trans.get("lang.save_change") }}</b-btn
+                <b-btn variant="primary" @click="onSubmit">{{ Trans.get("lang.save_change") }}</b-btn
                 >&nbsp;
                 <!-- <b-btn variant="default">Cancel</b-btn> -->
             </div>
@@ -126,9 +131,9 @@
     import { required, requiredIf, email, sameAs, minLength } from "node_modules/vuelidate/lib/validators";
 
     export default {
-        name: "pages-user-edit",
+        name: "moduser-user-form",
         metaInfo() {
-            return { title: this.Trans.get("user.module_caption") };
+            return { title: this.pageTitle };
         },
         components: {
             MaskedInput
@@ -193,13 +198,23 @@
             },
             roleItems: {},
             isDataLoaded: true,
+            // upload
+            showUpload: false,
+            otherParams: {
+                token: '123456798',
+                name: 'img'
+            }
         }),
         computed: {
             isAdd() {
                 return this.$route.params.userId ? false : true;
             },
+
+            pageTitle() {
+                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption);
+            },
             title() {
-                return this.isAdd ? this.Trans.get("user.userform.form_add_caption") : "#" + this.form.name;
+                return this.isAdd ? this.Trans.get("user.userform.form_add_caption") : ("#" + this.form.name);
             },
             oneData: {
                 get() {
@@ -218,17 +233,17 @@
             if (!(this.UserAuth.hasAccess(this.accessRuleKey, "c") || this.UserAuth.hasAccess(this.accessRuleKey, "u"))) {
                 //goto dashboard current tenant
                 this.Web.goToCurrentTenant();
-                this.Web.showAlert({ 
+                this.Web.showAlert({
                     title: this.Trans.get("alert.warning_title"),
-                    text: this.Trans.get("alert.access_denied"), 
-                    type: "warning" 
+                    text: this.Trans.get("alert.access_denied"),
+                    type: "warning"
                 });
                 return false;
             }
-            
-            this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-            this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
-            
+
+            // this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+            // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
+
             if (this.showUserField("username")) {
                 this.formEmpty.username = "";
             }
@@ -282,6 +297,8 @@
                             this.form.password = "";
                             this.form.repassword = "";
                             this.isDataLoaded = true;
+
+                            this.initView();
                         })
                         .catch(res => {
                             this.isDataLoaded = true;
@@ -291,6 +308,8 @@
                 } else {
                     this.isDataLoaded = true;
                     this.form = this.formEmpty;
+
+                    this.initView();
                 }
             },
             onSubmit(evt) {
@@ -307,7 +326,7 @@
                         if (!this.UserAuth.hasAccess(this.accessRuleKey, "c")) {
                             //goto dashboard current tenant
                             this.Web.goToCurrentTenant();
-                            this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
+                            this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
                             return false;
                         }
 
@@ -325,7 +344,7 @@
                         if (!this.UserAuth.hasAccess(this.accessRuleKey, "u")) {
                             //goto dashboard current tenant
                             this.Web.goToCurrentTenant();
-                            this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
+                            this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
                             return false;
                         }
 
@@ -345,19 +364,44 @@
             onReset(evt) {
                 evt.preventDefault();
                 // Reset our form values
+                this.form.name = "";
+                this.form.username = "";
                 this.form.email = "";
+                this.form.phone = "";
                 this.form.password = "";
-                this.form.rememberMe = false;
             },
             showUserField(field) {
                 return !this.AppConfig.packageLocal.moduser.users_hidden_field.includes(field);
             },
             showProfileField(field) {
                 return !this.AppConfig.packageLocal.moduser.user_profiles.hide.includes(field);
-            }
-        },
-        destroyed () {     
-            this.Web.setBodyWithPadding(true);
+            },
+            uploadAvatar() {
+                this.showUpload = this.showUpload?false:true;
+            },
+            resetdAvatar() {
+
+            },
+            //--------------------------
+            initView() {
+                this.Web.setModule("moduser");
+
+                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.caption));
+
+                this.Web.resetBreadcrumb();
+                this.Web.addBreadcrumb(this.Trans.get('lang.home'));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption),{name:'user.list'});
+                this.Web.addBreadcrumb(this.title);
+
+                this.Web.setBodyWithPadding(false);
+                this.Web.setShow("moduser");
+            },
+
         }
+        // destroyed () {
+        //     this.Web.setBodyWithPadding(true);
+        // }
     };
 </script>

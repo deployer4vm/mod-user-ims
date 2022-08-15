@@ -11,7 +11,7 @@ class UserActivation extends Notification implements ShouldQueue
 {
     use Queueable;
     
-    protected $userId,$isSecondary;
+    protected $userId,$isSecondary,$appName,$appDomain,$appUrl;
 
     /**
      * Create a new notification instance.
@@ -21,10 +21,13 @@ class UserActivation extends Notification implements ShouldQueue
      * Data :
      * Link Activation
      */
-    public function __construct($userId,$isSecondary=false)
+    public function __construct($userId,$isSecondary=false,$appName='',$appDomain='',$appUrl='')
     {
         $this->userId = $userId;
         $this->isSecondary = $isSecondary;
+        $this->appName = $appName;
+        $this->appDomain = $appDomain;
+        $this->appUrl = $appUrl;
         
         // $this->connection = config('bssystem.queue_connection_ac');
         $this->queue = 'verification';
@@ -49,7 +52,13 @@ class UserActivation extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $email = new \hpsynapse\moduser\Mail\UserActivation($this->userId,$this->isSecondary);
+        $email = new \hpsynapse\moduser\Mail\UserActivation(
+            $this->userId,
+            $this->isSecondary,
+            $this->appName,
+            $this->appDomain,
+            $this->appUrl
+        );
         return $email->to($notifiable->email);
     }
 

@@ -5,7 +5,7 @@
 	<td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
 		<div style="font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:14px;line-height:22px;text-align:left;color:#525252;">
 			<p>Hai {{$name}},</p>
-			<p>Selamat Datang, Silahkan klik link di bawah untuk verifikasi akun email anda</p>
+			<p>Terima Kasih telah mendaftar di {{$app_name}}. Selanjutnya silahkan klik tombol dibawah ini untuk memverifikasi email Anda :</p>
 		</div>
 	</td>
 </tr>
@@ -27,8 +27,8 @@
 <tr>
     <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
         <div style="font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:14px;line-height:20px;text-align:left;color:#525252;">
-            Salam Sukses,<br><br> Aplikasi<br>
-            <a href="#" style="color:#2F67F6">#</a>
+            Salam Sukses,<br><br> {{$app_name}}<br>
+            <a href="{{$app_url}}" style="color:#2F67F6">{{$app_url}}</a>
         </div>
     </td>
 </tr>

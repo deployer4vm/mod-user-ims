@@ -22,6 +22,9 @@ class RegisterController extends BaseController
         $this->middleware('guest');        
     }
 
+    /**
+     * Register Form (blade)
+     */
     public function register(Request $request, $apps_code = '')
     {
         $data['backlink'] = $request->input('backlink');
@@ -77,31 +80,66 @@ class RegisterController extends BaseController
      * Api resource untuk registrasi
      * 
      * @param Request $request
-     * @param type $apps_code
+     *      name
+     *      email
+     *      phone
+     *      username        String      *optional jika tidak disertakan maka email akan dijadikan username
+     *      role_code       String      *optional rolecode level 3 keatas
+     *      tos_confirm     String      *optional
+     * 
+     * @return Array 
+     *      on success :
+     * 
+     *      data
+     *          user        Array record
+     *          tenant
+     *          role_code   String main role code
+     *          role        Array list role yg dimiliki user
+     *          token       string
+     *          lastUpdate
+     *          validUntil
+     * 
+     *      on failed :
      */
-    public function apiRegister(Request $request, $apps_code = '')
+    public function apiRegister(Request $request)
     {            
         $userData = $request->all();//$request->only(['name', 'email', 'gender', 'password', 'password_confirmation']);
+
+        // jika tidak menyer
+        if(!isset($userData['username']))
+            $userData['username'] = $userData['email'];
+
+        // jika wajib ada tos_confirm maka validasi
+        if(config('AppConfig.packageLocal.moduser.registration.tos_confirm',0)==1){
+            if(!isset($userData['tos_confirm']) || $userData['tos_confirm'] == 0){
+                $this->setError(__('auth.register.alert.tos_confirm_required'));
+                return $this->done();
+            }
+        }
+
+        // validasi user role jika ada "khusus level 3 keatas"
+        if(isset($userData['role_code'])){
+
+        }
+
         $validator = \Validator::make($userData, [
+            'username' => 'required|min:3|max:255',
             'name' => 'required|min:3|max:255',
             'email' => 'required|email|max:255',
-            'phone' => 'required|max:20',
-            'password' => 'required|min:5|max:255',
-            'tos_confirm' => 'required'
+            'phone' => 'max:20',
+            'password' => 'required|min:5|max:255'
         ]);
         
-        $response = ['status'=>400,'message'=>'Authentificaion Failed','data'=>null,'errors'=>[true]];
-        
         if ($validator->fails()) {            
-            $response['message'] = __('validation.inputerror');
-            $response['errors'] = [$validator->messages()];
-        }else{
-        
+            $this->setError(__('auth.register.alert.validation_error'),$validator->messages());
+        }else{        
             $regUserData = UserRepo::register($userData,false);
 
             //jika berhasil
-            if ($regUserData) {            
-                UserRepo::activateUser($regUserData['id']);   
+            if ($regUserData) {      
+                
+                if(config('AppConfig.packageLocal.moduser.registration.auto_activate',0)==1)      
+                    UserRepo::activateUser($regUserData['id']);   
                 
                 if($request->input('pushNotifToken')){
                     $pushParam = [
@@ -109,19 +147,19 @@ class RegisterController extends BaseController
                         'type' => $request->input('pushType',1)
                     ];
                 }
-                $response['status'] = 200;
-                $response['errors'] = null;
-                $response['message'] = __('auth.registersuccess');
-                $response['data'] = UserAuth::getCurTimeStamp();
-                $response['data']['user'] = $regUserData;
-                $response['data']['role'] = UserRepo::getUserRole($regUserData['id']); 
+                $this->output['message'] =  __('auth.register.alert.register_success');
+                $this->output['data'] = UserAuth::getCurTimeStamp();
+                $this->output['data']['user'] = $regUserData;
+                $this->output['data']['role'] = UserRepo::getUserRole($regUserData['id']); 
                 foreach($this->output['data']['role'] as $key => $val) {
                     if($val['is_main_role']){
                         $this->output['data']['role_code'] = $key;
                     }
                 }  
+
                 $token = UserRepo::generateToken($regUserData['id'],$this->output['data']['role_code'],1,$request->input('deviceId',''));
-                $response['data']['token'] = $token['api_token'];
+                $this->output['data']['token'] = $token['api_token'];
+
                 //subscribekan ke channel/topic berdasarkan user role nya
                 if($request->input('pushNotifToken')){
                     $notifChannel[] = 'all';
@@ -131,10 +169,10 @@ class RegisterController extends BaseController
                 }
             
             }else{
-                $response['message'] = __('auth.registerfailed',['error' => UserRepo::error()]);
+                $this->setError(UserRepo::error(),UserRepo::errorValidator());
             }
         }
         
-        return response()->json($response,$response['status']);
+        return $this->done();    
     }
 }

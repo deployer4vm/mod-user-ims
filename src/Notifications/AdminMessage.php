@@ -8,7 +8,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 use hpsynapse\moduser\Channels\FirebaseChannels;
+use hpsynapse\moduser\Channels\AwsSNSChannels;
+use hpsynapse\moduser\Channels\PusherChannels;
+use hpsynapse\moduser\Channels\SmsChannels;
 use hpsynapse\moduser\Channels\DbChannels;
+
 /**
  * broad cast message dari admin ke member
  */
@@ -16,6 +20,7 @@ class AdminMessage extends Notification implements ShouldQueue
 {
     use Queueable;
     protected $title, $body, $data;
+
     /**
      * Create a new notification instance.
      *
@@ -30,8 +35,7 @@ class AdminMessage extends Notification implements ShouldQueue
     {
         $this->title = $title;
         $this->body = $body;
-        $this->data = $data;
-        
+        $this->data = $data;        
     }
 
     /**
@@ -42,9 +46,23 @@ class AdminMessage extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        // return ['mail',DbChannels::class,FirebaseChannels::class];
-        // return ['mail', DbChannels::class];
-        return [DbChannels::class];
+        $config = [DbChannels::class];
+
+        if(config('AppConfig.packageLocal.moduser.notification.mail.enable',1))
+            $config[] = 'mail';
+        
+        if(config('AppConfig.packageLocal.moduser.notification.sms.enable',1))
+            $config[] = SmsChannels::class;
+
+        if(config('AppConfig.packageLocal.moduser.notification.firebase.enable',1)){
+            $config[] = FirebaseChannels::class;
+        }else if(config('AppConfig.packageLocal.moduser.notification.pusher.enable',1)){
+            $config[] = PusherChannels::class;
+        }else if(config('AppConfig.packageLocal.moduser.notification.aws_sns.enable',1)){
+            $config[] = AwsSNSChannels::class;
+        }
+
+        return $config;
     }
 
     /**
@@ -59,14 +77,51 @@ class AdminMessage extends Notification implements ShouldQueue
         return $email->to($notifiable->email);
     }
 
+    public function toFirebase($notifiable)
+    {
+        return [
+            // 'topic' => 'broadcaset channel',
+            'token' => $notifiable->api_token->push_token,
+            'notification' => [
+                'title' => $this->title,
+                'body' => $this->body
+            ],
+            'data' => [
+                'description' => isset($this->data['description'])?$this->data['description']:'',
+                'from' => [
+                    'name' => isset($this->data['from']['name'])?$this->data['from']['name']:'',
+                    'icon' => isset($this->data['from']['icon'])?$this->data['from']['icon']:''
+                ],
+                'link_web' => [
+                    'link' => '',
+                    'route' => 'notification.detail',
+                    'parameter' => [
+                        'notifId' => $this->id
+                    ]
+                ],
+                'link_apps' => isset($this->data['link_apps'])?$this->data['link_apps']:'',
+            ]  
+        ];
+    }
+
+    /**
+     * Get the database array format representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function toDatabase($notifiable)
+    {
+        return $this->toArray($notifiable);
+    }
+    
     /**
      * Get the array representation of the notification.
      *
      * @param  mixed  $notifiable
      * @return array
      */
-
-    public function toDatabase($notifiable)
+    public function toArray($notifiable)
     {
         return [
             'subject' => $this->title,
@@ -84,13 +139,6 @@ class AdminMessage extends Notification implements ShouldQueue
                 ]
             ],
             'link_apps' => isset($this->data['link_apps'])?$this->data['link_apps']:''
-        ];
-    }
-    
-    public function toArray($notifiable)
-    {
-        return [
-            //
         ];
     }
 }

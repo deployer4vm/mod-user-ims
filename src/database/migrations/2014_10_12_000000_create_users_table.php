@@ -20,9 +20,9 @@ class CreateUsersTable extends Migration
             $table->string('user_idcode')->default('');
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->dateTime('email_verified_at')->nullable();
             $table->string('phone')->default('');
-            $table->timestamp('phone_verified_at')->nullable();
+            $table->dateTime('phone_verified_at')->nullable();
             $table->string('password')->default('');
             $table->string('auth_password')->default('');
             $table->text('note')->nullable();
@@ -39,7 +39,7 @@ class CreateUsersTable extends Migration
             
             $table->tinyInteger('status')->default(0);
             $table->string('banned_note')->default('');
-            $table->timestamp('banned_at')->nullable();
+            $table->dateTime('banned_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
 

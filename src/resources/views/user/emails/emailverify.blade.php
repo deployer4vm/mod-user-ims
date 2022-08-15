@@ -1,11 +1,11 @@
-@extends('layouts.email.auth.app')
+@extends('layouts.email.app')
 
 @section('content')
 <tr>
 	<td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
 		<div style="font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:14px;line-height:22px;text-align:left;color:#525252;">
 			<p>Hai {{$name}},</p>
-			<p>Terima Kasih telah mendaftar di Billionaire Store. Selanjutnya silahkan klik tombol dibawah ini untuk memverifikasi email Anda :</p>
+			<p>Email Anda telah terdaftar di {{$app_name}}, silahkan klik tombol dibawah ini untuk memverifikasi email Anda :</p>
 		</div>
 	</td>
 </tr>
@@ -19,7 +19,6 @@
 <tr>
 	<td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
 		<div style="font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:14px;line-height:22px;text-align:left;color:#525252;">
-			<p>Jika Anda merasa tidak melakukan registrasi di Billionaire Store, silahkan hubungi kami</p><br>
 			<p>Jika Anda bermasalah dengan klik tombol Verifikasi Email, copy dan paste URL di bawah ini di web browser Anda.</p>
 			<p><a style="color:#2F67F6" href="{{$verifyUrl}}" target="_blank">{{$verifyUrl}}</a></p>
 		</div>
@@ -28,8 +27,8 @@
 <tr>
     <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
         <div style="font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;font-size:14px;line-height:20px;text-align:left;color:#525252;">
-            Salam Sukses,<br><br> Billionaire Store<br>
-            <a href="{{ route('home') }}" style="color:#2F67F6">{{ route('home') }}</a>
+            Salam Sukses,<br><br> {{$app_name}}<br>
+            <a href="{{$app_url}}" style="color:#2F67F6">{{$app_url}}</a>
         </div>
     </td>
 </tr>

@@ -25,11 +25,12 @@ class FirebaseApi
     {   
         if (!self::$firebase) {
             self::$config = config('AppConfig.packageLocal.moduser.notification');
-            $serviceAccount = ServiceAccount::fromJsonFile(base_path(self::$config['firebase_config_path']));
+            // $serviceAccount = ServiceAccount::fromJsonFile(base_path(self::$config['firebase_config_path']));
+            $serviceAccount = ServiceAccount::fromArray(self::$config['services']['firebase']['config']['firebasejson']);
             
             self::$firebase = (new Factory)
                 ->withServiceAccount($serviceAccount)
-                ->withDatabaseUri(self::$config['database_url']) //url from database firebase
+                ->withDatabaseUri(self::$config['services']['firebase']['config']['realtime_database_url']) //url from realtime database firebase
                 ->create();
         }
         return self::$firebase;
@@ -50,6 +51,7 @@ class FirebaseApi
     
     /**
      * kirim push message ke salah satu device
+     * 
      * @param string $token
      * @param array $message format :
      *      'notification'
