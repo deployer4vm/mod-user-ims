@@ -62,7 +62,31 @@ Route::group($groupUser,function(){
         //delete resource
         Route::delete('/{id}', 'RoleController@delete')->name('user.role.delete');  
     });
+
+    /**
+     * Module User System
+     */
     
+    Route::group(['prefix'=>'usersystem'],function(){
+        Route::get('/', 'UserSystemController@readList')->name('user.usersystem.readList');
+        Route::get('/{id}', 'UserSystemController@readOne')->name('user.usersystem.readOne');
+        Route::match(['put','post'],'/', 'UserSystemController@create')->name('user.usersystem.create');
+        Route::match(['put','post'],'/{id}', 'UserSystemController@update')->name('user.usersystem.update');
+        Route::delete('/{id}', 'UserSystemController@delete')->name('user.usersystem.delete');
+        Route::match(['put','post'],'/{id}/generate_token', 'UserSystemController@generateToken')->name('user.usersystem.generateToken');
+    });
+
+    /**
+     * Module Role System
+     */
+    
+    Route::group(['prefix'=>'rolesystem'],function(){
+        Route::get('/', 'RoleSystemController@readList')->name('user.rolesystem.readList');
+        Route::get('/{id}', 'RoleSystemController@readOne')->name('user.rolesystem.readOne');
+        Route::post('/', 'RoleSystemController@create')->name('user.rolesystem.create');
+        Route::put('/{id}', 'RoleSystemController@update')->name('user.rolesystem.update');
+        Route::delete('/{id}', 'RoleSystemController@delete')->name('user.rolesystem.delete');
+    });
     
     /**
      * fituf notif

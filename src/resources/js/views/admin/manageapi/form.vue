@@ -1,78 +1,16 @@
 <template>
     <div>
-        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'user.list'}" />
+        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'manageapi.list'}" />
 
         <div class="m-3" v-if="isDataLoaded">
             <b-tabs class="nav-tabs-top nav-responsive-sm">
                 <b-tab :title="Trans.get('user.userform.tab_account_caption')" active>
-
-                    <b-card-body v-if="showUserField('avatar')">
-                        <!-- <div class="media align-items-center">
-                            <div class="ui-w-100 bg-light text-center rounded">
-                                <img :src="`${publicUrl}images/avatars/${form.id}/${form.avatar}?size=100x100`" alt class="d-block" style="max-width: 100px; max-height: 100px;" v-if="form.avatar" />
-                                <div class="ui-w-100 text-center" style="padding-top: 10px;" v-else>
-                                    <span class="ion ion-ios-person m-4" style="font-size: 22px"></span>
-                                </div>
-                            </div>
-                            <div class="media-body ml-3">
-                                <label class="form-label d-block mb-2">{{ Trans.get("user.field_caption.avatar") }}</label>
-                                <b-btn variant="outline-primary" @click="uploadAvatar" size="sm" :disabled="isAdd">Upload new photo</b-btn> &nbsp; <i class="text-muted" v-if="isAdd">Untuk menambahkan avatar, silahkan tambahkan terlebih dahulu data user.</i>
-                                <b-btn variant="default md-btn-flat" @click="resetdAvatar" size="sm" v-if="form.avatar">{{ Trans.get("lang.reset") }}</b-btn>
-                                <div class="text-light small mt-1">Allowed JPG, GIF or PNG. Max size of 800K</div>
-                            </div>
-                        </div> -->
-                        <image-crop-upload
-                            v-if="form.id || isAdd"
-                            :imagePath="form.avatar"
-                            @setValue="form.avatar = $event"
-                            maxSize="800000"
-                            :fieldCaption="Trans.get('user.field_caption.avatar')"
-                            fieldName="avatar"
-                        >
-                        </image-crop-upload>
-                    </b-card-body>
-
-                    <hr class="border-light m-0" v-if="showUserField('avatar')" />
-
                     <b-card-body class="pb-2">
                         <b-form-group :label="Trans.get('user.field_caption.name')" class="col position-relative">
                             <b-input :state="$v.form.name.$error ? 'invalid' : ''" @blur="$v.form.name.$touch()" v-model="form.name" placeholder="Name" />
                             <invalid-tooltip :inputItem="$v.form.name" :fieldName="'Name'" />
                         </b-form-group>
-
-                        <b-form-group :label="Trans.get('user.field_caption.username')" class="col position-relative" v-if="showUserField('username')">
-                            <b-input v-model="form.username" :placeholder="Trans.get('user.field_caption.username')" />
-                        </b-form-group>
-
-                        <b-form-group :label="Trans.get('user.field_caption.email')" class="col position-relative" v-if="showUserField('email')">
-                            <masked-input :class="{ 'form-control': true, 'is-invalid': $v.form.email.$error ? true : false }" type="text" :mask="emailMask" :aria-invalid="$v.form.email.$error" v-model.trim="form.email" placeholder="Email" />
-                            <invalid-tooltip :inputItem="$v.form.email" :fieldName="Trans.get('user.field_caption.email')" />
-                            <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
-                        </b-form-group>
-
-                        <b-form-group label="Phone" class="col position-relative" v-if="showUserField('phone')">
-                            <b-input v-model="form.phone" />
-                            <a href="javascript:void(0)" class="small" v-if="false">Resend confirmation</a>
-                        </b-form-group>
-                    </b-card-body>
-
-                    <hr class="border-light m-0" />
-
-                    <b-card-body class="pb-2">
-                        <b-form-group :label="Trans.get('user.field_caption.password')" class="col position-relative">
-                            <b-input type="password" :state="$v.form.password.$error ? 'invalid' : ''" v-model.trim="form.password" @blur="$v.form.password.$touch()" :placeholder="Trans.get('user.field_caption.password')" />
-                            <invalid-tooltip :inputItem="$v.form.password" :fieldName="Trans.get('user.field_caption.password')" />
-                        </b-form-group>
-
-                        <b-form-group :label="Trans.get('user.field_caption.confirm_password')" class="col position-relative">
-                            <b-input type="password" :state="$v.form.repassword.$error ? 'invalid' : ''" v-model.trim="form.repassword" @blur="$v.form.repassword.$touch()" :placeholder="Trans.get('user.field_caption.confirm_password')" />
-                            <invalid-tooltip :inputItem="$v.form.repassword" :fieldName="Trans.get('user.field_caption.confirm_password')" :customAlert="{ sameAsPassword: Trans.get('user.alert.password_not_match') }" />
-                        </b-form-group>
-                    </b-card-body>
-
-                    <hr class="border-light m-0" />
-
-                    <b-card-body class="pb-2">
+                        
                         <b-form-group :label="Trans.get('user.field_caption.role')" class="col position-relative">
                             <template v-if="AppConfig.packageLocal.moduser.user_role.multi_role">
                                 <b-check-group :state="$v.form.role_code.$error ? 'invalid' : ''" v-model="form.role_code" :options="roleItems" class="custom-controls-stacked" />
@@ -82,12 +20,28 @@
                             </template>
                             <invalid-tooltip :inputItem="$v.form.role_code" :fieldName="Trans.get('user.field_caption.role')" />
                         </b-form-group>
-
-                        <b-form-group :label="Trans.get('user.field_caption.status')" class="col position-relative">
-                            <b-select v-model="form.status" :options="{ 1: Trans.get('user.field_caption.status_item.active'), 2: Trans.get('user.field_caption.status_item.banned') }" />
-                        </b-form-group>
                     </b-card-body>
 
+
+                    <hr class="border-light m-0" v-if="!isAdd"/>
+                
+                    <b-card-body class="pb-2" v-if="!isAdd">
+                        <b-form-group :label="Trans.get('user.field_caption.generate_token')" class="col position-relative">
+                            <div class="input-group mb-3">
+                              <input type="text" class="form-control" v-model="form.api_token.api_token" placeholder="Generate Token" readonly>
+                              <div class="input-group-append">
+                                <button class="btn btn-outline-warning" type="button" @click="generateTokenSystem(form.id)">Generate Token</button>
+                              </div>
+                              <div class="input-group-append">
+                                <button class="btn btn-outline-info" type="button" v-if="form.api_token.api_token"
+                                    v-clipboard:copy="form.api_token.api_token" v-clipboard:success="copySuccess"
+                                    v-clipboard:error="copyFail">
+                                    Copy Token
+                                </button>
+                              </div>
+                            </div>
+                        </b-form-group>
+                    </b-card-body>
                 </b-tab>
 
                 <b-tab :title="Trans.get('user.userform.tab_profile_caption')" v-if="showProfile">
@@ -127,8 +81,9 @@
 
 <script>
     import MaskedInput, { conformToMask } from "node_modules/vue-text-mask";
-    import { emailMask } from "node_modules/text-mask-addons/dist/textMaskAddons";
-    import { required, requiredIf, email, sameAs, minLength } from "node_modules/vuelidate/lib/validators";
+    import { required } from "node_modules/vuelidate/lib/validators";
+    import VueClipboard from 'vue-clipboard2'
+    Vue.use(VueClipboard)
 
     export default {
         name: "moduser-user-form",
@@ -144,48 +99,21 @@
                     name: {
                         required
                     },
-                    email: {
-                        email
-                    },
                     role_code: {
                         required
                     },
-                    password: {
-                        required: requiredIf(function(n) {
-                            return this.isAdd;
-                        }),
-                        minLength: minLength(6)
-                    },
-                    repassword: {
-                        sameAsPassword: sameAs("password")
-                    }
                 }
             };
-
-            // if(this.form.password != '') {
-            //     data.form.password = {
-            //             required: requiredIf(function(n) {
-            //                 return this.isAdd;
-            //             }),
-            //             minLength: minLength(6)
-            //         };
-            //     data.form.repassword = {
-            //             sameAsPassword: sameAs('password')
-            //         };
-            // }
 
             return data;
         },
         data: () => ({
-            accessRuleKey: "moduser.user",
-            emailMask: emailMask,
+            accessRuleKey: "moduser.manage_api",
             form: {},
             formEmpty: {
                 id: 0,
                 all_tenant: 0,
                 name: "",
-                password: "",
-                repassword: "",
                 role_code: [],
                 note: "",
                 status: 1,
@@ -203,7 +131,8 @@
             otherParams: {
                 token: '123456798',
                 name: 'img'
-            }
+            },
+            generateToken: "",
         }),
         computed: {
             isAdd() {
@@ -211,17 +140,17 @@
             },
 
             pageTitle() {
-                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption);
+                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption);
             },
             title() {
                 return this.isAdd ? this.Trans.get("user.userform.form_add_caption") : ("#" + this.form.name);
             },
             oneData: {
                 get() {
-                    return this.$store.state.user.user;
+                    return this.$store.state.usersystem.user;
                 },
                 set(value) {
-                    this.$store.commit("user/setUser", value);
+                    this.$store.commit("usersystem/setUser", value);
                 }
             },
             //access config
@@ -244,34 +173,17 @@
             // this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
             // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
 
-            if (this.showUserField("username")) {
-                this.formEmpty.username = "";
-            }
-
-            if (this.showUserField("email")) {
-                this.formEmpty.email = "";
-            }
-
-            if (this.showUserField("avatar")) {
-                this.formEmpty.avatar = "";
-            }
-
-            if (this.showUserField("phone")) {
-                this.formEmpty.phone = "";
-            }
-
             if (this.AppConfig.packageLocal.moduser.user_role.multi_role == 0) {
                 this.form.role_code = "";
             }
 
-            //load data role
-            this.$store.dispatch("role/roleList", { system_role: false }).then(res => {
+            //load data rolesystem
+            this.$store.dispatch("rolesystem/roleList", { system_role: 1 }).then(res => {
                 let tmpRoleItems = [];
                 _.forEach(res.data, (v, i) => {
                     tmpRoleItems.push({ value: v.role_code, text: "[" + v.role_code + "] " + v.name });
                 });
                 this.roleItems = tmpRoleItems;
-                console.log(res);
             });
 
             this.loadData();
@@ -282,7 +194,7 @@
                 if (!this.isAdd) {
                     this.isDataLoaded = false;
                     this.$store
-                        .dispatch("user/getUser", this.$route.params.userId)
+                        .dispatch("usersystem/getUser", this.$route.params.userId)
                         .then(res => {
                             this.checkSystemUser(res)
                             this.form = this.oneData;
@@ -295,10 +207,13 @@
                                     return true;
                                 }
                             });
-                            this.form.status = this.form.status==2?2:1;
-                            this.form.password = "";
-                            this.form.repassword = "";
                             this.isDataLoaded = true;
+                            
+                            if (!this.form.api_token) {
+                                this.form.api_token = {
+                                    api_token: "",
+                                }
+                            }
 
                             this.initView();
                         })
@@ -333,10 +248,10 @@
                         }
 
                         this.$store
-                            .dispatch("user/register", this.form)
+                            .dispatch("usersystem/register", this.form)
                             .then(res => {
                                 this.Web.showAlert({ type: "info", text: "User Registered Successfully" });
-                                this.$router.push({ name: "user.list" });
+                                this.$router.push({ name: "manageapi.list" });
                             })
                             .catch(err => {
                                 console.log("add User error : ", err);
@@ -351,13 +266,13 @@
                         }
 
                         this.$store
-                            .dispatch("user/update", { data: this.form, id: this.form.id })
+                            .dispatch("usersystem/update", { data: this.form, id: this.form.id })
                             .then(res => {
-                                this.Web.showAlert({ type: "info", text: "User Updated Successfully" });
-                                this.$router.push({ name: "user.list" });
+                                this.Web.showAlert({ type: "info", text: "User System Updated Successfully" });
+                                this.$router.push({ name: "manageapi.list" });
                             })
                             .catch(err => {
-                                console.log("update user error : ", err);
+                                console.log("update user system error : ", err);
                                 this.Web.showAlert({ type: "danger", text: "Simpan data gagal : " + err.message });
                             });
                     }
@@ -367,10 +282,6 @@
                 evt.preventDefault();
                 // Reset our form values
                 this.form.name = "";
-                this.form.username = "";
-                this.form.email = "";
-                this.form.phone = "";
-                this.form.password = "";
             },
             showUserField(field) {
                 return !this.AppConfig.packageLocal.moduser.users_hidden_field.includes(field);
@@ -384,8 +295,35 @@
             resetdAvatar() {
 
             },
+            copySuccess() {
+                this.Web.showAlert({ text: "Copy success" });
+                this.loadData();
+            },
+            copyFail() {
+                this.Web.showAlert({ text: "Copy fail" });
+            },
+            generateTokenSystem(id){
+                this.Web.showAlert({
+                    styleType: "modal",
+                    style: "warning",
+                    title: "Generate Confirmation",
+                    text: "Are you sure ?",
+                    modalButtonCancel: "No",
+                    modalButtonOk: "Yes",
+                    onOk: () => {
+                        this.$store.dispatch("usersystem/generateToken", id)
+                            .then(res => {
+                                this.Web.showAlert({ text: "Token generated" });
+                                this.loadData();
+                            })
+                            .catch(res => {
+                                this.Web.showAlert({ text: "Token generated fail", style: "warning" });
+                            });
+                        }
+                });
+            },
             checkSystemUser(user){
-                if(user.system_user !== 0){
+                if(user.system_user !== 1){
                     this.$router.push({ name: "user.list" });
                     this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
                 }
@@ -394,13 +332,13 @@
             initView() {
                 this.Web.setModule("moduser");
 
-                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.caption));
+                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
+                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.children.manage_api.caption));
 
                 this.Web.resetBreadcrumb();
                 this.Web.addBreadcrumb(this.Trans.get('lang.home'));
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption),{name:'user.list'});
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption),{name:'manageapi.list'});
                 this.Web.addBreadcrumb(this.title);
 
                 this.Web.setBodyWithPadding(false);

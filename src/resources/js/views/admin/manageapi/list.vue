@@ -57,8 +57,11 @@
                             </b-btn>
                         </b-form-group>
                     </div> -->
-                    <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'user.add' }">
+                    <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'manageapi.add' }">
                             <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }}
+                        </router-link>
+                    <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'r')" class="btn btn-secondary d-block mx-1" :to="{ name: 'manageapi.role' }">
+                            <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.manageapi.role_list") }}
                         </router-link>
                 </div>
             </b-card-body>
@@ -81,60 +84,23 @@
                         <a href="javascript:void(0)">{{ data.item.account }}</a>
                     </template>
 
-                    <template v-slot:cell(avatar)="data">
-                        <div class="ui-w-100 bg-light text-center rounded">
-                            <a :href="publicUrl + 'upload/' + data.item.avatar" target="_blank" v-if="data.item.avatar"><img :src="publicUrl + 'upload/' + data.item.avatar" style="max-width: 100px; max-height: 100px;" /></a>
-                            <div class="ui-w-100 text-center" style="padding-top: 10px;" v-else>
-                                <span class="ion ion-ios-person m-4" style="font-size: 22px"></span>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template v-slot:cell(email)="data">
-                        <div>
-                            <span>{{data.item.email}}</span>
-                            <template v-if="data.item.email_verified_at">
-
-                                    <b-badge variant="success mt-2">
-                                        verified
-                                    </b-badge>
-                                    <span class="pt-2 text-light">
-                                        diverifikasi pada {{moment(data.item.email_verified_at).format('YYYY-MM-DD')}} jam {{moment(data.item.email_verified_at).format('hh:mm')}}
-                                    </span>
-
-                            </template>
-                            <template v-else>
-
-                                    <b-badge variant="outline-danger mt-2">
-                                        unverified
-                                    </b-badge>
-                                    <span class="pt-2 text-light">
-                                        kirim ulang email verifikasi ?
-                                        <b-btn class="btn btn-secondary btn-sm md-btn-flat" @click="sendVerification(data.item.id)" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
-                                            <span class="ion ion-md-mail mr-1"></span> Kirim
-                                            <!-- kirim -->
-                                        </b-btn>
-                                    </span>
-                            </template>
-                        </div>
-                    </template>
-
-                    <template v-slot:cell(role)="data">
-                        <b-badge variant="outline-info" v-for="dRole in data.item.roles" :key="data.item.id + dRole.role.id">{{ dRole.role.name }}</b-badge>
-                    </template>
-
-                    <template v-slot:cell(status)="data">
-                        <b-badge variant="outline-success" v-if="data.item.status === 1 || data.item.status === 0">{{ Trans.get("user.field_caption.status_item.active") }}</b-badge>
-                        <b-badge variant="outline-danger" v-if="data.item.status === 2">{{ Trans.get("user.field_caption.status_item.banned") }}</b-badge>
-                        <!-- <b-badge variant="outline-default" v-if="data.item.status === 0">Guest</b-badge> -->
-                    </template>
-
                     <template v-slot:cell(actions)="data">
+                        <b-btn class="btn btn-info btn-sm md-btn-flat" v-if="data.item.api_token" 
+                            v-clipboard:copy="data.item.api_token.api_token" v-clipboard:success="copySuccess"
+                            v-clipboard:error="copyFail"
+                        >
+                            Copy Token
+                        </b-btn>
+                        <b-btn class="btn btn-primary btn-sm md-btn-flat" v-if="!data.item.api_token"
+                            @click="generateToken(data.item.id)"
+                        >
+                            Generate Token
+                        </b-btn>
                         <!-- <b-btn variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit"><i class="ion ion-md-create"></i></b-btn> -->
-                        <router-link class="btn btn-success icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.edit')" v-b-tooltip.hover :to="{ name: 'user.edit', params: { userId: data.item.id } }" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
+                        <router-link class="btn btn-success icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.edit')" v-b-tooltip.hover :to="{ name: 'manageapi.edit', params: { userId: data.item.id } }" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
                             <span class="ion ion-md-create"></span>
                         </router-link>
-                        <b-btn class="btn btn-danger icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.delete')" @click="deleteUser(data.item)" v-if="UserAuth.hasAccess(accessRuleKey, 'd') && data.item.linked_id == 0" v-b-tooltip.hover>
+                        <b-btn class="btn btn-danger icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.delete')" @click="deleteUser(data.item.id)" v-if="UserAuth.hasAccess(accessRuleKey, 'd') && data.item.linked_id == 0" v-b-tooltip.hover>
                             <span class="ion ion-md-close"></span>
                         </b-btn>
                         <!-- <b-dropdown variant="default btn-xs icon-btn md-btn-flat hide-arrow" :right="!isRTL">
@@ -169,9 +135,11 @@
 
 <script>
     import flatPickr from "node_modules/vue-flatpickr-component";
+    import VueClipboard from 'vue-clipboard2'
+    Vue.use(VueClipboard)
 
     export default {
-        name: "pages-user-list",
+        name: "pages-usersystem-list",
         metaInfo() {
             return { title: this.pageTitle };
         },
@@ -179,7 +147,7 @@
             flatPickr
         },
         data: () => ({
-            accessRuleKey: "moduser.user",
+            accessRuleKey: "moduser.manage_api",
             // START ----FI listing option
             sortBy: "id",
             sortDesc: false,
@@ -202,26 +170,6 @@
                     }
                 },
                 {
-                    key: "avatar",
-                    sortable: true,
-                    tdClass: "align-middle",
-                    tdAttr: {
-                        "data-lable": "Avatar"
-                    }
-                },
-                {
-                    key: "username",
-                    sortable: true,
-                    tdClass: "align-middle",
-                    tdAttr: {
-                        "data-lable": "Username"
-                    }
-                },
-                {
-                    key: "email",
-                    sortable: true,
-                    tdClass: "align-middle", },
-                {
                     key: "name",
                     sortable: true, tdClass: "align-middle",
                     tdAttr: {
@@ -229,24 +177,8 @@
                     }
                 },
                 {
-                    key: "role",
-                    sortable: true,
-                    tdClass: "align-middle",
-                    tdAttr: {
-                        "data-lable": "Role"
-                    }
-                },
-                {
-                    key: "status",
-                    sortable: true,
-                    tdClass: "align-middle",
-                    tdAttr: {
-                        "data-lable": "Status"
-                    }
-                },
-                {
                     key: "actions",
-                    label: " ",
+                    label: "Aksi",
                     tdClass: "text-nowrap align-middle text-center col-action",
                     tdAttr: {
                         "data-lable": ""
@@ -257,17 +189,16 @@
         }),
 
         computed: {
-
             listData: {
                 get() {
-                    return this.$store.state.user.userList;
+                    return this.$store.state.usersystem.userList;
                 },
                 set(value) {
-                    this.$store.commit("user/setUserList", value);
+                    this.$store.commit("usersystem/setUserList", value);
                 }
             },
             pageTitle() {
-                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption);
+                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption);
             },
             listRole() {
                 return this.$store.state.role.roleList;
@@ -308,9 +239,6 @@
             }
         },
         methods: {
-            showUserField(field) {
-                return !this.AppConfig.packageLocal.moduser.users_hidden_field.includes(field);
-            },
             doSearch() {
                 this.loadData(this.curPage,this.searchString,this.sortBy,this.sortDesc);
             },
@@ -321,7 +249,7 @@
 
                 this.loadParams.params.limit = this.perPage;
                 this.loadParams.params.offset = offset;
-                this.loadParams.params.system_user = false;
+                this.loadParams.params.system_user = 1;
 
                 if (q != "") {
                     this.loadParams.params.q = q;
@@ -340,21 +268,17 @@
                     this.loadParams.params.status = this.filterStatus;
                 }
 
-                this.$store.dispatch("user/userList", this.loadParams);
+                this.$store.dispatch("usersystem/userList", this.loadParams);
             },
             setStatus(userId, status) {
                 if (status == 1) {
                 } else {
                 }
             },
-            deleteUser(user) {
+            deleteUser(userId) {
                 if (!this.UserAuth.hasAccess(this.accessRuleKey, "d")) {
                     //goto dashboard current tenant
                     this.Web.goToCurrentTenant();
-                    this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
-                    return false;
-                }
-                if (user.system_user == 1){
                     this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
                     return false;
                 }
@@ -368,7 +292,7 @@
                     modalButtonOk: "Yes",
                     onOk: () => {
                         this.$store
-                            .dispatch("user/delete", user.id)
+                            .dispatch("usersystem/delete", userId)
                             .then(res => {
                                 this.Web.showAlert({ text: "Data deleted" });
                                 this.loadData(1);
@@ -379,50 +303,39 @@
                     }
                 });
             },
-            sendVerification(userId){
-
-                if (!this.UserAuth.hasAccess(this.accessRuleKey, "u")) {
-                    //goto dashboard current tenant
-                    this.Web.goToCurrentTenant();
-                    this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
-                    return false;
-                }
-
-                this.Web.showAlert({
-                    styleType: "modal",
-                    style: "info",
-                    title: "Confirmation",
-                    text: "Kirim ulang email verifikasi ?",
-                    modalButtonCancel: "No",
-                    modalButtonOk: "Yes",
-                    onOk: () => {
-                        this.$store
-                            .dispatch("user/resentVerificationMail", userId)
-                            .then(res => {
-                                this.Web.showAlert({ text: "Kirim berhasil" });
-                                this.loadData(1);
-                            })
-                            .catch(res => {
-                                this.Web.showAlert({ text: "Kirim gagal : " + res.message, style: "warning" });
-                            });
-                    }
-                });
+            copySuccess() {
+                this.Web.showAlert({ text: "Copy success" });
+                this.loadData(1);
+            },
+            copyFail() {
+                this.Web.showAlert({ text: "Copy fail" });
+            },
+            generateToken(id)
+            {
+                this.$store.dispatch("usersystem/generateToken", id)
+                    .then(res => {
+                        this.Web.showAlert({ text: "Token generated" });
+                        this.loadData(1);
+                    })
+                    .catch(res => {
+                        this.Web.showAlert({ text: "Token generated fail", style: "warning" });
+                    });
             },
             initView() {
                 this.Web.setModule("moduser");
 
-                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.caption));
+                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
+                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.children.manage_api.caption));
 
                 this.Web.resetBreadcrumb();
                 this.Web.addBreadcrumb(this.Trans.get('lang.home'));
-                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.user.caption));
-                // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
+                // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.children.manage_api.caption));
 
                 this.Web.setBodyWithPadding(false);
                 this.Web.setShow("moduser");
-            },
+            }
         },
         created() {
             if (!this.UserAuth.hasAccess(this.accessRuleKey)) {
@@ -437,7 +350,7 @@
             }
             this.initView();
 
-            //load data user
+            //load data usersystem
             this.loadData(1);
 
             //load data role
@@ -449,24 +362,11 @@
                 this.roleItems = tmpRoleItems;
             });
 
-            this.fields = JSON.parse(JSON.stringify(this.defaultFields));
+            this.fields = this.defaultFields;
 
             if (!(this.UserAuth.hasAccess(this.accessRuleKey, "u") || this.UserAuth.hasAccess(this.accessRuleKey, "d"))) {
                 this.fields.splice(6, 1);
             }
-
-            //jika username termasuk dari field yang dihide maka hide kolomnya
-            if (this.AppConfig.packageLocal.moduser.users_hidden_field.includes("username")) {
-                this.fields.splice(2, 1);
-            }
-
-            if(!this.showUserField('avatar')){
-                this.fields.splice(1, 1);
-            }
-            //filter kolom table user berdasarkan konfig
-            // _.forEach(this.AppConfig.packageLocal.moduser.users_hidden_field,(v,i)=>{
-            //     this.fields.splice(5,0,{ key: "stok_optimum", label:"Stok Optimum", sortable: true, thStyle: "min-width: 5rem"})
-            // });
         }
     };
 </script>

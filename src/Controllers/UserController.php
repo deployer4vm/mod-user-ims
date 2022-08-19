@@ -40,6 +40,8 @@ class UserController extends BaseController
         //jika menyertakan status
         if($request->input('status', false))
             $filter[] = ['status', $request->input('status')];
+
+        $filter[] = ['system_user', false];
         
         if(UserAuth::isLogin()){
             $filter[] = ['id','!=',UserAuth::user('id')];

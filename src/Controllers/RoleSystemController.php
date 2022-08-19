@@ -3,15 +3,19 @@
 namespace hpsynapse\moduser\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
+use hpsynapse\moduser\Facades\UserRepo;
 use hpsynapse\moduser\Facades\RoleRepo;
 use hpsynapse\moduser\Facades\UserAuth;
+use hpsynapse\moduser\Facades\UserSystemRepo;
+use hpsynapse\moduser\Facades\RoleSystemRepo;
 
 use App\Base\BaseController;
 
-class RoleController extends BaseController
+class RoleSystemController extends BaseController
 {
-    protected $accessRuleKey = 'moduser.role';
+    protected $accessRuleKey = 'moduser.manage_api';
     
     public function __construct()
     {
@@ -19,7 +23,7 @@ class RoleController extends BaseController
     }
 
     /**
-     * GET /api/user/role
+     * GET /api/user/rolesystem
      * 
      * list pengajuan
      * 
@@ -43,7 +47,7 @@ class RoleController extends BaseController
         if($request->input('status', false))
             $filter[] = ['status', $request->input('status')];
 
-        $filter[] = ['system_role', false];
+        $filter[] = ['system_role', true];
 
         if(UserAuth::isLogin()){
             $roles = explode(';',trim(UserAuth::user('role'),';'));
@@ -92,19 +96,19 @@ class RoleController extends BaseController
     }
 
     /**
-     * GET /api/user/role/{id}
+     * GET /api/user/rolesystem/{id}
      * 
      * Route Param : 
      *      id : route id
      */
     public function readOne(Request $request) 
     {
-        if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
+        $id = $request->route('id');
+
+        if(!UserAuth::hasAccess($this->accessRuleKey,'r') || !RoleRepo::checkSystemRole($id)){
             $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
-
-        $id = $request->route('id');
         $this->output['data'] = RoleRepo::getRole($id);
 
         if(!$this->output['data']){
@@ -112,9 +116,9 @@ class RoleController extends BaseController
         }
         return $this->done();
     }
-
+    
     /**
-     * POST /api/user/role
+     * POST /api/user/rolesystem
      * 
      * @param Request $request 
      *      role_code String
@@ -129,7 +133,7 @@ class RoleController extends BaseController
     public function create(Request $request) 
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'c')){
-            $this->setError(__('alert.access_denied'),false,403);
+            $this->setError(__('alert.access_denied',false,403));
             return $this->done();
         }
 
@@ -167,10 +171,10 @@ class RoleController extends BaseController
         }
         
         //jika berhasil
-        if ($user = RoleRepo::createRole($input)) {
+        if ($user = RoleSystemRepo::createRole($input)) {
             $this->setAlert('Data Inserted successfully','success');
         }else{
-            $this->setError(RoleRepo::error(),'success');
+            $this->setError(RoleSystemRepo::error(),'success');
         }
         
         return $this->done();
@@ -181,18 +185,12 @@ class RoleController extends BaseController
     {
         
         if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied'),false,403);
+            $this->setError(__('alert.access_denied',false,403));
             return $this->done();
         }
 
         $id = $request->route('id');
         $input = $request->all();
-        
-        if(!UserAuth::hasAccess($this->accessRuleKey.'.can_edit_role_code') && isset($input['role_code']))
-            unset($input['role_code']);
-        
-        if(!UserAuth::hasAccess($this->accessRuleKey.'.can_edit_level') && isset($input['level']))
-            unset($input['level']);
         
         if(isset($input['id']))unset($input['id']);
 
@@ -210,10 +208,10 @@ class RoleController extends BaseController
         }
 
         $this->output['message'] = 'Data berhasil diupdate';
-        $this->output['data'] = RoleRepo::updateRole(['id',$id],$input);            
+        $this->output['data'] = RoleSystemRepo::updateRole(['id',$id],$input);            
 
         if(!$this->output['data']) {
-            $this->setError('Update failed : '.RoleRepo::error());
+            $this->setError('Update failed : '.RoleSystemRepo::error());
         }
         return $this->done();
     }
@@ -222,7 +220,7 @@ class RoleController extends BaseController
     {
 
         if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
-            $this->setError(__('alert.access_denied'),false,403);
+            $this->setError(__('alert.access_denied',false,403));
             return $this->done();
         }
 
@@ -238,7 +236,7 @@ class RoleController extends BaseController
             }
         }   
 
-        if(!RoleRepo::deleteRole($id)){
+        if(!RoleSystemRepo::deleteRole($id)){
             $this->setError('Error : '.RoleRepo::error());
         }
         return $this->done();

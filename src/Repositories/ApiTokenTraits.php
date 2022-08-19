@@ -59,20 +59,20 @@ trait ApiTokenTraits
      * 
      * @param type $userId , user id atau apps id
      * @param type $ssoId
-     * @param type $isMobileAppsToken
+     * @param type $isPemanent
      * @param type $deviceId
      * @param mixed $pushDetail false jika tidak ada push, atau array jika ada push
      *      type
      *      token
      * @return type
      */
-    public function generateToken($userId,$roleCode='',$isMobileAppsToken=0,$deviceId='',$pushDetail=false)
+    public function generateToken($userId,$roleCode='',$isPemanent=0,$deviceId='',$pushDetail=false)
     {
         $data['api_token'] = hash('sha256', 'token'.$userId.'.'.now());
         $data['session_id'] = session()->exists('_token')?session()->getId():'';
-        $data['is_mobileapps_token'] = $isMobileAppsToken;
+        $data['is_permanent'] = $isPemanent;
         
-        if($isMobileAppsToken && $deviceId)$data['device_id'] = $deviceId;                
+        if($isPemanent && $deviceId)$data['device_id'] = $deviceId;                
             
         if($pushDetail&& is_array($pushDetail)){
             if(isset($pushDetail['type']))$data['push_type'] = $pushDetail['type'];

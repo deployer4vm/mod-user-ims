@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'role.list'}" />
+        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'manageapi.role'}" />
 
         <b-card class="m-3">
             <b-card-body class="p-0">
@@ -39,7 +39,6 @@
                         @change="$v.roleForm.level.$touch()"
                         v-model="roleForm.level"
                         :options="levelOption"
-                        :disabled="!(isAdd || UserAuth.hasAccess(accessRuleKey + '.can_edit_level'))"
                     />
                     <invalid-tooltip :inputItem="$v.roleForm.level" :fieldName="Trans.get('role.field_caption.level')" />
                 </b-form-group>
@@ -48,7 +47,7 @@
 
             <hr class="border-light m-0">
 
-            <div class="table-responsive">
+            <div class="table-responsive" v-if="isAdd">
 
                 <table class="table mb-0 table-hover not-responsive">
                     <thead>
@@ -185,11 +184,12 @@ export default {
             level: 2,
             tenant_group_id: 0,
             tenant_id: 0,
-            rule: {}
+            rule: {},
+            system_role: 1
         },
         disabledModuleAccess: {},
         rulePerModule: {},
-        levelOption: [],
+        levelOption: [2],
         tenantOption: [],
         tenantGroupOption: []
     }),
@@ -267,7 +267,7 @@ export default {
             this.$store.dispatch(
                     'role/getRole',this.$route.params.roleId
                 ).then((res)=>{
-                    this.checkSystemUser(res)
+                    this.checkSystemRole(res)
 
                     //copy semua data role ke roleform nya kecuali field rule, karena field rule akan di-assign
                     //selanjutnya sesuai format yang digunakan di roleform ini
@@ -357,8 +357,6 @@ export default {
             return false;
         },
         save() {
-
-
             /**
              * memastikan child yg parent Module nya tidak diceklis agar di 0 kan jg semau
              */
@@ -433,9 +431,9 @@ export default {
                         this.Web.showAlert({text: this.Trans.get('alert.access_denied'),style: "warning"});
                         return false;
                     }
-                    this.$store.dispatch("role/create", this.roleForm).then((res)=>{
+                    this.$store.dispatch("rolesystem/create", this.roleForm).then((res)=>{
                         this.Web.showAlert({type: 'info', text: 'Role Registered Successfully' });
-                        this.$router.push({name: 'role.list'});
+                        this.$router.push({name: 'manageapi.role'});
                     }).catch((err)=>{
                         console.log('create role error : ',err);
                         this.Web.showAlert({type: 'danger', text: 'Save data failed' });
@@ -449,9 +447,9 @@ export default {
                         return false;
                     }
 
-                    this.$store.dispatch("role/update", {data: this.roleForm,id: this.roleForm.id}).then((res)=>{
+                    this.$store.dispatch("rolesystem/update", {data: this.roleForm,id: this.roleForm.id}).then((res)=>{
                         this.Web.showAlert({type: 'info', text: 'Role Updated Successfully' });
-                        this.$router.push({name: 'role.list'});
+                        this.$router.push({name: 'manageapi.role'});
                     }).catch((err)=>{
                         console.log('update role error : ',err);
                         this.Web.showAlert({type: 'danger', text: 'Save data failed' });
@@ -459,6 +457,12 @@ export default {
                 }
 
             }
+        },
+        checkSystemRole(data){
+                if(data.system_role !== 1){
+                    this.$router.push({ name: "manageapi.role" });
+                    this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
+                }
         },
 
         initView() {
@@ -470,17 +474,11 @@ export default {
             this.Web.resetBreadcrumb();
             this.Web.addBreadcrumb(this.Trans.get('lang.home'));
             this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-            this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.role.caption),{name:'role.list'});
+            this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.role.caption),{name:'manageapi.role'});
             this.Web.addBreadcrumb(this.title);
 
             this.Web.setBodyWithPadding(false);
             this.Web.setShow("moduser");
-        },
-        checkSystemRole(data){
-            if(data.system_role !== 0){
-                this.$router.push({ name: "user.role" });
-                this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
-            }
         },
     },
     created() {
@@ -504,11 +502,6 @@ export default {
         var endI = parseInt(this.AppConfig.packageLocal.moduser.user_role.user_level.max)+1;
         if(startI < parseInt(this.AppConfig.packageLocal.moduser.user_role.user_level.min))
             startI = parseInt(this.AppConfig.packageLocal.moduser.user_role.user_level.max);
-
-        //load level
-        for (var i = startI; i < endI; i++) {
-            this.levelOption[i] = i;
-        };
 
         //load tenant group jika fitur multitenant aktif
         if(this.AppConfig.system.multitenant.active==1 && this.Web.getTenant.is_main){

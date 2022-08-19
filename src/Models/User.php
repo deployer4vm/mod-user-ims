@@ -21,7 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'all_tenant','user_idcode','name','username', 'email', 'phone', 'password','auth_password',
         'socialauth_facebook_id','socialauth_facebook_token','socialauth_facebook_data',
         'socialauth_google_id','socialauth_google_token','socialauth_google_data', 'level',
-        'note', 'role',  'status', 'banned_note'
+        'note', 'role',  'status', 'banned_note','system_user'
     ];
 
     /**
@@ -80,5 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail
             '', // Local key on main model table...
             'user_id' // Local key on table transaksi...
         );
-    }    
+    }
+
+    public function apiToken(){
+        return $this->hasOne('hpsynapse\moduser\Models\ApiToken','user_id');
+    }
 }

@@ -15,7 +15,8 @@ return [
             'guest' => 'User Baru',
             'active' => 'Aktif',
             'banned' => 'Diblokir'
-        ]
+        ],
+        'generate_token' => 'Generate Token',
     ],
     'userlist' => [
         'add_new_user' => 'Tambah User'
@@ -27,5 +28,8 @@ return [
     ],
     'alert' => [
         'password_not_match' => 'Password tidak sama'
-    ]
+    ],
+    'manageapi' => [
+        'role_list' => 'Manage Role System ',
+    ],
 ];

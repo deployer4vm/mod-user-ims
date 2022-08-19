@@ -21,6 +21,7 @@ use hpsynapse\moduser\Models\PasswordReset;
 use hpsynapse\moduser\Models\UserRole;
 use hpsynapse\moduser\Models\Role;
 // use hpsynapse\moduser\Models\ApiToken;
+use Illuminate\Support\Str;
 
 use hpsynapse\moduser\Models\UserTenant;
 use App\Facades\Tenant;
@@ -103,6 +104,12 @@ class UserRepo extends BaseRepository
         }
 
         $user = $userData->toArray();
+
+        //user system tidak bisa login
+        if ($user['system_user']){
+            $this->error = __('auth.login.alert.system_user');
+            return false;
+        }
 
         //user banned
         if($user['status']==2){
@@ -616,6 +623,12 @@ class UserRepo extends BaseRepository
             $this->error = 'user tidak ditemukan';
             return false;
         }
+
+        if ($this->checkSystemUser($userId)) {
+            $this->error = 'user ini adalah user system, tidak bisa dihapus disini';
+            return false;
+        }
+
         $this->_delete(new User,[['id',$userId]]);
         $this->_delete(new UserProfile,[['user_id',$userId]]);
         $this->_delete(new UserRole,[['user_id',$userId]]);
@@ -957,7 +970,6 @@ class UserRepo extends BaseRepository
     }
 
     
-    
     /**
      * Manage USER ROLE
      * -------------------------------------------------------------------------
@@ -1077,6 +1089,14 @@ class UserRepo extends BaseRepository
             'role'=> $roleUser,
             'level'=>$role->level
         ]);
+    }
+
+    public function checkSystemUser($id){
+        $user = $this->_getOne(new User,['id',$id]);
+        if ($user['system_user']) {
+            return true;
+        }
+        return false;
     }
 
     /**

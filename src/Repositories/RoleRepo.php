@@ -52,11 +52,30 @@ class RoleRepo extends BaseRepository
     public function updateRole($where, $data)
     {
         if(isset($data['rule']) && is_array($data['rule']))$data['rule'] = json_encode($data['rule'],JSON_PRETTY_PRINT);
+
+        if ($this->checkSystemRole($where)){
+            $this->error = 'Cannot update system role in here';
+            return false;
+        }
+
         return $this->_update(new Role, $where, $data);
     }
     public function deleteRole($id)
     {
+        if ($this->checkSystemRole($id)){
+            $this->error = 'System role cannot be deleted in here';
+            return false;
+        }
+
         return $this->_delete(new Role, ['id', $id]);
+    }
+
+    public function checkSystemRole($id){
+        $role = $this->_getOne(new Role,['id',$id]);
+        if($role['system_role']){
+            return true;
+        }
+        return false;
     }
    
     

@@ -107,6 +107,37 @@ const NotifDetail = resolve => {
         resolve(require("../views/admin/user/notifdetail"));
     });
 };
+
+/*
+Manage Api 
+----------------------------------------------------------------
+*/
+
+const ManageApiList = resolve => {
+  require.ensure(["../views/admin/manageapi/list"], () => {
+    resolve(require("../views/admin/manageapi/list"));
+  });
+};
+
+const ManageApiForm = resolve => {
+  require.ensure(["../views/admin/manageapi/form"], () => {
+    resolve(require("../views/admin/manageapi/form"));
+  });
+};
+
+const ManageApiRoleList = resolve => {
+  require.ensure(["../views/admin/manageapi/role/rolelist"], () => {
+    resolve(require("../views/admin/manageapi/role/rolelist"));
+  });
+};
+
+const ManageApiRoleForm = resolve => {
+  require.ensure(["../views/admin/manageapi/role/roleform"], () => {
+    resolve(require("../views/admin/manageapi/role/roleform"));
+  });
+};
+
+
 /*
 Broadcast
 ----------------------------------------------------------------
@@ -255,6 +286,36 @@ export default [
             name: "role.edit"
           },
         ]
+      },
+      {
+        path: "manageapi",
+        component: ManageApiList,
+        name: "manageapi.list"
+      },
+      {
+        path: "manageapi/add",
+        component: ManageApiForm,
+        name: "manageapi.add"
+      },
+      {
+        path: "manageapi/edit/:userId",
+        component: ManageApiForm,
+        name: "manageapi.edit"
+      },
+      {
+        path: "manageapirole",
+        component: ManageApiRoleList,
+        name: "manageapi.role"
+      },
+      {
+        path: "manageapirole/add",
+        component: ManageApiRoleForm,
+        name: "manageapi.role.add"
+      },
+      {
+        path: "manageapirole/edit/:roleId",
+        component: ManageApiRoleForm,
+        name: "manageapi.role.edit"
       }
     ]
   }

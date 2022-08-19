@@ -6,6 +6,7 @@ namespace hpsynapse\moduser\database\seeds;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserAuthSeeds extends Seeder
 {
@@ -30,6 +31,7 @@ class UserAuthSeeds extends Seeder
                 'name' => 'Web Developer',
                 'level' => 1,
                 'rule' => '',
+                'system_role' => false,
                 'created_at' => $now,
                 'updated_at' => $now
             ], [
@@ -37,6 +39,15 @@ class UserAuthSeeds extends Seeder
                 'name' => 'Super Admin',
                 'level' => 2,
                 'rule' => '',
+                'system_role' => false,
+                'created_at' => $now,
+                'updated_at' => $now
+            ], [
+                'role_code' => 'system',
+                'name' => 'System',
+                'level' => 2,
+                'rule' => '',
+                'system_role' => true,
                 'created_at' => $now,
                 'updated_at' => $now
             ]
@@ -96,6 +107,33 @@ class UserAuthSeeds extends Seeder
                     'created_at' => $now,
                     'updated_at' => $now
                 ]
+            ],
+            [
+                'users' => [
+                    'user_idcode' => '2019010110000000’',
+                    'name' => 'API',
+                    'username' => Str::random(10),
+                    'password' => Hash::make(uniqid()),
+                    'role' => ';system;',
+                    'system_user' => true,
+                    'level' => 2,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ],
+                'user_profiles' =>
+                [
+                    'user_id' => 3,
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ],
+                'user_roles' => [
+                    'user_id' => 3,
+                    'role_id' => 3,
+                    'has_auth_grant' => 1,
+                    'is_main_role' => 1,
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ],
             ]
         ];
 
