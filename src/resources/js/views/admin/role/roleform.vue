@@ -267,7 +267,7 @@ export default {
             this.$store.dispatch(
                     'role/getRole',this.$route.params.roleId
                 ).then((res)=>{
-                    this.checkSystemUser(res)
+                    this.checkSystemRole(res)
 
                     //copy semua data role ke roleform nya kecuali field rule, karena field rule akan di-assign
                     //selanjutnya sesuai format yang digunakan di roleform ini
@@ -478,7 +478,7 @@ export default {
         },
         checkSystemRole(data){
             if(data.system_role !== 0){
-                this.$router.push({ name: "user.role" });
+                this.$router.push({ name: "role.list" });
                 this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
             }
         },

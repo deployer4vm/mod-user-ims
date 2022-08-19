@@ -175,7 +175,7 @@ export default {
         return { title: this.pageTitle };
     },
     data: () => ({
-        accessRuleKey: "moduser.role",
+        accessRuleKey: "moduser.manage_api",
         permissions: [],//data acl
         roleForm: {
             id: 0,
