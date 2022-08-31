@@ -11,7 +11,7 @@ class Notification extends DatabaseNotification
      *
      * @var string
      */
-    protected $table = 'notifications';
+    protected $table = 'moduser_notifications';
     
     /**
      * The attributes that aren't mass assignable.

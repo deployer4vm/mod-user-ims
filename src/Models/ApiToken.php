@@ -11,7 +11,7 @@ class ApiToken extends Authenticatable
      *
      * @var string
      */
-    protected $table = 'api_tokens';
+    protected $table = 'moduser_api_tokens';
     
     /**
      * The attributes that aren't mass assignable.

@@ -11,7 +11,7 @@ class UserOTP extends BaseModel
      *
      * @var string
      */
-    protected $table = 'user_otp';
+    protected $table = 'moduser_user_otp';
     const UPDATED_AT = null;
     /**
      * The attributes that aren't mass assignable.

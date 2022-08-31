@@ -93,13 +93,13 @@ class UserRepo extends BaseRepository
         if ($userData == null) {
             $userData = User::where('email', $username)->first();
             if ($userData == null) {
-                $this->error = __('auth.login.alert.user_not_found').'1';
+                $this->error = __('auth.login.alert.user_not_found').'.';
                 return false;
             }
         }
         
         if (!Hash::check($password, $userData->password)){
-            $this->error = __('auth.login.alert.password_fail').' - ';
+            $this->error = __('auth.login.alert.password_fail').' .';
             return false;
         }
 
