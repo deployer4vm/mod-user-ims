@@ -11,7 +11,7 @@ class UserRole extends BaseModel
      *
      * @var string
      */
-    protected $table = 'user_roles';
+    protected $table = 'moduser_user_roles';
     
     /**
      * The attributes that aren't mass assignable.

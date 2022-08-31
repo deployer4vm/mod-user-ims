@@ -11,7 +11,7 @@ class AuthLog extends BaseModel
      *
      * @var string
      */
-    protected $table = 'auth_logs';
+    protected $table = 'moduser_auth_logs';
     
     /**
      * The attributes that aren't mass assignable.

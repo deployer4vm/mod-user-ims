@@ -10,7 +10,7 @@ class NotificationChannel extends BaseModel
      *
      * @var string
      */
-    protected $table = 'notification_channels';
+    protected $table = 'moduser_notification_channels';
     
     /**
      * The attributes that aren't mass assignable.

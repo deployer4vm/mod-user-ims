@@ -11,7 +11,7 @@ class UserTenant extends BaseModel
      *
      * @var string
      */
-    protected $table = 'user_tenants';
+    protected $table = 'moduser_user_tenants';
     
     /**
      * The attributes that aren't mass assignable.

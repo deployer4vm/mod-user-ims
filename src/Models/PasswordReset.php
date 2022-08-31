@@ -11,7 +11,7 @@ class PasswordReset extends BaseModel
      *
      * @var string
      */
-    protected $table = 'password_resets';
+    protected $table = 'moduser_password_resets';
     protected  $primaryKey  = 'email';
     const UPDATED_AT = null;
     

@@ -7,8 +7,14 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+use App\Base\Traits\SeedDataTenant;
+
+use App\Facades\Tenant;
+
 class UserAuthSeeds extends Seeder
 {
+    use SeedDataTenant;
+
     /**
      * Run the database seeds.
      *
@@ -16,15 +22,15 @@ class UserAuthSeeds extends Seeder
      */
     public function run()
     {
-        DB::table('users')->truncate();
-        DB::table('user_profiles')->truncate();
-        DB::table('roles')->truncate();
-        DB::table('user_roles')->truncate();
-        DB::table('user_tenants')->truncate();
+        $this->dbTable('users')->truncate();
+        $this->dbTable('user_profiles')->truncate();
+        $this->dbTable('roles')->truncate();
+        $this->dbTable('user_roles')->truncate();
+        $this->dbTable('user_tenants')->truncate();
         
         $now = Now();
                 
-        DB::table('roles')->insert([
+        $this->dbTable('roles')->insert([
             [
                 'role_code' => 'webdev',
                 'name' => 'Web Developer',
@@ -100,9 +106,9 @@ class UserAuthSeeds extends Seeder
         ];
 
         foreach ($users as $key => $value) {
-            DB::table('users')->insert($value['users']);
-            DB::table('user_profiles')->insert($value['user_profiles']);
-            DB::table('user_roles')->insert($value['user_roles']);
+            $this->dbTable('users')->insert($value['users']);
+            $this->dbTable('user_profiles')->insert($value['user_profiles']);
+            $this->dbTable('user_roles')->insert($value['user_roles']);
         }
     }
 }

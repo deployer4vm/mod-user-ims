@@ -244,60 +244,60 @@ const actions = {
                 
                 //----cek hak askses level 2 jika ada
                 if (accessItem.children != undefined) {
-                _.forEach(accessItem.children, (accessItemLv2, aclIdLv2) => {
+                    _.forEach(accessItem.children, (accessItemLv2, aclIdLv2) => {
 
-                    curAclId = packageNamespace + '.' + aclId + '.' +aclIdLv2;
+                        curAclId = packageNamespace + '.' + aclId + '.' +aclIdLv2;
 
-                    if(state.role[state.role_code]['rule'][curAclId]==undefined)return true;
+                        if(state.role[state.role_code]['rule'][curAclId]==undefined)return true;
 
-                    aclItemLv2 = state.role[state.role_code]['rule'][curAclId];
+                        aclItemLv2 = state.role[state.role_code]['rule'][curAclId];
 
-                    if (aclItemLv2.has_access) {
-                        accessItemLv2.active_acl = {
-                            has_access: aclItemLv2.has_access,
-                            crud: {
-                                c: aclItemLv2.c,
-                                r: aclItemLv2.r,
-                                u: aclItemLv2.u,
-                                d: aclItemLv2.d
-                            }
-                        };
-                    } else {
-                        accessItemLv2.active_acl = {
-                            has_access: 0,
-                            crud: { c: 0, r: 0, u: 0, d: 0 }
-                        };
-                    }
+                        if (aclItemLv2.has_access) {
+                            accessItemLv2.active_acl = {
+                                has_access: aclItemLv2.has_access,
+                                crud: {
+                                    c: aclItemLv2.c,
+                                    r: aclItemLv2.r,
+                                    u: aclItemLv2.u,
+                                    d: aclItemLv2.d
+                                }
+                            };
+                        } else {
+                            accessItemLv2.active_acl = {
+                                has_access: 0,
+                                crud: { c: 0, r: 0, u: 0, d: 0 }
+                            };
+                        }
 
-                    //----cek hak askses level 3 jika ada
-                    if (accessItemLv2.children != undefined) {
-                        _.forEach(accessItemLv2.children, (accessItemLv3, aclIdLv3) => {
+                        //----cek hak askses level 3 jika ada
+                        if (accessItemLv2.children != undefined) {
+                            _.forEach(accessItemLv2.children, (accessItemLv3, aclIdLv3) => {
 
-                            curAclId = packageNamespace + '.' + aclId + '.' + aclIdLv2 + '.' + aclIdLv3;
+                                curAclId = packageNamespace + '.' + aclId + '.' + aclIdLv2 + '.' + aclIdLv3;
 
-                            if(state.role[state.role_code]['rule'][curAclId]==undefined)return true;
+                                if(state.role[state.role_code]['rule'][curAclId]==undefined)return true;
 
-                            aclItemLv3 = state.role[state.role_code]['rule'][curAclId];
+                                aclItemLv3 = state.role[state.role_code]['rule'][curAclId];
 
-                            if (aclItemLv3.has_access) {
-                                accessItemLv3.active_acl = {
-                                    has_access: aclItemLv3.has_access,
-                                    crud: {
-                                    c: aclItemLv3.c,
-                                    r: aclItemLv3.r,
-                                    u: aclItemLv3.u,
-                                    d: aclItemLv3.d
-                                    }
-                                };
-                            } else {
-                                accessItemLv3.active_acl = {
-                                    has_access: 0,
-                                    crud: { c: 0, r: 0, u: 0, d: 0 }
-                                };
-                            }
-                        });
-                    }
-                });
+                                if (aclItemLv3.has_access) {
+                                    accessItemLv3.active_acl = {
+                                        has_access: aclItemLv3.has_access,
+                                        crud: {
+                                        c: aclItemLv3.c,
+                                        r: aclItemLv3.r,
+                                        u: aclItemLv3.u,
+                                        d: aclItemLv3.d
+                                        }
+                                    };
+                                } else {
+                                    accessItemLv3.active_acl = {
+                                        has_access: 0,
+                                        crud: { c: 0, r: 0, u: 0, d: 0 }
+                                    };
+                                }
+                            });
+                        }
+                    });
                 }
             });
         });

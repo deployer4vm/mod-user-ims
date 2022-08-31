@@ -11,7 +11,7 @@ class SystemUserLog extends BaseModel
      *
      * @var string
      */
-    protected $table = 'system_user_logs';
+    protected $table = 'moduser_system_user_logs';
     
     /**
      * The attributes that aren't mass assignable.

@@ -11,7 +11,7 @@ class UserProfile extends BaseModel
      *
      * @var string
      */
-    protected $table = 'user_profiles';
+    protected $table = 'moduser_user_profiles';
     
     /**
      * The attributes that aren't mass assignable.

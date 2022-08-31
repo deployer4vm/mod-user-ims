@@ -9,8 +9,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
+
     //comment HasApiTokens jika tidak menggunakan passport
     use NotifiableCustom;//HasApiTokens,
+    
+    protected $table = 'moduser_users';
 
     /**
      * The attributes that are mass assignable.
