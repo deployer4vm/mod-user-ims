@@ -182,7 +182,6 @@
             form: {},
             formEmpty: {
                 id: 0,
-                all_tenant: 0,
                 name: "",
                 password: "",
                 repassword: "",

@@ -20,7 +20,7 @@ class CreateUsersCategoriesTable extends Migration
             // create table di database utama untuk tenant manager
             Schema::create('moduser_user_categories', function (Blueprint $table) {
                 $table->bigIncrements('id');            
-                $table->unsignedBigInteger('tenant_id')->default(0)->comment('tenant id, 0 : berarti sistem tidak multi tenant');
+                $table->unsignedBigInteger('tenant_id')->default(0)->comment('tenant id, 0 : berarti sistem tidak multi tenant, atau data di tenant manager');
                 $table->unsignedBigInteger('created_by')->default(0)->comment('user id yang create data ini');
                 $table->unsignedBigInteger('updated_by')->default(0)->comment('last user id yg update');
 
@@ -36,7 +36,7 @@ class CreateUsersCategoriesTable extends Migration
             // create table di masing-masing tenang
             $this->createPerTenant('moduser_user_categories', function (Blueprint $table) {
                 $table->bigIncrements('id');            
-                $table->unsignedBigInteger('tenant_id')->default(0)->comment('tenant id, 0 : berarti sistem tidak multi tenant');
+                $table->unsignedBigInteger('tenant_id')->default(0)->comment('tenant id, 0 : berarti sistem tidak multi tenant, atau data di tenant manager');
                 $table->unsignedBigInteger('created_by')->default(0)->comment('user id yang create data ini');
                 $table->unsignedBigInteger('updated_by')->default(0)->comment('last user id yg update');
 

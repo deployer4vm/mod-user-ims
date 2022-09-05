@@ -23,16 +23,17 @@ class UserAuthSeeds extends Seeder
      */
     public function run()
     {
-        $this->dbTable('users')->truncate();
-        $this->dbTable('user_profiles')->truncate();
-        $this->dbTable('roles')->truncate();
-        $this->dbTable('user_roles')->truncate();
-        $this->dbTable('user_tenants')->truncate();
+        $this->dbTable('moduser_users')->truncate();
+        $this->dbTable('moduser_user_profiles')->truncate();
+        $this->dbTable('moduser_roles')->truncate();
+        $this->dbTable('moduser_user_roles')->truncate();
+        // $this->dbTable('moduser_user_tenants')->truncate(); sudah tidak digunakan
         
         $now = Now();
                 
-        $this->dbTable('roles')->insert([
+        $this->dbTable('moduser_roles')->insert([
             [
+                'tenant_id' => $this->tenantId,
                 'role_code' => 'webdev',
                 'name' => 'Web Developer',
                 'level' => 1,
@@ -41,6 +42,7 @@ class UserAuthSeeds extends Seeder
                 'created_at' => $now,
                 'updated_at' => $now
             ], [
+                'tenant_id' => $this->tenantId,
                 'role_code' => 'superadmin',
                 'name' => 'Super Admin',
                 'level' => 2,
@@ -49,6 +51,7 @@ class UserAuthSeeds extends Seeder
                 'created_at' => $now,
                 'updated_at' => $now
             ], [
+                'tenant_id' => $this->tenantId,
                 'role_code' => 'system',
                 'name' => 'System',
                 'level' => 2,
@@ -62,6 +65,7 @@ class UserAuthSeeds extends Seeder
         $users = [
             [
                 'users' => [
+                    'tenant_id' => $this->tenantId,
                     'user_idcode' => '2019010110000001',
                     'name' => 'Web Developer',
                     'username' => 'webdev',
@@ -74,11 +78,13 @@ class UserAuthSeeds extends Seeder
                 ],
                 'user_profiles' =>
                 [
+                    'tenant_id' => $this->tenantId,
                     'user_id' => 1,
                     'created_at' => $now,
                     'updated_at' => $now
                 ],
                 'user_roles' => [
+                    'tenant_id' => $this->tenantId,
                     'user_id' => 1,
                     'role_id' => 1,
                     'has_auth_grant' => 1,
@@ -89,6 +95,7 @@ class UserAuthSeeds extends Seeder
             ],
             [
                 'users' => [
+                    'tenant_id' => $this->tenantId,
                     'user_idcode' => '2019010110000002',
                     'name' => 'Super Admin',
                     'username' => 'superadmin',
@@ -101,11 +108,13 @@ class UserAuthSeeds extends Seeder
                 ],
                 'user_profiles' =>
                 [
+                    'tenant_id' => $this->tenantId,
                     'user_id' => 2,
                     'created_at' => $now,
                     'updated_at' => $now
                 ],
                 'user_roles' => [
+                    'tenant_id' => $this->tenantId,
                     'user_id' => 2,
                     'role_id' => 2,
                     'has_auth_grant' => 1,
@@ -116,6 +125,7 @@ class UserAuthSeeds extends Seeder
             ],
             [
                 'users' => [
+                    'tenant_id' => $this->tenantId,
                     'user_idcode' => '2019010110000000’',
                     'name' => 'API',
                     'username' => Str::random(10),
@@ -128,11 +138,13 @@ class UserAuthSeeds extends Seeder
                 ],
                 'user_profiles' =>
                 [
+                    'tenant_id' => $this->tenantId,
                     'user_id' => 3,
                     'created_at' => $now,
                     'updated_at' => $now
                 ],
                 'user_roles' => [
+                    'tenant_id' => $this->tenantId,
                     'user_id' => 3,
                     'role_id' => 3,
                     'has_auth_grant' => 1,
@@ -144,9 +156,9 @@ class UserAuthSeeds extends Seeder
         ];
 
         foreach ($users as $key => $value) {
-            $this->dbTable('users')->insert($value['users']);
-            $this->dbTable('user_profiles')->insert($value['user_profiles']);
-            $this->dbTable('user_roles')->insert($value['user_roles']);
+            $this->dbTable('moduser_users')->insert($value['users']);
+            $this->dbTable('moduser_user_profiles')->insert($value['user_profiles']);
+            $this->dbTable('moduser_user_roles')->insert($value['user_roles']);
         }
     }
 }

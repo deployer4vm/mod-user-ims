@@ -1,6 +1,6 @@
 <template>
     <div>
-        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'manageapi.list'}" />
+        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'systemuser.list'}" />
 
         <div class="m-3" v-if="isDataLoaded">
             <b-tabs class="nav-tabs-top nav-responsive-sm">
@@ -82,7 +82,7 @@
 <script>
     import MaskedInput, { conformToMask } from "node_modules/vue-text-mask";
     import { required } from "node_modules/vuelidate/lib/validators";
-    import VueClipboard from 'vue-clipboard2'
+    import VueClipboard from 'node_modules/vue-clipboard2'
     Vue.use(VueClipboard)
 
     export default {
@@ -108,11 +108,10 @@
             return data;
         },
         data: () => ({
-            accessRuleKey: "moduser.manage_api",
+            accessRuleKey: "moduser.system_user",
             form: {},
             formEmpty: {
                 id: 0,
-                all_tenant: 0,
                 name: "",
                 role_code: [],
                 note: "",
@@ -140,7 +139,7 @@
             },
 
             pageTitle() {
-                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption);
+                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.system_user.caption);
             },
             title() {
                 return this.isAdd ? this.Trans.get("user.userform.form_add_caption") : ("#" + this.form.name);
@@ -251,7 +250,7 @@
                             .dispatch("usersystem/register", this.form)
                             .then(res => {
                                 this.Web.showAlert({ type: "info", text: "User Registered Successfully" });
-                                this.$router.push({ name: "manageapi.list" });
+                                this.$router.push({ name: "systemuser.list" });
                             })
                             .catch(err => {
                                 console.log("add User error : ", err);
@@ -269,7 +268,7 @@
                             .dispatch("usersystem/update", { data: this.form, id: this.form.id })
                             .then(res => {
                                 this.Web.showAlert({ type: "info", text: "User System Updated Successfully" });
-                                this.$router.push({ name: "manageapi.list" });
+                                this.$router.push({ name: "systemuser.list" });
                             })
                             .catch(err => {
                                 console.log("update user system error : ", err);
@@ -332,13 +331,13 @@
             initView() {
                 this.Web.setModule("moduser");
 
-                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
-                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.children.manage_api.caption));
+                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.system_user.caption));
+                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.children.system_user.caption));
 
                 this.Web.resetBreadcrumb();
                 this.Web.addBreadcrumb(this.Trans.get('lang.home'));
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption),{name:'manageapi.list'});
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.system_user.caption),{name:'systemuser.list'});
                 this.Web.addBreadcrumb(this.title);
 
                 this.Web.setBodyWithPadding(false);

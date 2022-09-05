@@ -46,13 +46,17 @@ class RoleRepo extends BaseRepository
 
     public function createRole($data)
     {
-        if(isset($data['rule']) && is_array($data['rule']))$data['rule'] = json_encode($data['rule'],JSON_PRETTY_PRINT);
+        // if(isset($data['rule']) && is_array($data['rule']))
+        //     $data['rule'] = json_encode($data['rule'],JSON_PRETTY_PRINT);
+        if(!isset($data['tenant_id']))
+            $data['tenant_id'] = config('tenant.id',0);
         return $this->_create(new Role, $data);
     }
+
     public function updateRole($where, $data)
     {
-        if(isset($data['rule']) && is_array($data['rule']))$data['rule'] = json_encode($data['rule'],JSON_PRETTY_PRINT);
-
+        // if(isset($data['rule']) && is_array($data['rule']))
+        //     $data['rule'] = json_encode($data['rule'],JSON_PRETTY_PRINT);
         if ($this->checkSystemRole($where)){
             $this->error = 'Cannot update system role in here';
             return false;

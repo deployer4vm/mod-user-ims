@@ -57,10 +57,10 @@ class UserController extends BaseController
         } else if($request->input('level_except', false)){
             $filter[] = ['level', '!=', $request->input('level_except')];
         }
-
+        
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
-        if (config('AppConfig.system.multitenant.active',false) && config('tenant.id',0)!=1) {
-            $filter['tenant'] = [config('tenant.id')];
+        if (config('AppConfig.system.multitenant.active',false) && config('tenant.id',0) > 1) {
+            $filter[] = ['tenant_id', config('tenant.id')];
         }
         
         //jika menyertakan order by

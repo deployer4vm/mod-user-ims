@@ -8,6 +8,7 @@ use hpsynapse\moduser\Facades\RoleRepo;
 use hpsynapse\moduser\Facades\UserAuth;
 
 use App\Base\BaseController;
+use Illuminate\Support\Facades\Log;
 
 class RoleController extends BaseController
 {
@@ -32,7 +33,7 @@ class RoleController extends BaseController
             $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
-
+        // dd(config('database'));
         $orderBy = [];
         $filter = [];
 
@@ -55,14 +56,7 @@ class RoleController extends BaseController
 
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
         if (config('AppConfig.system.multitenant.active',false) && config('tenant.id',0) > 1) {
-            $filter[] = [
-                ['tenant_id', config('tenant.id')],
-                ['OR tenant_group_id',config('tenant.tenant_group_id')],
-                [
-                    'OR',
-                    ['tenant_id',0],['tenant_group_id',0]
-                ]
-            ];
+            $filter[] = ['tenant_id', config('tenant.id')];
         }
 
         //jika menyertakan order by

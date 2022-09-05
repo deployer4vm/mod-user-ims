@@ -29,7 +29,7 @@ return [
     'alert' => [
         'password_not_match' => 'Password tidak sama'
     ],
-    'manageapi' => [
+    'systemuser' => [
         'role_list' => 'Manage Role System ',
     ],
 ];

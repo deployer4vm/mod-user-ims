@@ -24,6 +24,8 @@ class RoleSystemRepo extends BaseRepository
         if(isset($data['rule']) && is_array($data['rule']))$data['rule'] = json_encode($data['rule'],JSON_PRETTY_PRINT);
         $data['level'] = 2;
         $data['system_role'] = true;
+        if(!isset($data['tenant_id']))
+            $data['tenant_id'] = config('tenant.id',0);
 
         if ($this->model->where('role_code', $data['role_code'])->count() > 0) {
             $this->error = 'Role code already exists';

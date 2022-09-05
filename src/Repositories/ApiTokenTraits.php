@@ -81,6 +81,7 @@ trait ApiTokenTraits
         
         $data['active_role_code'] = $roleCode;
         $data['user_id'] = $userId;
+        $data['tenant_id'] = config('tenant.id',0);
         
         $apiTokenData = ApiToken::create($data);
         return $apiTokenData->toArray();

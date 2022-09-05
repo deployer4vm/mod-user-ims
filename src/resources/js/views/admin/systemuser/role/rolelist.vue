@@ -60,12 +60,12 @@
                         </b-form-group>
                     </div> -->
                     <div>
-                        <span v-if="this.$route.fullPath === '/user/manageapirole'">
-                            <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'manageapi.role.add' }">
+                        <span v-if="this.$route.fullPath === '/user/systemuserrole'">
+                            <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'systemuser.role.add' }">
                                 <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("role.rolelist.add_new_role") }}
                             </router-link>
                         </span>
-                        <span v-if="this.$route.fullPath !== '/user/manageapirole'">
+                        <span v-if="this.$route.fullPath !== '/user/systemuserrole'">
                             <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'role.add' }">
                                 <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("role.rolelist.add_new_role") }}
                             </router-link>
@@ -94,7 +94,7 @@
 
                     <template v-slot:cell(actions)="data">
                         <!-- <b-btn variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit"><i class="ion ion-md-create"></i></b-btn> -->
-                        <router-link class="btn btn-success icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.edit')" :to="{ name: 'manageapi.role.edit', params: { roleId: data.item.id } }" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
+                        <router-link class="btn btn-success icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.edit')" :to="{ name: 'systemuser.role.edit', params: { roleId: data.item.id } }" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
                             <span class="ion ion-md-create"></span>
                         </router-link>
 
@@ -142,7 +142,7 @@
         },
         data() {
             return {
-                accessRuleKey: "moduser.manage_api",
+                accessRuleKey: "moduser.system_user",
                 // START ----FI listing option
                 sortBy: "id",
                 sortDesc: false,
@@ -219,7 +219,7 @@
 
                 this.loadParams.limit = this.perPage;
                 this.loadParams.offset = offset;
-                if(this.$route.fullPath === "/user/manageapirole"){
+                if(this.$route.fullPath === "/user/systemuserrole"){
                     this.loadParams.system_role = 1;
                 }
 
@@ -258,7 +258,7 @@
                     return false;
                 }
 
-                if(this.$route.fullPath !== "/user/manageapirole" && role.system_role == true){
+                if(this.$route.fullPath !== "/user/systemuserrole" && role.system_role == true){
                     this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), style: "warning" });
                     return false;
                 }
@@ -291,7 +291,7 @@
 
                 this.Web.resetBreadcrumb();
                 this.Web.addBreadcrumb(this.Trans.get('lang.home'));
-                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.system_user.caption));
                 this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.role.caption));
                 // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.caption));
 

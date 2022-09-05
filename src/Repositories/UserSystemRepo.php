@@ -51,27 +51,28 @@ class UserSystemRepo extends BaseRepository
      * @param $filter array
      *     profile
      *     tenant
-    */
+     */
     public function listUser($filter = false,int $offset = 0,int $limit = 0,array $orderBy=[])
     {
         if (!$filter) $filter = [];
         $filter['searchField'] = ['name','email','username'];
         $filter['hiddenColumn'] = ['created_at', 'updated_at', 'cached_at'];
-          $user = User::with(['profile','roles.role','mainRole','apiToken']);
-          if(isset($filter['profile'])){
+        $user = User::with(['profile','roles.role','mainRole','apiToken']);
+        if(isset($filter['profile'])){
             $user = $user->whereHas('profile', function($q) use ($filter){
                 $q = $this->_where($q,$filter['profile']);
             });
             unset($filter['profile']);
         }
-          if(isset($filter['tenant'])){
-            // $user = $user->where('all_tenant');
-            $user = $user->whereHas('userTenant', function($q) use ($filter){
-                $q = $this->_where($q,[['tenant_id',$filter['tenant']]]);
-            });
-            unset($filter['tenant']);
-          }
-        
+
+        // if(isset($filter['tenant'])){
+        //     $user = $user->where('tenant_id',$filter['tenant']);
+        //     // $user = $user->whereHas('userTenant', function($q) use ($filter){
+        //     //     $q = $this->_where($q,[['tenant_id',$filter['tenant']]]);
+        //     // });
+        //     unset($filter['tenant']);
+        // }
+    
         $data = $this->_list(
             $user,
             $filter,
@@ -165,6 +166,7 @@ class UserSystemRepo extends BaseRepository
         $userData['password'] = $this->generatePassword();
         $userData['system_user'] = true;
         $userData['status'] = 'active';
+        $userData['tenant_id'] = config('tenant.id',0);
         
         // if(!isset($userData['tenant_id']))$userData['tenant_id'] = config('tenant.id',0);//jika 0 berarti tanpa tenant atau bisa akses semua tenant
 
@@ -181,16 +183,17 @@ class UserSystemRepo extends BaseRepository
             $data = $this->model->create($userData);
             $data = $data->toArray();
 
-            //jika menyertakan tenant maka daftarkan user di tenant bersangkutan
-            if(!(isset($userData['all_tenant']) && $userData['all_tenant']==1)){
-                $userData['all_tenant'] = 0;
-                if(config('tenant.id')){
-                    UserTenant::create([
-                        'tenant_id' => config('tenant.id'),
-                        'user_id' => $data['id']
-                    ]);
-                }
-            }
+            // SUDAH TIDAK ADA KONSEP user multitenant
+            // //jika menyertakan tenant maka daftarkan user di tenant bersangkutan
+            // if(!(isset($userData['all_tenant']) && $userData['all_tenant']==1)){
+            //     $userData['all_tenant'] = 0;
+            //     if(config('tenant.id')){
+            //         UserTenant::create([
+            //             'tenant_id' => config('tenant.id'),
+            //             'user_id' => $data['id']
+            //         ]);
+            //     }
+            // }
 
             if ($generateToken) {
                 $apiTokenData = $this->generateToken($data['id'],$mainRole['role_code'],1);
@@ -335,6 +338,7 @@ class UserSystemRepo extends BaseRepository
                 ]);
             }else{
                 $this->_create(new UserRole, [
+                    'tenant_id' => config('tenant.id',0),
                     'user_id'=>$userId,
                     'role_id'=>$role->id,
                     'has_auth_grant'=>$hasAuthGrant,

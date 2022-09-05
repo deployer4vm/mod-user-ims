@@ -3,9 +3,11 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Base\Traits\MigrateDataTenant;
 
 class AddSystemUserColumnToUsersTable extends Migration
 {
+    use MigrateDataTenant;
     /**
      * Run the migrations.
      *
@@ -13,9 +15,18 @@ class AddSystemUserColumnToUsersTable extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
+        if(config('AppConfig.system.multitenant.active',false) && $this->tenantMigrateMode()==false){
+            if (!Schema::hasColumn('moduser_users','system_user')) {
+                Schema::table('moduser_users', function (Blueprint $table) {
+                    $table->boolean('system_user')->default(false)->comment('Apakah user ini adalah user system')->after('level');
+                });
+            }
+        }
+
+        // update data di database/table per-tenant
+        $this->tablePerTenant('moduser_users', function (Blueprint $table) {
             $table->boolean('system_user')->default(false)->comment('Apakah user ini adalah user system')->after('level');
-        });
+        },'system_user');
     }
 
     /**
@@ -25,7 +36,7 @@ class AddSystemUserColumnToUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('moduser_users', function (Blueprint $table) {
             $table->dropColumn('system_user');
         });
     }

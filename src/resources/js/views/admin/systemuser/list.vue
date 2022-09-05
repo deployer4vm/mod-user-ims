@@ -57,11 +57,11 @@
                             </b-btn>
                         </b-form-group>
                     </div> -->
-                    <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'manageapi.add' }">
+                    <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'c')" class="btn btn-primary d-block" :to="{ name: 'systemuser.add' }">
                             <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.userlist.add_new_user") }}
                         </router-link>
-                    <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'r')" class="btn btn-secondary d-block mx-1" :to="{ name: 'manageapi.role' }">
-                            <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.manageapi.role_list") }}
+                    <router-link v-if="UserAuth.hasAccess(accessRuleKey, 'r')" class="btn btn-secondary d-block mx-1" :to="{ name: 'systemuser.role' }">
+                            <span class="ion ion-md-add"></span>&nbsp; {{ Trans.get("user.systemuser.role_list") }}
                         </router-link>
                 </div>
             </b-card-body>
@@ -97,7 +97,7 @@
                             Generate Token
                         </b-btn>
                         <!-- <b-btn variant="default btn-xs icon-btn md-btn-flat" v-b-tooltip.hover title="Edit"><i class="ion ion-md-create"></i></b-btn> -->
-                        <router-link class="btn btn-success icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.edit')" v-b-tooltip.hover :to="{ name: 'manageapi.edit', params: { userId: data.item.id } }" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
+                        <router-link class="btn btn-success icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.edit')" v-b-tooltip.hover :to="{ name: 'systemuser.edit', params: { userId: data.item.id } }" v-if="UserAuth.hasAccess(accessRuleKey, 'u')">
                             <span class="ion ion-md-create"></span>
                         </router-link>
                         <b-btn class="btn btn-danger icon-btn btn-sm md-btn-flat" :title="Trans.get('lang.delete')" @click="deleteUser(data.item.id)" v-if="UserAuth.hasAccess(accessRuleKey, 'd') && data.item.linked_id == 0" v-b-tooltip.hover>
@@ -135,7 +135,7 @@
 
 <script>
     import flatPickr from "node_modules/vue-flatpickr-component";
-    import VueClipboard from 'vue-clipboard2'
+    import VueClipboard from 'node_modules/vue-clipboard2'
     Vue.use(VueClipboard)
 
     export default {
@@ -147,7 +147,7 @@
             flatPickr
         },
         data: () => ({
-            accessRuleKey: "moduser.manage_api",
+            accessRuleKey: "moduser.system_user",
             // START ----FI listing option
             sortBy: "id",
             sortDesc: false,
@@ -198,7 +198,7 @@
                 }
             },
             pageTitle() {
-                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption);
+                return this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.system_user.caption);
             },
             listRole() {
                 return this.$store.state.role.roleList;
@@ -324,14 +324,14 @@
             initView() {
                 this.Web.setModule("moduser");
 
-                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
-                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.children.manage_api.caption));
+                this.Web.setNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.system_user.caption));
+                // this.Web.appendNavbarTitle(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.module.children.system_user.caption));
 
                 this.Web.resetBreadcrumb();
                 this.Web.addBreadcrumb(this.Trans.get('lang.home'));
-                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
-                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.manage_api.caption));
-                // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.children.manage_api.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.system_user.caption));
+                this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.system_user.caption));
+                // this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.PSBBI.access.children.merchant.children.insurance.children.system_user.caption));
 
                 this.Web.setBodyWithPadding(false);
                 this.Web.setShow("moduser");

@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'manageapi.role'}" />
+        <header-breadcrumb :pageTitle="pageTitle" :backPath="{name: 'systemuser.role'}" />
 
         <b-card class="m-3">
             <b-card-body class="p-0">
@@ -175,7 +175,7 @@ export default {
         return { title: this.pageTitle };
     },
     data: () => ({
-        accessRuleKey: "moduser.manage_api",
+        accessRuleKey: "moduser.system_user",
         permissions: [],//data acl
         roleForm: {
             id: 0,
@@ -433,7 +433,7 @@ export default {
                     }
                     this.$store.dispatch("rolesystem/create", this.roleForm).then((res)=>{
                         this.Web.showAlert({type: 'info', text: 'Role Registered Successfully' });
-                        this.$router.push({name: 'manageapi.role'});
+                        this.$router.push({name: 'systemuser.role'});
                     }).catch((err)=>{
                         console.log('create role error : ',err);
                         this.Web.showAlert({type: 'danger', text: 'Save data failed' });
@@ -449,7 +449,7 @@ export default {
 
                     this.$store.dispatch("rolesystem/update", {data: this.roleForm,id: this.roleForm.id}).then((res)=>{
                         this.Web.showAlert({type: 'info', text: 'Role Updated Successfully' });
-                        this.$router.push({name: 'manageapi.role'});
+                        this.$router.push({name: 'systemuser.role'});
                     }).catch((err)=>{
                         console.log('update role error : ',err);
                         this.Web.showAlert({type: 'danger', text: 'Save data failed' });
@@ -460,7 +460,7 @@ export default {
         },
         checkSystemRole(data){
                 if(data.system_role !== 1){
-                    this.$router.push({ name: "manageapi.role" });
+                    this.$router.push({ name: "systemuser.role" });
                     this.Web.showAlert({ text: this.Trans.get("alert.access_denied"), type: "warning" });
                 }
         },
@@ -474,7 +474,7 @@ export default {
             this.Web.resetBreadcrumb();
             this.Web.addBreadcrumb(this.Trans.get('lang.home'));
             this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.caption));
-            this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.role.caption),{name:'manageapi.role'});
+            this.Web.addBreadcrumb(this.Trans.chose(this.AppConfig.packageLocal.moduser.access.children.role.caption),{name:'systemuser.role'});
             this.Web.addBreadcrumb(this.title);
 
             this.Web.setBodyWithPadding(false);

@@ -20,8 +20,8 @@ class CreateUserTenantsTable extends Migration
             Schema::create('user_tenants', function (Blueprint $table) {
                 $table->bigIncrements('id');
 
-                $table->unsignedInteger('tenant_id')->default(0);
-                $table->unsignedInteger('user_id')->default(0);
+                $table->unsignedBigInteger('tenant_id')->default(0)->comment('tenant id, 0 : berarti sistem tidak multi tenant, atau data di tenant manager');
+                $table->unsignedBigInteger('user_id')->default(0);
                 
                 $table->timestamps();
 
@@ -32,8 +32,8 @@ class CreateUserTenantsTable extends Migration
         $this->createPerTenant('user_tenants', function (Blueprint $table) {
             $table->bigIncrements('id');
 
-            $table->unsignedInteger('tenant_id')->default(0);
-            $table->unsignedInteger('user_id')->default(0);
+            $table->unsignedBigInteger('tenant_id')->default(0)->comment('tenant id, 0 : berarti sistem tidak multi tenant, atau data di tenant manager');
+            $table->unsignedBigInteger('user_id')->default(0);
             
             $table->timestamps();
         });

@@ -19,7 +19,7 @@ class CreateRolesTable extends Migration
         if(config('AppConfig.system.multitenant.active',false) && $this->tenantMigrateMode()==false){
             Schema::create('roles', function (Blueprint $table) {
                 $table->increments('id');
-                $table->unsignedInteger('tenant_id')->default(0);
+                $table->unsignedBigInteger('tenant_id')->default(0)->comment('tenant id, 0 : berarti sistem tidak multi tenant, atau data di tenant manager');
                 $table->string('role_code');
                 $table->tinyInteger('level')->default(2);
                 $table->string('name');
@@ -31,7 +31,7 @@ class CreateRolesTable extends Migration
         // create table di database/table per-tenant
         $this->createPerTenant('roles', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('tenant_id')->default(0);
+            $table->unsignedBigInteger('tenant_id')->default(0)->comment('tenant id, 0 : berarti sistem tidak multi tenant, atau data di tenant manager');
             $table->string('role_code');
             $table->tinyInteger('level')->default(2);
             $table->string('name');

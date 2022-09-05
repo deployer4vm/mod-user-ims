@@ -20,8 +20,9 @@ class UserLogRepo extends BaseRepository
         $logData['user_id'] = $user_id;
         $logData['section'] = $section;
         $logData['subsection'] = $subsection;
-        $logData['content'] = is_array($log)?json_encode($log):$log;
-        
+        $logData['content'] = is_array($log)?json_encode($log):$log;        
+        $logData['tenant_id'] = config('tenant.id',0);
+
         SystemUserLog::create($logData);
     }
     
@@ -45,7 +46,8 @@ class UserLogRepo extends BaseRepository
         $logData['user_id'] = $user_id;
         $logData['rule_group'] = $ruleItem[0];
         $logData['rule_key'] = $ruleItem[1];
-        $logData['data'] = is_array($data)?json_encode($data):$data;
+        $logData['data'] = is_array($data)?json_encode($data):$data;        
+        $logData['tenant_id'] = config('tenant.id',0);
         
         AuthLog::create($logData);
     }

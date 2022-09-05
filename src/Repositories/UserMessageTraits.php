@@ -146,6 +146,7 @@ trait UserMessageTraits
             'verifyCode' => $userData['verifyCode']
         ]);
         PasswordReset::create([
+            'tenant_id' => config('tenant.id',0),
             'email' => $userData['email'],
             'token' => $userData['verifyCode']            
         ]);
@@ -196,6 +197,7 @@ trait UserMessageTraits
 
         $otpCode = rand(1000,9999);
         $otp = UserOTP::create([
+            'tenant_id' => config('tenant.id',0),
             'user_id' => $userId,
             'token' => $otpCode,
             'phone' => $phone,

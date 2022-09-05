@@ -14,7 +14,7 @@ use App\Base\BaseController;
 
 class UserSystemController extends BaseController
 {
-    protected $accessRuleKey = 'moduser.manage_api';
+    protected $accessRuleKey = 'moduser.system_user';
 
     public function __construct()
     {
@@ -56,7 +56,7 @@ class UserSystemController extends BaseController
 
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
         if (config('AppConfig.system.multitenant.active',false) && config('tenant.id',0)!=1) {
-            $filter['tenant'] = [config('tenant.id')];
+            $filter[] = ['tenant_id', config('tenant.id')];
         }
         
         //jika menyertakan order by

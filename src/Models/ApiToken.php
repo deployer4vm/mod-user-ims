@@ -4,8 +4,13 @@ namespace hpsynapse\moduser\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+use App\Base\Traits\ModelDataTenant;
+
 class ApiToken extends Authenticatable
 {
+    use ModelDataTenant;    
+    protected $connection = 'perTenant';
+
     /**
      * The table associated with the model.
      *

@@ -15,7 +15,7 @@ use App\Base\BaseController;
 
 class RoleSystemController extends BaseController
 {
-    protected $accessRuleKey = 'moduser.manage_api';
+    protected $accessRuleKey = 'moduser.system_user';
     
     public function __construct()
     {

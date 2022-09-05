@@ -7,12 +7,16 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+use App\Base\Traits\ModelDataTenant;
+
 class User extends Authenticatable implements MustVerifyEmail
 {
 
     //comment HasApiTokens jika tidak menggunakan passport
-    use NotifiableCustom;//HasApiTokens,
-    
+    use NotifiableCustom;//HasApiTokens,    
+    use ModelDataTenant;    
+    protected $connection = 'perTenant'; 
+
     protected $table = 'moduser_users';
 
     /**

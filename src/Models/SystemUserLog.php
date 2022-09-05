@@ -3,9 +3,13 @@
 namespace hpsynapse\moduser\Models;
 
 use App\Base\BaseModel;
+use App\Base\Traits\ModelDataTenant;
 
 class SystemUserLog extends BaseModel
 {
+    use ModelDataTenant;    
+    protected $connection = 'perTenant'; 
+
     /**
      * The table associated with the model.
      *

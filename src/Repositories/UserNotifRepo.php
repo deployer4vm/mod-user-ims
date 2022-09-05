@@ -138,6 +138,7 @@ class UserNotifRepo extends BaseRepository
         }
         
         $notifchannel = NotificationChannel::create([
+            'tenant_id' => config('tenant.id',0),
             'user_id' => $token['user_id'],
             'push_type' => $token['push_type'],
             'push_token' => $token['push_token'],
