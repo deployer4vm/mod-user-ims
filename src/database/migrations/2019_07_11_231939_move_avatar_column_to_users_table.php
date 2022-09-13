@@ -32,7 +32,7 @@ class MoveAvatarColumnToUsersTable extends Migration
 
         $this->tablePerTenant('users', function (Blueprint $table) {
             $table->string('avatar')->after('user_idcode')->default('');
-        },'user_idcode');
+        },'avatar');
 
         $this->tablePerTenant('user_profiles', function (Blueprint $table) {
             $table->dropColumn('avatar');

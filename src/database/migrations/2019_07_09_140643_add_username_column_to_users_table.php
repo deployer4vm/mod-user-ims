@@ -27,7 +27,7 @@ class AddUsernameColumnToUsersTable extends Migration
         // update data di database/table per-tenant
         $this->tablePerTenant('users', function (Blueprint $table) {
             $table->string('username')->after('name')->default('');
-        },'name');
+        },'username');
     }
 
     /**
