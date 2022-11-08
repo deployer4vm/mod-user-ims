@@ -4,7 +4,7 @@ namespace hpsynapse\moduser\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class UserLogRepo extends Facade
+class UserLog extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -13,6 +13,6 @@ class UserLogRepo extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return \hpsynapse\moduser\Contracts\UserLogRepo::class;
+        return \hpsynapse\moduser\Contracts\UserLog::class;
     }
 }

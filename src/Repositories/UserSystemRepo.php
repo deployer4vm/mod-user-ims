@@ -13,7 +13,6 @@ use Validator;
 use Mail;
 use Carbon\Carbon;
 
-use hpsynapse\moduser\Facades\UserLogRepo;
 //use semua model yg diperlukan
 use hpsynapse\moduser\Models\User;
 use hpsynapse\moduser\Models\UserProfile;

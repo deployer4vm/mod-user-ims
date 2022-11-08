@@ -22,6 +22,9 @@ const getters = {
     getAuthRole(state) {
         return state.role?state.role[state.role_code]:false;
     },
+    getAuthRoleCode(state) {
+        return state.role_code;
+    },
     getAuthRoleList(state) {
         return state.role?state.role:false;
     },

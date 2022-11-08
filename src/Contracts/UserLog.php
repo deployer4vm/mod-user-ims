@@ -2,6 +2,6 @@
 
 namespace hpsynapse\moduser\Contracts;
 
-interface UserLogRepo {
+interface UserLog {
     
 }

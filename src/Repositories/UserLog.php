@@ -8,11 +8,12 @@ namespace hpsynapse\moduser\Repositories;
 
 //use semua model yg diperlukan
 use hpsynapse\moduser\Models\SystemUserLog;
+use hpsynapse\moduser\Models\SystemUserLogGlobal;
 use hpsynapse\moduser\Models\AuthLog;
 
 use App\Base\BaseRepository;
 
-class UserLogRepo extends BaseRepository
+class UserLog extends BaseRepository
 {
     
     public function addLog($user_id,$section,$subsection=false,$log=false)
@@ -23,7 +24,11 @@ class UserLogRepo extends BaseRepository
         $logData['content'] = is_array($log)?json_encode($log):$log;        
         $logData['tenant_id'] = config('tenant.id',0);
 
-        SystemUserLog::create($logData);
+        if(config('tenant.id')){
+            SystemUserLog::create($logData);
+        }else{
+            SystemUserLogGlobal::create($logData);
+        }
     }
     
     /**

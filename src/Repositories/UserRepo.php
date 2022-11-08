@@ -13,7 +13,7 @@ use Validator;
 use Mail;
 use Carbon\Carbon;
 
-use hpsynapse\moduser\Facades\UserLogRepo;
+use hpsynapse\moduser\Facades\UserLog;
 //use semua model yg diperlukan
 use hpsynapse\moduser\Models\User;
 use hpsynapse\moduser\Models\UserProfile;
@@ -843,7 +843,7 @@ class UserRepo extends BaseRepository
             return false;
         }
 
-        UserLogRepo::addActivityLog($user_id, 'activate');
+        UserLog::addActivityLog($user_id, 'activate');
 
         return $userData->update(['status' => 1]);
     }
