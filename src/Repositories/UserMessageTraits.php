@@ -67,7 +67,7 @@ trait UserMessageTraits
                 $isSecondary,
                 config('AppConfig.client.app_name'),
                 Request::getHost(),
-                route('home')
+                url(config('AppConfig.endpoint.home'))
             )
         );
     }    
@@ -82,7 +82,7 @@ trait UserMessageTraits
                 false,
                 config('AppConfig.client.app_name'),
                 Request::getHost(),
-                route('home')
+                url(config('AppConfig.endpoint.home'))
             )
         );
     }
@@ -128,7 +128,7 @@ trait UserMessageTraits
                 $userId,
                 config('AppConfig.client.app_name'),
                 Request::getHost(),
-                route('home')
+                url(config('AppConfig.endpoint.home'))
             ) 
         );
     }

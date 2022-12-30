@@ -82,7 +82,8 @@ class NotificationController extends BaseController
             $this->response = 'account.notification_detail';
             $this->output['viewdata']['onIframe'] = true;
         }else{
-            $this->response = redirect()->route('home');
+            //$this->response = redirect()->route('home');
+            $this->response = redirect(config('AppConfig.endpoint.home'));
         }
         
         $this->output['data'] = UserNotifSrv::getNotif($userId,$notificationId);
