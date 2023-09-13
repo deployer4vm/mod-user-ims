@@ -29,7 +29,7 @@ class ExportUserFormater extends BaseRepository implements ContractsExportUserFo
     public static function downloadUserData(
         $exportData,
         $listingParams
-    ): UserRepo {
+    ) {
         $model = UserRepo::listUser(
             $listingParams['filter'],
             false,
