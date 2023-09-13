@@ -10,6 +10,9 @@ use hpsynapse\moduser\Facades\RoleRepo;
 use hpsynapse\moduser\Facades\UserAuth;
 
 use App\Base\BaseController;
+use App\Facades\Export;
+// use hpsynapse\moduser\Contracts\ExportUserFormater;
+use hpsynapse\moduser\Facades\ExportUserFormater;
 
 class UserController extends BaseController
 {
@@ -19,12 +22,12 @@ class UserController extends BaseController
     {
         // $this->forceApiOutput();
     }
-    
+
     /**
      * GET /api/user
-     * 
+     *
      */
-    public function readList(Request $request) 
+    public function readList(Request $request)
     {
         if(!UserAuth::hasAccess($this->accessRuleKey,'r')){
             $this->setError(__('alert.access_denied'),false,403);
@@ -42,34 +45,34 @@ class UserController extends BaseController
             $filter[] = ['status', $request->input('status')];
 
         $filter[] = ['system_user', false];
-        
+
         if(UserAuth::isLogin()){
             $filter[] = ['id','!=',UserAuth::user('id')];
             $filter[] = ['level','>',UserAuth::user('level')];
-        }     
-        
+        }
+
         //jika menyertakan status
         if($request->input('role', false))
             $filter[] = ['role', 'LIKE', '%;'.$request->input('role').';%'];
-            
+
         if($request->input('level', false)){
             $filter[] = ['level', '!=', $request->input('level')];
         } else if($request->input('level_except', false)){
             $filter[] = ['level', '!=', $request->input('level_except')];
         }
-        
+
         //jika multitenant aktif dan bukan dari aplikasi owner maka filter berdasarkan tenant nya
         if (config('AppConfig.system.multitenant.active',false) && config('tenant.id',0) > 1) {
             $filter[] = ['tenant_id', config('tenant.id')];
         }
-        
+
         //jika menyertakan order by
         if ($request->input('orderBy', false))
             $orderBy = [$request->input('orderBy'), $request->input('orderType', 'ASC')];
-        
+
         $limit['offset'] = $request->input('offset', 0);
         $limit['limit'] = $request->input('limit', 0);
-        
+
         $this->output['data'] = UserRepo::listUser(
             $filter,
             $limit['offset'],
@@ -79,19 +82,19 @@ class UserController extends BaseController
 
         return $this->done();
     }
-    
+
     /**
      * GET /api/user/{id}
-     * 
-     * Route Param : 
+     *
+     * Route Param :
      *      id : route id
      * @return Array default synapse api return
-     *      data 
+     *      data
      *          ...all user record
      *          profile Array record user_proflie
      *          user_role
      *          main_role Array record role utama user
-     *      
+     *
      */
     public function readOne(Request $request)
     {
@@ -111,15 +114,15 @@ class UserController extends BaseController
             if($val['is_main_role']){
                 $this->output['data']['role_code'] = $key;
             }
-        } 
+        }
 
         return $this->done();
     }
 
     /**
      * POST /api/user/
-     * 
-     * @param Request $request 
+     *
+     * @param Request $request
      *      name
      *      email
      *      username
@@ -155,18 +158,18 @@ class UserController extends BaseController
 
         $validator = Validator::make($userData, $validator);
 
-        if ($validator->fails()) {       
+        if ($validator->fails()) {
             $this->setError('Data keliru',$validator->messages());
             return $this->done();
         }
-        
+
         //jika berhasil
         if ($user = UserRepo::register($userData,false)) {
             $this->setAlert('Data Inserted successfully','success');
         }else{
             $this->setError(UserRepo::error());
         }
-        
+
         return $this->done();
     }
 
@@ -179,7 +182,7 @@ class UserController extends BaseController
         //     $this->setError(__('alert.access_denied'),false,403);
         //     return $this->done();
         // }
-        
+
         $id = $request->route('id');
 
         $input = $request->all();
@@ -200,7 +203,7 @@ class UserController extends BaseController
         }
 
         if(!empty($validator)){
-            $validator = Validator::make($input, $validator); 
+            $validator = Validator::make($input, $validator);
             if ($validator->fails()) {
                 $this->setError('Input Error :',$validator->messages(),400,true);
                 return $this->done();
@@ -213,8 +216,8 @@ class UserController extends BaseController
 
         if($request->file('avatar',false))
             $input['avatar'] = $request->file('avatar');
-        
-        if(UserRepo::updateUser($id, $input)) {            
+
+        if(UserRepo::updateUser($id, $input)) {
             $this->setAlert('Data Updated successfully','success');
         }else{
             $this->setError(UserRepo::error());
@@ -222,11 +225,11 @@ class UserController extends BaseController
 
         return $this->done();
     }
-    
-    
+
+
     /**
      * upload avatar
-     * 
+     *
      * @param Request $request
      *      avatar
      */
@@ -245,23 +248,23 @@ class UserController extends BaseController
         $id = $request->route('id');
         if(UserRepo::updateUser($id, [
             'avatar'=> $request->file('avatar')
-        ])) {            
+        ])) {
             $this->setAlert(__('alert.update_success',['attribute'=>'Avatar']),'success');
         }else{
             $this->setError(UserRepo::error(),UserRepo::errorValidator());
         }
         return $this->done();
     }
-    
+
     public function deleteAvatar(Request $request)
     {
         // if(!UserAuth::hasAccess($this->accessRuleKey,'u')){
         //     $this->setError(__('alert.access_denied'),false,403);
         //     return $this->done();
         // }
-        
+
         $id = $request->route('id');
-           
+
         if(UserRepo::deleteAvatar($id)){
             $this->setAlert(__('alert.delete_success',['attribute'=>'Avatar']),'success');
         }else{
@@ -269,12 +272,12 @@ class UserController extends BaseController
         }
 
         return $this->done();
-           
+
     }
 
     /**
      * update password di my profile
-     * 
+     *
      * @param Request $request
      *      password
      *      password_confirmatin
@@ -324,7 +327,7 @@ class UserController extends BaseController
             $this->setError(__('alert.access_denied'),false,403);
             return $this->done();
         }
-        
+
         $id = $request->route('id');
         UserRepo::unbanUser($id);
         $this->setAlert('User unbanned successfully','success');
@@ -337,7 +340,7 @@ class UserController extends BaseController
         //     $this->setError(__('alert.access_denied'),false,403);
         //     return $this->done();
         // }
-        
+
         $id = $request->route('id');
         if(($userData = UserRepo::getUser(['id',$id]))!=false){
             if (isset($userData['email']) && $userData['email']){
@@ -359,9 +362,9 @@ class UserController extends BaseController
             $this->setError(__('alert.access_denied',false,403));
             return $this->done();
         }
-        
+
         $id = $request->route('id');
-           
+
         if(UserAuth::isLogin() && $id != UserAuth::user('id')){
             $filter[] = ['id', $id];
             $filter[] = ['level','>',UserAuth::user('level')];
@@ -370,16 +373,16 @@ class UserController extends BaseController
                 $this->setError('Permission denied');
                 return $this->done();;
             }
-        }   
+        }
 
         if(!UserRepo::deleteUser($id)){
             $this->setError('Error : '.UserRepo::error());
         }
         return $this->done();
-           
+
     }
 
-    
+
     /**
      * PROFILE
      * =================================================================
@@ -396,14 +399,14 @@ class UserController extends BaseController
             if($val['is_main_role']){
                 $this->output['data']['role_code'] = $key;
             }
-        } 
+        }
 
         return $this->done();
     }
 
     public function updateProfile(Request $request)
     {
-        
+
         if(UserAuth::isLogin()){
             $id = UserAuth::user('id');
         }else{
@@ -433,20 +436,20 @@ class UserController extends BaseController
         }
 
         if(!empty($validator)){
-            $validator = Validator::make($input, $validator); 
+            $validator = Validator::make($input, $validator);
             if ($validator->fails()) {
                 $this->setError('Input Error :',$validator->messages(),400,true);
                 return $this->done();
             }
         }
-        
+
         if(isset($input['role_code']))unset($input['role_code']);
         if(isset($input['status']))unset($input['status']);
-        
+
         if($request->file('avatar',false))
             $input['avatar'] = $request->file('avatar');
-            
-        if(UserRepo::updateUser($id, $input)) {            
+
+        if(UserRepo::updateUser($id, $input)) {
             $this->setAlert('Data Updated successfully','success');
         }else{
             $this->setAlert(UserRepo::error(),'danger');
@@ -455,7 +458,7 @@ class UserController extends BaseController
 
         return $this->done();
     }
-    
+
     /**
      * GET
      *      /auth/change_role/ROLE_CODE
@@ -475,6 +478,59 @@ class UserController extends BaseController
             $this->setAlert('Role tidak ditemukan','danger');
         }
 
+        return $this->done();
+    }
+
+    /**
+     * Export User Data
+     *
+     */
+    public function downloadDataUser(Request $request)
+    {
+        $this->buildParams();
+
+        /**
+         * Start Download Init
+         * ---------------------------------------------------------------------
+         */
+        $cacheKey = 'exportdatauser.' . UserAuth::user('id');
+
+        // proses generate download
+        if ($this->output['data'] = Export::createExport(
+            $cacheKey,
+            [ExportUserFormater::class, 'downloadUserData'],
+            [
+                'filter' => $this->output['params']['filter'],
+            ],
+            UserAuth::user('id'),
+            config('tenant.id'),
+            'spout' // bisa isi 'phpspreadsheet' atau 'spout', tapi jika tidak disertakan maka akan otomatis 'spout'
+        )) {
+            // set paramter tambahan untuk digunakan diproses joobs jika diperlukan
+            Export::setAddsParam($cacheKey, []);
+
+            // set nama kolom dari kolom sebelah kiri ke kolom sebelah kanan
+            Export::setColumn($cacheKey, ExportUserFormater::columnDownload());
+
+            // set formater untuk row data yang diinsert
+            Export::setCoreRowFormater($cacheKey, ExportUserFormater::class, 'dataUserCoreRowFormater');
+
+            // set formater saat proses export selesai
+
+            if (!($this->output['data'] = Export::dispatchExport($cacheKey))) {
+                $this->setError(Export::error() ? Export::error() : 'Dispatch job error');
+            }
+        } else {
+            $this->setError(Export::error() ? Export::error() : 'Create export error');
+        }
+
+        return $this->done();
+    }
+
+    public function downloadDataUserStatus(Request $request)
+    {
+        $cacheKey = 'exportdatauser.' . UserAuth::user('id');
+        $this->output['data'] = Export::getExport($cacheKey);
         return $this->done();
     }
 }

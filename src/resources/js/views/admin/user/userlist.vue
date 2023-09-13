@@ -28,8 +28,32 @@
                     <!-- <b-form-group :label="''" class="d-inline-block w-auto mt-1">
                     </b-form-group> -->
                 </div>
+                <div class="d-flex form-row flex-xl-row align-items-end" v-if="isConfigExportEnable">
+                    <div class="ml-2">
+                        <!-- Export -->
+                        <b-btn
+                            variant="default btn-sm w-icon w-100 w-xl-auto"
+                            v-b-toggle.export-block
+                        >
+                        <i class="ion ion-md-cloud-download text-danger mr-2"></i><span>Export</span>
+                        </b-btn>
+                    </div>
+                </div>
             </b-card-body>
         </b-card>
+
+        <!-- block export -->
+        <b-collapse id="export-block" v-if="isConfigExportEnable">
+            <b-card class="m-3" no-body>
+                <b-card-body>
+                    <export
+                        :api-export-generate="downloadApiUserGenerateUrl"
+                        :api-export-status="downloadApiUserStatusUrl"
+                        :adds-jobs-params="null"
+                    ></export>
+                </b-card-body>
+            </b-card>
+        </b-collapse>
         <b-card class="m-3" no-body>
             <!-- Table controls -->
             <b-card-body>
@@ -277,7 +301,18 @@
             },
             totalPages() {
                 return Math.ceil(this.listData.count / this.perPage);
-            }
+            },
+            // download
+            //------------------------------------------------------------------
+            isConfigExportEnable() {
+                return this.AppConfig.packageLocal.moduser.export_user.enable == 1;
+            },
+            downloadApiUserGenerateUrl() {
+                return this.AppConfig.endpoint.api.moduser + "/export";
+            },
+            downloadApiUserStatusUrl() {
+                return this.AppConfig.endpoint.api.moduser + "/export/status";
+            },
         },
         watch: {
             curPage(v) {
