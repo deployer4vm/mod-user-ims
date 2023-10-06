@@ -16,7 +16,7 @@ class ChangeIsMobileappsTokenAtApiTokensTable extends Migration
      */
     public function up()
     {
-        
+
         if(config('AppConfig.system.multitenant.active',false) && $this->tenantMigrateMode()==false){
             // update data di database utama (tenant manager)
             if (Schema::hasColumn('moduser_api_tokens','is_mobileapps_token')) {
@@ -27,9 +27,9 @@ class ChangeIsMobileappsTokenAtApiTokensTable extends Migration
         }
 
         // update data di database/table per-tenant
-        $this->tablePerTenant('moduser_api_tokens', function (Blueprint $table) {            
+        $this->tablePerTenant('moduser_api_tokens', function (Blueprint $table) {
             $table->renameColumn('is_mobileapps_token', 'is_permanent');
-        },'is_mobileapps_token');
+        },'is_permanent');
     }
 
     /**
