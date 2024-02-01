@@ -353,6 +353,9 @@
                         if (data.main_role) {
                             delete data.main_role;
                         }
+                        if (data.user_role) {
+                            delete data.user_role;
+                        }
 
                         this.$store
                             .dispatch("user/update", { data: data, id: this.form.id })
