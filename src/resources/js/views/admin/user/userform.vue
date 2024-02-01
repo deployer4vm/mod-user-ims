@@ -349,8 +349,13 @@
                             return false;
                         }
 
+                        let data = JSON.parse(JSON.stringify(this.form));
+                        if (data.main_role) {
+                            delete data.main_role;
+                        }
+
                         this.$store
-                            .dispatch("user/update", { data: this.form, id: this.form.id })
+                            .dispatch("user/update", { data: data, id: this.form.id })
                             .then(res => {
                                 this.Web.showAlert({ type: "info", text: "User Updated Successfully" });
                                 this.$router.push({ name: "user.list" });
