@@ -186,7 +186,7 @@ export default {
         },
         // tenantGroup() {
         //     return this.$store.state.tenant.listTenantGroup;
-        // },        
+        // },
         tenantGroup() {
             return this.$store.getters.getTenantGroup;
         },
@@ -200,26 +200,27 @@ export default {
          * cek apakah curTenantGroup (tenant_group_id dari menu) menampilkan menu atau tidak
          * param :
          *      curTenantGroup : array berisi list id group tenant menu yg dicek (dari tenant_group_id di item access nya)
-         * 
-         * return 
+         *
+         * return
          */
         isInGroup(curTenantGroup) {
             // jika multi tenant aktif
             if(this.AppConfig.system.multitenant.active){
                 // jika tenant_group_id menu yg dicek berbentuk array, maka detek bandingkan dengan activeGroup nya
                 if(curTenantGroup.length && curTenantGroup.length > 0){
-                    var arr = this.tenantGroup;// list id tenant group tenant aktif                    
+                    var arr = this.tenantGroup;// list id tenant group tenant aktif
                     //jika tidak ada group berarti sedang di tenant manager
-                    if (arr.length == undefined)                        
+                    if (!arr || arr.length == undefined) {
                         arr = [0];
-                    
+                    }
+
                     return curTenantGroup.some(r => arr.indexOf(r) >= 0);
                 }else{
                     return curTenantGroup == 0 || (curTenantGroup == 1 && !isOnTenantManager) || (curTenantGroup == 2 && isOnTenantManager);
-                }          
+                }
             }else{
                 return curTenantGroup == 0 || curTenantGroup == 1;
-            }            
+            }
         },
         // cek apakah tenant_group_id terlampir (rule) ditampilkan di role ini
         // isGroupTenantAllowed(tenant_group_id) {
@@ -399,7 +400,7 @@ export default {
                 });
             } else {
                 if (this.isAdd) {
-                    
+
                     if (!this.UserAuth.hasAccess(this.accessRuleKey, "c")) {
                         //goto dashboard current tenant
                         this.Web.goToCurrentTenant();
