@@ -79,6 +79,9 @@
                     <!-- Tab Change Password -->
                     <div class="col-md-9" v-if="curTab === 'password'">
                         <b-card-body>
+                            <b-form-group label="Current password">
+                                <b-input type="password" v-model="passwordForm.current_password" />
+                            </b-form-group>
                             <b-form-group label="New password">
                                 <b-input type="password" v-model="passwordForm.password" />
                             </b-form-group>
@@ -123,6 +126,7 @@
         data: () => ({
             curTab: "general",
             passwordForm: {
+                current_password: "",
                 password: "",
                 password_confirmation: "",
             },
@@ -216,11 +220,13 @@
             savePassword() {
                 this.LocalApi.put(this.AppConfig.endpoint.api.moduser + "/" + this.userForm.id + "/updatepassword", {
                         id: this.userForm.id,
+                        current_password: this.passwordForm.current_password,
                         password: this.passwordForm.password,
                         password_confirmation: this.passwordForm.password_confirmation,
                     })
                     .then((res) => {
                         this.Web.showAlert({ text: "Password berhasil diganti" });
+                        this.passwordForm.current_password = "";
                         this.passwordForm.password = "";
                         this.passwordForm.password_confirmation = "";
                     })

@@ -4,6 +4,8 @@ namespace hpsynapse\moduser\Repositories;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 use hpsynapse\moduser\Models\User;
 use hpsynapse\moduser\Models\UserOTP;
@@ -37,7 +39,7 @@ trait UserMessageTraits
     public function sendEmail($userId,$email)
     {        
         $user = User::find($userId);
-        if($user)return false;
+        if(!$user)return false;
         Mail::to($user->email)->send($email);
         return true;
     }
@@ -107,15 +109,19 @@ trait UserMessageTraits
                 
         if($isSecondary){
             $userProfile = UserProfile::where('user_id',$userId)->first();
-            if($userProfile)return false; 
+            if(!$userProfile)return false;
             $userData['email'] = $userProfile->email2;
         }
         
         $userData['verifyCode'] = $this->generateEmailVerfifyCode($userData['email']);
-        $userData['verifyUrl'] = route('auth.emailVerification',[
+        $userData['verifyUrl'] = URL::temporarySignedRoute(
+            'auth.emailVerification',
+            now()->addMinutes(config('auth.verification.expire', 60)),
+            [
             'email' => $userData['email'],
             'verifyCode' => $userData['verifyCode']
-            ]);
+            ]
+        );
         
         return $userData;
     }
@@ -139,22 +145,23 @@ trait UserMessageTraits
         if(!$user)return false; 
         $userData = $user->toArray();
         
-        $userData['verifyCode'] = $this->generateEmailVerfifyCode($userData['email']);
+        $userData['verifyCode'] = Str::random(64);
         
         $userData['resetPasswordUrl'] = route('auth.resetPassword',[
             'email' => $userData['email'],
             'verifyCode' => $userData['verifyCode']
         ]);
+        PasswordReset::where('email', $userData['email'])->delete();
         PasswordReset::create([
             'tenant_id' => config('tenant.id',0),
             'email' => $userData['email'],
-            'token' => $userData['verifyCode']            
+            'token' => hash('sha256', $userData['verifyCode'])
         ]);
         return $userData;
     }
     public function generateEmailVerfifyCode($email)
     {
-        return hash('sha256',$email.'somesaltbrooooooo');
+        return hash_hmac('sha256', $email, (string) config('app.key'));
     }
     
     /**
@@ -195,7 +202,7 @@ trait UserMessageTraits
         $otpData = UserOTP::where('phone',$phone)->first();
         if($otpData)UserOTP::where('phone',$phone)->delete();
 
-        $otpCode = rand(1000,9999);
+        $otpCode = random_int(100000, 999999);
         $otp = UserOTP::create([
             'tenant_id' => config('tenant.id',0),
             'user_id' => $userId,
@@ -218,6 +225,7 @@ trait UserMessageTraits
     {
         $otpData = UserOTP::where('phone',$phone)        
                 ->where('token',$otpCode)
+                ->where('timeout', '>=', now())
                 ->first();
         
         //jika otp valid
@@ -225,6 +233,7 @@ trait UserMessageTraits
             UserOTP::where('phone',$phone)->delete();
             return true;
         }
+        UserOTP::where('phone',$phone)->where('timeout', '<', now())->delete();
         return false;
     }
     

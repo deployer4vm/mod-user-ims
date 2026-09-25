@@ -25,12 +25,32 @@ class FirebaseApi
     {   
         if (!self::$firebase) {
             self::$config = config('AppConfig.packageLocal.moduser.notification');
-            // $serviceAccount = ServiceAccount::fromJsonFile(base_path(self::$config['firebase_config_path']));
-            $serviceAccount = ServiceAccount::fromArray(self::$config['services']['firebase']['config']['firebasejson']);
+            $credentials = env('FIREBASE_CREDENTIALS');
+            if (!$credentials) {
+                throw new \RuntimeException('FIREBASE_CREDENTIALS is not configured.');
+            }
+
+            if (is_file($credentials)) {
+                $serviceAccount = ServiceAccount::fromJsonFile($credentials);
+            } else {
+                $credentialsArray = json_decode($credentials, true);
+                if (!is_array($credentialsArray) || empty($credentialsArray['private_key'])) {
+                    throw new \RuntimeException('FIREBASE_CREDENTIALS must be a service-account JSON file path or JSON string.');
+                }
+                $serviceAccount = ServiceAccount::fromArray($credentialsArray);
+            }
+
+            $databaseUrl = env(
+                'FIREBASE_DATABASE_URL',
+                self::$config['services']['firebase']['config']['realtime_database_url'] ?? null
+            );
+            if (!$databaseUrl) {
+                throw new \RuntimeException('FIREBASE_DATABASE_URL is not configured.');
+            }
             
             self::$firebase = (new Factory)
                 ->withServiceAccount($serviceAccount)
-                ->withDatabaseUri(self::$config['services']['firebase']['config']['realtime_database_url']) //url from realtime database firebase
+                ->withDatabaseUri($databaseUrl)
                 ->create();
         }
         return self::$firebase;

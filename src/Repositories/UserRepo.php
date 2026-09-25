@@ -858,7 +858,8 @@ class UserRepo extends BaseRepository
      */
     public function varifyEmail($email, $verifyCode)
     {
-        if ($this->generateEmailVerfifyCode($email) == $verifyCode) {
+        $expectedCode = $this->generateEmailVerfifyCode($email);
+        if (is_string($verifyCode) && hash_equals($expectedCode, $verifyCode)) {
             $user = User::where('email', $email);
             if (!$user->exists()) {
                 $this->error = __('auth.emailverify_fail_mailnotfound');
@@ -905,17 +906,23 @@ class UserRepo extends BaseRepository
 
     public function varifyResetPasswordToken($email, $verifyCode, $delete = false)
     {
-        //jika match
-        if ($this->generateEmailVerfifyCode($email) == $verifyCode) {
+        if (!is_string($verifyCode) || strlen($verifyCode) < 32) {
+            $this->error = __('auth.resetpassword_fail_verificationcodeinvalid');
+            return false;
+        }
 
-            $passwordReset = PasswordReset::where('email', $email)->where('token', $verifyCode)->first();
-            if (!$passwordReset) {
-                $this->error = __('auth.resetpassword_fail_mailnotfound');
-                return false;
+        $passwordReset = PasswordReset::where('email', $email)
+            ->where('token', hash('sha256', $verifyCode))
+            ->where('created_at', '>=', now()->subMinutes(config('auth.passwords.users.expire', 60)))
+            ->first();
+
+        if ($passwordReset) {
+            if ($delete) {
+                $passwordReset->delete();
             }
-            if ($delete) $passwordReset->delete();
             return true;
         }
+
         $this->error = __('auth.resetpassword_fail_verificationcodeinvalid');
         return false;
     }

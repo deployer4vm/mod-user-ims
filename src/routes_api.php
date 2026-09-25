@@ -10,20 +10,24 @@ $groupAuth = [
 ];
 Route::group($groupAuth,function(){
     //Auth/LoginController
-    Route::post('/login', 'Auth\LoginController@apiLogin')->name('auth.api.login');
+    Route::post('/login', 'Auth\LoginController@apiLogin')
+        ->middleware('throttle:5,1')
+        ->name('auth.api.login');
 
     //Auth/RegisterController
     Route::post('/register', 'Auth\RegisterController@apiRegister')->name('auth.api.register');
 
     //Auth/ForgotPasswordController
-    Route::post('/forgotpassword', 'Auth\ForgotPasswordController@doForgotPassword')->name('auth.api.register');
+    Route::post('/forgotpassword', 'Auth\ForgotPasswordController@doForgotPassword')
+        ->middleware('throttle:3,1')
+        ->name('auth.api.forgotpassword');
 
     //Auth/TokenApiController - generate token akses tanpa user
     // Route::post('/token', 'Auth\TokenApiController@generateToken')->name('auth.api.generatetoken');
 
     Route::middleware('auth:api')->group(function(){
         //Auth/LoginController
-        Route::get('/logout', 'Auth\LoginController@apiLogout')->name('auth.api.logout');
+        Route::match(['post', 'delete'], '/logout', 'Auth\LoginController@apiLogout')->name('auth.api.logout');
         //TokenApiController
         Route::post('/token/validate', 'Auth\TokenApiController@validateToken')->name('auth.api.validatetoken');
         //ubah role user yang sedang loign
@@ -43,7 +47,6 @@ $groupUser = [
     'prefix' => config('AppConfig.endpoint.api.moduser'),
     'middleware' => 'auth:api'
 ];
-Route::get('/notification/setnotif', 'NotificationController@setnotif')->name('user.notification.setnotif');
 Route::group($groupUser,function(){
 
     /**

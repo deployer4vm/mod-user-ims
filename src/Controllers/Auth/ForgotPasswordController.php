@@ -44,9 +44,10 @@ class ForgotPasswordController extends BaseController
         $user = UserRepo::getUser(['email',$this->output['data']['email']]);
         
         if(!$user || $user['status'] != 1){
-            $this->setError(__('auth.forgotpassword.alert.email_not_registered'));
-            $this->response = redirect(url()->previous())->withInput();
-            return $this->done();            
+            // Return the same response for registered and unknown addresses to
+            // prevent account enumeration.
+            $this->output['message'] = __('auth.forgotpassword.alert.forgot_password_success');
+            return $this->done();
         }
         
         UserRepo::sendUserResetPasswordEmail($user['id'],config('cur_apps.id'));

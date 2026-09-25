@@ -58,7 +58,8 @@ if(config('AppConfig.system.use_admin_full_vue',1)!=1){
         
         //ForgotPassowrdController
         Route::get('/forgotpassword', 'Auth\ForgotPasswordController@forgotPassword')->name('auth.forgotPassword');//form forgot password
-        Route::post('/forgotpassword', 'Auth\ForgotPasswordController@doForgotPassword'); //send reset email
+        Route::post('/forgotpassword', 'Auth\ForgotPasswordController@doForgotPassword')
+            ->middleware('throttle:3,1'); //send reset email
         
         //ResetPasswordController
         Route::get('/resetpassword', 'Auth\ResetPasswordController@resetPassword')->name('auth.resetPassword'); //form reset password dari link yg didapat di email

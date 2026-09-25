@@ -3,6 +3,8 @@
 namespace hpsynapse\moduser\Repositories;
 
 use hpsynapse\moduser\Models\ApiToken;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 trait ApiTokenTraits
 {    
@@ -20,8 +22,12 @@ trait ApiTokenTraits
             $lastUpdate = $tokenData['updated_at'];
         }
         
-        //jika sudah melebihi batas waktu
-        if(now() > now()->addHours(config('bssystem.sso.session_lifetime'))){
+        if (!empty($tokenData['is_permanent'])) {
+            return true;
+        }
+
+        $lifetime = (int) config('session.lifetime', 120);
+        if (!$lastUpdate || now()->greaterThan(Carbon::parse($lastUpdate)->addMinutes($lifetime))){
             $this->deleteToken($tokenData['api_token']);
             return false;
         }
@@ -68,7 +74,7 @@ trait ApiTokenTraits
      */
     public function generateToken($userId,$roleCode='',$isPemanent=0,$deviceId='',$pushDetail=false)
     {
-        $data['api_token'] = hash('sha256', 'token'.$userId.'.'.now());
+        $data['api_token'] = hash('sha256', Str::random(80));
         $data['session_id'] = session()->exists('_token')?session()->getId():'';
         $data['is_permanent'] = $isPemanent;
         

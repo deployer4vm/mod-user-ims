@@ -15,8 +15,8 @@ class VerificationController extends BaseController
         $data['verifyCode'] = $request->query('verifyCode');
         $data['email'] = $request->query('email');
                         
-        //jika verified
-        if(!UserRepo::varifyEmail($data['email'],$data['verifyCode'])){
+        if (!$request->hasValidSignature()
+            || !UserRepo::varifyEmail($data['email'],$data['verifyCode'])) {
             return redirect()->route('auth.emailVerification.fail', ['error_message'=>UserRepo::error()]);
         }
 

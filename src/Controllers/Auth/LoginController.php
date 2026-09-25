@@ -25,7 +25,7 @@ class LoginController extends BaseController
 
     public function __construct()
     {
-        $this->middleware('guest')->except(['logout','revalidate']);
+        $this->middleware('guest')->except(['logout','apiLogout','revalidate']);
     }
     
     // public function username()
@@ -74,8 +74,10 @@ class LoginController extends BaseController
         $authData = $request->only('username', 'password');
         if ($this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
-            Log::info('Login Failed ! user : "'.$authData['username'].'" - password : "'.$authData['password'].'"');
-            Log::info('Too many login attemp');
+            Log::warning('Login throttled.', [
+                'username' => $authData['username'],
+                'ip' => $request->ip(),
+            ]);
             return $this->sendLockoutResponse($request);
         }
         
@@ -223,7 +225,13 @@ class LoginController extends BaseController
             }
 
             $this->output['data']['role'] = UserRepo::getUserRole($user['id']);        
-            $token = UserRepo::generateToken($user['id'],$this->output['data']['role_code'],1,$request->input('deviceId',''),$pushParam);
+            $token = UserRepo::generateToken(
+                $user['id'],
+                $this->output['data']['role_code'],
+                (int) config('auth.api_tokens.permanent', false),
+                $request->input('deviceId',''),
+                $pushParam
+            );
             $this->output['data']['token'] = $token['api_token'];
 
             //subscribekan ke channel/topic berdasarkan user role nya
@@ -246,6 +254,11 @@ class LoginController extends BaseController
      */
     public function apiLogout(Request $request)
     {
-        
+        $token = Auth::user() ? Auth::user()->api_token : null;
+        if ($token) {
+            UserRepo::deleteToken($token);
+        }
+        $this->output['message'] = __('auth.logout');
+        return $this->done();
     }
 }
