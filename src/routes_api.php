@@ -14,9 +14,6 @@ Route::group($groupAuth,function(){
         ->middleware('throttle:5,1')
         ->name('auth.api.login');
 
-    //Auth/RegisterController
-    Route::post('/register', 'Auth\RegisterController@apiRegister')->name('auth.api.register');
-
     //Auth/ForgotPasswordController
     Route::post('/forgotpassword', 'Auth\ForgotPasswordController@doForgotPassword')
         ->middleware('throttle:3,1')

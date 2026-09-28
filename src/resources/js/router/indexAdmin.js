@@ -26,23 +26,6 @@ const LoginPage3 = (resolve) => {
     });
 };
 
-const RegisterPage = (resolve) => {
-    require.ensure(["../views/admin/auth/register"], () => {
-        resolve(require("../views/admin/auth/register"));
-    });
-};
-const RegisterPage2 = (resolve) => {
-    require.ensure(["../views/admin/auth/register2"], () => {
-        resolve(require("../views/admin/auth/register2"));
-    });
-};
-//custom
-const RegisterPage3 = (resolve) => {
-    require.ensure(["node_modules/../app/MainApp/resources/js/components/moduser/auth/register"], () => {
-        resolve(require("node_modules/../app/MainApp/resources/js/components/moduser/auth/register"));
-    });
-};
-
 const ForgotPasswordPage = (resolve) => {
     require.ensure(["../views/admin/auth/forgotpasswordform"], () => {
         resolve(require("../views/admin/auth/forgotpasswordform"));
@@ -161,11 +144,6 @@ if (globals().AppConfig.packageLocal.moduser.auth_template.type == 1) {
             name: "login",
         },
         {
-            path: "register",
-            component: RegisterPage2,
-            name: "register",
-        },
-        {
             path: "forgot",
             component: ForgotPasswordPage2,
             name: "forgotpassword",
@@ -179,11 +157,6 @@ if (globals().AppConfig.packageLocal.moduser.auth_template.type == 1) {
             name: "login",
         },
         {
-            path: "register",
-            component: RegisterPage3,
-            name: "register",
-        },
-        {
             path: "forgot",
             component: ForgotPasswordPage3,
             name: "forgotpassword",
@@ -195,11 +168,6 @@ if (globals().AppConfig.packageLocal.moduser.auth_template.type == 1) {
             path: "login",
             component: LoginPage,
             name: "login",
-        },
-        {
-            path: "register",
-            component: RegisterPage,
-            name: "register",
         },
         {
             path: "forgot",

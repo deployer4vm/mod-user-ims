@@ -65,10 +65,6 @@
                         </form>
                         <!-- / Form -->
 
-                        <div class="text-center text-muted" v-if="AppConfig.packageLocal.moduser.registration.enable">
-                            {{ Trans.get("auth.login.dont_have_an_account") }}
-                            <router-link tag="a" :to="{ name: 'register' }">{{ Trans.get("auth.login.signupcaption") }}</router-link>
-                        </div>
                     </div>
                 </div>
             </div>

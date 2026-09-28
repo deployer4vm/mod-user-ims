@@ -76,12 +76,6 @@
                         </form>
                         <!-- / Form -->
 
-                        @if(config('AppConfig.packageLocal.moduser.registration.enable'))
-                        <div class="text-center text-muted">
-                            {{ __('auth.login.dont_have_an_account') }} <a href="{{ route('auth.register') }}">{{ __('auth.login.signupcaption') }}</a>
-                        </div>
-                        @endif
-
                     </div>
                 </div>
             </div>

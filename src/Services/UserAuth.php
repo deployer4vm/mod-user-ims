@@ -336,13 +336,13 @@ class UserAuth
      */
     public function isWebDev()
     {
-        return $this->isLogin() && $this->is('webbdev');
+        return $this->isLogin() && $this->is('webdev');
     }
     
     public function hasAccess(
         $key, 
         $subKey = 'has_access', 
-        $defaultAccess = true,
+        $defaultAccess = false,
         $checkWebDev = false
     ) {
         if ($checkWebDev === true && $this->isWebDev()) {

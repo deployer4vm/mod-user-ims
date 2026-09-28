@@ -225,8 +225,16 @@ class UserController extends BaseController
             unset($input['banned_note']);
         }
 
-        if($request->file('avatar',false))
+        if($request->file('avatar',false)) {
+            $avatarValidator = Validator::make($request->all(), [
+                'avatar' => 'image|mimes:jpeg,jpg,png,gif,webp|max:5120',
+            ]);
+            if ($avatarValidator->fails()) {
+                $this->setError('Input Error :', $avatarValidator->messages(), 422, true);
+                return $this->done();
+            }
             $input['avatar'] = $request->file('avatar');
+        }
 
         if(UserRepo::updateUser($id, $input)) {
             $this->setAlert('Data Updated successfully','success');

@@ -57,18 +57,6 @@
           <!-- / Form -->
         </div>
 
-        <b-card-footer
-          class="py-3 px-4 px-sm-5"
-          v-if="AppConfig.packageLocal.moduser.registration.enable"
-        >
-          <div class="text-center text-muted">
-            {{ Trans.get('auth.login.dont_have_an_account') }}
-            <router-link
-              tag="a"
-              :to="{name: 'register'}"
-            >{{ Trans.get('auth.login.signupcaption') }}</router-link>
-          </div>
-        </b-card-footer>
       </b-card>
     </div>
   </div>

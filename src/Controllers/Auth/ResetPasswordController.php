@@ -39,8 +39,8 @@ class ResetPasswordController extends BaseController
         
         $request->validate([
             'email' => 'required|email|max:255',
-            'password' => 'required|min:5|max:255',
-            'password_confirmation' => 'required|min:5|max:255|same:password',
+            'password' => 'required|min:12|max:255',
+            'password_confirmation' => 'required|min:12|max:255|same:password',
         ]);
         
         //jika verified

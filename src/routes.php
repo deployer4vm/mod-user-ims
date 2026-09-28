@@ -47,14 +47,11 @@ if(config('AppConfig.system.use_admin_full_vue',1)!=1){
 
         //LoginController - appCode untuk SSO
         Route::get('/login/{appCode?}', 'Auth\LoginController@login')->name('auth.login');
-        Route::post('/login/{appCode?}', 'Auth\LoginController@doLogin');
+        Route::post('/login/{appCode?}', 'Auth\LoginController@doLogin')
+            ->middleware('throttle:5,1');
         Route::get('/logout/{appCode?}', 'Auth\LoginController@logout')->name('auth.logout');
         // revalidate / cek session untuk SSO
         Route::get('/revalidate/{appCode}', 'Auth\LoginController@revalidate')->name('auth.reValidate');
-        
-        //RegisterController
-        Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');//->middleware('AppsPermissionCheck')
-        Route::post('/register', 'Auth\RegisterController@doRegister')->name('auth.doRegister');//->middleware('AppsPermissionCheck')
         
         //ForgotPassowrdController
         Route::get('/forgotpassword', 'Auth\ForgotPasswordController@forgotPassword')->name('auth.forgotPassword');//form forgot password
@@ -63,7 +60,8 @@ if(config('AppConfig.system.use_admin_full_vue',1)!=1){
         
         //ResetPasswordController
         Route::get('/resetpassword', 'Auth\ResetPasswordController@resetPassword')->name('auth.resetPassword'); //form reset password dari link yg didapat di email
-        Route::post('/resetpassword', 'Auth\ResetPasswordController@doResetPassword');//prosess reset password
+        Route::post('/resetpassword', 'Auth\ResetPasswordController@doResetPassword')
+            ->middleware('throttle:5,1');//prosess reset password
         Route::get('/resetpassword/fail', 'Auth\ResetPasswordController@verifyFail')->name('auth.resetPassword.fail');
         
         //Social Sign On
@@ -150,15 +148,10 @@ if(config('AppConfig.system.use_admin_full_vue',1)!=1){
         Route::get('/login/{appCode?}', function(){
             return view('layouts.full_vue.main');
         })->name('auth.login');
-        // dd(config('AppConfig.system.mode'));
-        // dd(config('AppConfig.client.endpoint.'.config('AppConfig.system.mode').'.domain'));
-        Route::get('/register', function(){
-            return view('layouts.full_vue.main');
-        })->name('auth.register');//->middleware('AppsPermissionCheck')
-        
         //ResetPasswordController
         Route::get('/resetpassword', 'Auth\ResetPasswordController@resetPassword')->name('auth.resetPassword'); //form reset password dari link yg didapat di email
-        Route::post('/resetpassword', 'Auth\ResetPasswordController@doResetPassword');//prosess reset password
+        Route::post('/resetpassword', 'Auth\ResetPasswordController@doResetPassword')
+            ->middleware('throttle:5,1');//prosess reset password
         Route::get('/resetpassword/fail', 'Auth\ResetPasswordController@verifyFail')->name('auth.resetPassword.fail');
     });
 }
